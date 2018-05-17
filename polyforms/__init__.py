@@ -12,6 +12,16 @@ def root():
 def login_page():
     return render_template('login.html')
 
+@polyforms.route('/login/verify', methods=["POST"])
+def login_logic():
+    uname = request.form.get("username", "")
+    pword = request.form.get("password", "")
+    if pword == "123": #replace with database check
+        session["user"] = uname
+    else:
+        flash("Wrong")
+    return redirect(url_for("/"))
+
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
     return render_template('form.html')
