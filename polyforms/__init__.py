@@ -6,7 +6,12 @@ DIR = os.path.dirname(__file__) + "/"
 
 @polyforms.route('/')
 def root():
-    return ""
+    print "=====================================\nConsole Message\n"
+    print DIR + "\n====================================="
+    body = "<h2> Deployment Test </h2>"
+    body+= "DIR: " + DIR + "<br>"
+    body+= '<img src="' + url_for('static', filename='img/cat_cage.jpg') + '" width="500"</img>'
+    return body
 
 @polyforms.route('/login')
 def login_page():
