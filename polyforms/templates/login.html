@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %} Login | Polyforms {% endblock %}
+{% block body %}
+    <h1>Login</h1>
+    <p>Password must be 123 and username not blank</p>
+    <form method="POST" action="/login/verify">
+        <input type="text" placeholder="username" name="username"><br>
+        <input type="password" placeholder="password" name="password"><br>
+        <input type="submit" name="submit" value="Login">
+    </form>
+    <p>Don't have an account? Click <a href="/join">here</a> to make one.</p>
+{% endblock %}
