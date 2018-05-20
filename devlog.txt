@@ -1,3 +1,5 @@
 maxZ chengM wongA leiG -- 2018-05-18 14:15
 Created directory structure for our web application
 
+wongA -- 2018-05-20 16:58
+Created database structure and placeholder get functions
