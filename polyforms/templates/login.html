@@ -1,12 +1,22 @@
 {% extends "base.html" %}
 {% block title %} Login | Polyforms {% endblock %}
 {% block body %}
+<div class="m-3">
+    {% set messages = get_flashed_messages() %}
     <h1>Login</h1>
+    {% for message in messages %}
+        {% if "Success" in message %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% else %}
+	    <div class="alert alert-danger">{{ message }}</div>
+	{% endif %}
+    {% endfor %}    
     <p>Password must be 123 and username not blank</p>
     <form method="POST" action="/login/verify">
-        <input type="text" placeholder="username" name="username"><br>
-        <input type="password" placeholder="password" name="password"><br>
-        <input type="submit" name="submit" value="Login">
+        <input type="text" placeholder="username" name="username" class="form-control"><br>
+        <input type="password" placeholder="password" name="password" class="form-control"><br>
+        <input type="submit" name="submit" value="Login" class="form-control btn btn-primary">
     </form>
     <p>Don't have an account? Click <a href="/join">here</a> to make one.</p>
+</div>
 {% endblock %}

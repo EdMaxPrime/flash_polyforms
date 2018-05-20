@@ -29,22 +29,38 @@ def login_page():
 def login_logic():
     uname = request.form.get("username", "")
     pword = request.form.get("password", "")
-    if pword == "123": #replace with database check
+    if pword == "123" and uname != "": #replace with database check
         session["user"] = uname
     else:
         flash("Wrong")
+        return redirect(url_for("login_page"))
     return redirect(url_for("home_page"))
 
 #Shows the form to signup
 @polyforms.route('/join')
 def signup_page():
-    return "Go back this page doesnt exist yet"
+    return render_template("signup.html", username=session.get("user", ""))
 
 #Verifies that this account can be made, redirects to login page on success
 @polyforms.route('/join/verify', methods=['POST'])
 def signup_logic():
-    #insert logic to check that this account is valid
-    return redirect(url_for("home_page"))
+    uname = request.form.get("username1", "")
+    pword = request.form.get("password1", "")
+    if len(uname) == 0:
+        flash("Username can't be blank")
+    elif uname != request.form.get("username2", ""):
+        flash("You didn't type the username correctly the 2nd time")
+    elif len(pword) == 0:
+        flash("Password can't be blank")
+    elif pword != request.form.get("password2", ""):
+        flash("You didn't type the password correctly the 2nd time")
+    elif uname == "taken": #check its not already existing
+        flash("This username already exists")
+    else:
+        #insert into database, then...
+        flash("Success! Your account has been made. Please login.")
+        return redirect(url_for("login_page"))
+    return redirect(url_for("signup_page"))
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
