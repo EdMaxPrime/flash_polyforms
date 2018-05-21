@@ -18,7 +18,7 @@ def increment_id(table):
     db, c = open_db()
     command = "SELECT * FROM %s" % (table)
     id = 0
-    for user in c.execute(command):
+    for entry in c.execute(command):
         id+=1
     close_db(db)
     return id
@@ -28,7 +28,7 @@ def hashed(foo):
     
 def add_form():
     db, c = open_db()
-    
+    c.execute("INSERT INTO forms VALUES(%d, '%s', %d, %d, %d, '%s')" % ())
     close_db(db)
 
 def add_response():
@@ -41,9 +41,10 @@ def add_question():
     
     close_db(db)
 
-def add_account():
+# add security questions later
+def add_account(username, password):
     db, c = open_db()
-    
+    c.execute("INSERT INTO accounts VALUES(%d, '%s', '%s')" % (increment_id('accounts'), username, hashed(password)))
     close_db(db)
     
 def add_style():
@@ -55,7 +56,7 @@ def create_tables():
     db, c = open_db()
     c.execute("CREATE TABLE forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT)")
     c.execute("CREATE TABLE responses(form_id integer PRIMARY KEY, question_id INTEGER, user_id INTEGER, response_id INTEGER, response BLOB, timestamp TEXT)")
-    c.execute("CREATE TABLE questions(question_id PRIMARY KEY, question integer, type TEXT, form_id INTEGER, min INTEGER, max INTEGER)")
+    c.execute("CREATE TABLE questions(question_id PRIMARY KEY, question integer, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER)")
     c.execute("CREATE TABLE options(form_id PRIMARY KEY, question_id INTEGER, option_index INTEGER, text_user_sees TEXT, value TEXT)")
     c.execute("CREATE TABLE accounts(user_id INTEGER PRIMARY KEY, username integer TEXT, password TEXT)")
     c.execute("CREATE TABLE styles(form_id INTEGER, row INTEGER, column INTEGER, property TEXT, value TEXT)")

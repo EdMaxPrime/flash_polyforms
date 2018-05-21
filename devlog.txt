@@ -3,3 +3,6 @@ Created directory structure for our web application
 
 wongA -- 2018-05-20 16:58
 Created database structure and placeholder get functions
+
+wongA -- 2018-05-21 14:46
+add_account function created
