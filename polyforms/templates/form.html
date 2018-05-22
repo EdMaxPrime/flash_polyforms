@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> {{title}} | Polyforms </title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <form method="POST" action="/form/submit">
+      {% for q in questions %}
+        <div>
+          <label for="q{{q.index}}">
+	  {{q.question}}
+          {% if q.type == "short" %}
+            <input type="text" name="{{q.index}}">
+	  {% endif %}
+	  </label>
+	</div>
+      {% endfor %}
+      <input type="submit" name="submit" value="Submit">	
+    </form>
+  </body>
+</html>
+
