@@ -5,8 +5,8 @@ polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
 DIR = os.path.dirname(__file__) + "/"
 
-@polyforms.route('/')
-def root():
+@polyforms.route('/test')
+def deploy_test():
     print "=====================================\nConsole Message\n"
     print DIR + "\n====================================="
     body = "<h2> Deployment Test </h2>"
@@ -14,8 +14,7 @@ def root():
     body+= '<img src="' + url_for('static', filename='img/cat_cage.jpg') + '" width="500"</img>'
     return body
 
-#This will become the root "/" page but not right now because of the deploytest stuff
-@polyforms.route('/home')
+@polyforms.route('/')
 def home_page():
     return render_template("index.html", username=session.get("user", ""))
 
