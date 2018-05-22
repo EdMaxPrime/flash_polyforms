@@ -64,7 +64,8 @@ def signup_logic():
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
-    return render_template('form.html')
+    q = {'type':"short", 'index':"0", 'question':"Name"}
+    return render_template('form.html', title="test", questions=[q])
 
 @polyforms.route('/ajax')
 def ajax():
