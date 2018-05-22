@@ -6,3 +6,7 @@ Created database structure and placeholder get functions
 
 wongA -- 2018-05-21 14:46
 add_account function created
+
+leiG -- 2018-05-21 23:22:05
+updated database with add Form methods
+
