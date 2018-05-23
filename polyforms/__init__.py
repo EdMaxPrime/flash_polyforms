@@ -1,9 +1,22 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 import os
+import random #for the generate_questions random word generator
 
 polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
 DIR = os.path.dirname(__file__) + "/"
+
+#Used for testing the display of questions
+def generate_questions(num):
+    results = []
+    words = "blah ooh why aaah how far when foo what bar name interest".split()
+    types = ["short", "long", "number", "choice"]
+    for x in range(0, num):
+        qtype = random.choice(types)
+        results.append({'type':qtype, 'question': 8 * (random.choice(words)+' ')+'?', 'index': str(x), 'min':None, 'max':None})
+        if qtype == "choice":
+            results[-1]["choices"] = random.randrange(1, 10) * [random.choice(words)]
+    return results
 
 @polyforms.route('/test')
 def deploy_test():
@@ -63,8 +76,12 @@ def signup_logic():
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
-    q = {'type':"short", 'index':"0", 'question':"Name"}
-    return render_template('form.html', title="test", questions=[q])
+    return render_template('form.html', title="This is the title of a form", questions=generate_questions(10))
+
+#This will store the responses to the form and then redirect to a Thank You
+@polyforms.route('/form/submit', methods=['POST'])
+def process_form():
+    return redirect(url_for("display_form"))
 
 @polyforms.route('/ajax')
 def ajax():

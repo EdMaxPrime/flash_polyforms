@@ -12,6 +12,14 @@
 	  {{q.question}}
           {% if q.type == "short" %}
             <input type="text" name="{{q.index}}">
+	  {% elif q.type == "long" %}
+	    <textarea name="{{q.index}}"></textarea>
+	  {% elif q.type == "number" %}
+	    <input type="number" name="{{q.index}}">
+	  {% elif q.type == "choice" %}
+	    {% for c in q.choices %}
+	      <input type="checkbox" name="{{q.index}}" value="lol"> {{c}}<br>
+	    {% endfor %}
 	  {% endif %}
 	  </label>
 	</div>
