@@ -1,19 +1,32 @@
 {% extends "base.html" %}
 {% block title %} {{title}} | Polyforms {% endblock %}
 {% block body %}
-<h1>{{title}}</h1>
-<button class="btn btn-primary" id="chartDialogToggler">Chart</button>
+{% set number_cols = headers | length %}
+<div class="row">
+  <div class="col-12 col-md-2">
+    <h1>{{title}}</h1>
+  </div>
+  <div class="col-12 col-sm">
+    <button class="btn btn-primary" id="chartDialogToggler">Make A Chart</button>
+  </div>
+  <div class="col-12 col-sm-6">
+    <input type="text" id="filter" class="form-control" placeholder="filter...">
+  </div>
+</div>
 <table class="table table-sm table-bordered table-hover">
   <thead class="thead-light">
     <tr>
-      {% for x in range(1, 5) %}<th>{{ x }}</th>{% endfor %}
+      <th>Response Index</th>
+      {% for col in headers %}<th>{{ col }}</th>{% endfor %}
     </tr>
   </thead>
   <tbody>
+    {% for row in data %}
     <tr>
-      <th scope="row">1</th>
-      {% for x in range(101, 104) %}<td>{{x}}</td>{% endfor %}
+      <th scope="row">{{ loop.index }}</th>
+      {% for cell in row %}<td>{{cell}}</td>{% endfor %}
     </tr>
+    {% endfor %}
   </tbody>
 </table>
 {% endblock %}

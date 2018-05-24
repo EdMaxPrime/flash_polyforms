@@ -18,6 +18,11 @@ def generate_questions(num):
             results[-1]["choices"] = random.randrange(1, 10) * [random.choice(words)]
     return results
 
+#Used to test viewing of results in a table. Returns a random word
+def random_word():
+    length = random.randrange(2, 10)
+    return reduce(lambda s, c: s+c, [chr(random.randrange(ord('A'), ord('Z'))) for i in range(0, length)], "")
+
 @polyforms.route('/test')
 def deploy_test():
     print "=====================================\nConsole Message\n"
@@ -86,7 +91,7 @@ def process_form():
 #View the responses to your form and make charts
 @polyforms.route('/form/view')
 def responses_page():
-    return render_template("spreadsheet.html", title="My Form")
+    return render_template("spreadsheet.html", title="My Form", headers=["name"], data=[[random_word()] for i in range(0, 20)])
 
 @polyforms.route('/ajax')
 def ajax():
