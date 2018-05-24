@@ -83,6 +83,11 @@ def display_form():
 def process_form():
     return redirect(url_for("display_form"))
 
+#View the responses to your form and make charts
+@polyforms.route('/form/view')
+def responses_page():
+    return render_template("spreadsheet.html", title="My Form")
+
 @polyforms.route('/ajax')
 def ajax():
     return redirect(url_for('/form'))
