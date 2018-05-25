@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %} Your Forms | Polyforms {% endblock %}
+{% block body %}
+{% if len(forms_user_made) = 0 %}
+    You currently do not have any forms.
+{% else %}
+    {% for key in forms_user_made.keys() %}
+    <a href="form/view?id={{key}}">{{forms_user_made[key]}}</a>
+    {% endfor %}
+{% endif %}
+{% endblock %}
