@@ -8,12 +8,22 @@
   </div>
   <div class="w-100"></div>
   <div class="col-12 col-md-2 order-last order-md-2">
-    <button class="btn btn-primary" id="chartDialogToggler">Make A Chart</button>
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" id="chartMenuToggler" data-toggle="dropdown" type="button">Make A Chart</button>
+      <div class="dropdown-menu" aria-labelledby="chartMenuToggler">
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#pieModal">Pie Chart</a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#lineModal">Line Chart</a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#barModal">Bar Chart</a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#histModal">Histogram</a>
+        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#plotModal">Scatter Plot</a>
+      </div>
+    </div>
   </div>
   <div class="col-12 col-md order-2 order-md-last">
     <input type="search" id="filter" class="form-control" placeholder="start typing filter criteria and rows that don't match will disappear">
   </div>
 </div>
+
 <!-- The actual table showing form results as rows. The outer div is for scrolling. -->
 <div class="table-responsive">
   <table class="table table-bordered table-hover">
@@ -33,4 +43,128 @@
     </tbody>
   </table>
 </div>
+
+<!-- These modal dialogs are hidden by default -->
+<div class="modal fade" id="pieModal" tabindex="-1" role="dialog" aria-labelledby="pieModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pieModalLabel">Pie Chart</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        To make a new pie chart, please fill out the fields below. The dropdown menu lists the questions in your form as options.
+        Select one to use as the frequency data for the pie chart. This works best with questions that ask the user to pick one
+        from several options.
+        <hr>
+        <form>
+          <div class="form-group">
+            <label for="thing1">Frequency Column:</label>
+            <select class="form-control" id="thing1" name="f">
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Make Chart</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="lineModal" tabindex="-1" role="dialog" aria-labelledby="lineModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lineModalLabel">Line Chart</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        To make a new line chart, please fill out the fields below. The dropdown menus list the questions in your form as options.
+        Select one to use as an x-axis, and then one as a y-axis. It is best if the y-axis data is numerical. 
+        <hr>
+        <form>
+          <div class="form-group">
+            <label for="thing2">X-axis:</label>
+            <select class="form-control" id="thing2" name="x">
+              <option value="0">Response Index</option>
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="thing2a">Y-Axis:</label>
+            <select class="form-control" id="thing2a" name="y">
+              <option value="0">Response Index</option>
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Make Chart</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="barModal" tabindex="-1" role="dialog" aria-labelledby="barModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="barModalLabel">Bar Chart</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        To make a new line chart, please fill out the fields below. The dropdown menus list the questions in your form as options.
+        Select one to use as an x-axis, and then one as a y-axis. The y-axis data must be numerical. If a free-response question
+        is chosen, the length of the response will be used as its numerical representation. 
+        <hr>
+        <form>
+          <div class="form-group">
+            <label for="thing3">X-axis:</label>
+            <select class="form-control" id="thing3" name="x">
+              <option value="0">Response Index</option>
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="thing3a">Y-Axis:</label>
+            <select class="form-control" id="thing3a" name="y">
+              <option value="0">Response Index</option>
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <input class="form-check-input" type="checkbox" name="order" value="height" id="thing3b">
+            <label class="form-check-label" for="thing3b">Order bars by height from shortest to tallest?</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Make Chart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="/static/js/c3.min.js"></script>
+<script type="text/javascript" src="/static/js/charts.js"></script>
 {% endblock %}
