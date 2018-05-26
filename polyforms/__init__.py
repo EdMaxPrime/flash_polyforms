@@ -23,6 +23,15 @@ def random_word():
     length = random.randrange(2, 10)
     return reduce(lambda s, c: s+c, [chr(random.randrange(ord('A'), ord('Z'))) for i in range(0, length)], "")
 
+#Returns a dictionary with the keys {title: form_title, headers: [], data: [[]]}
+def random_form(form_title, number_of_questions, number_of_responses):
+    form = {}
+    form['title'] = form_title
+    questions = generate_questions(number_of_questions)
+    form['headers'] = [q['question'] for q in questions]
+    form['data'] = [[(random_word() if questions[i]['type'] != "number" else random.randrange(0, 100)) for i in range(0, number_of_questions)] for i in range(0, number_of_responses)]
+    return form
+
 @polyforms.route('/test')
 def deploy_test():
     print "=====================================\nConsole Message\n"
@@ -91,7 +100,9 @@ def process_form():
 #View the responses to your form and make charts
 @polyforms.route('/form/view')
 def responses_page():
-    return render_template("spreadsheet.html", title="My Form", headers=["name"], data=[[random_word()] for i in range(0, 20)])
+    id = request.args.get("id", "0")
+    test_form = random_form("This is a randomly generated form #"+id, 5, 20)
+    return render_template("spreadsheet.html", username=session.get("user", ""), title=test_form['title'], headers=test_form['headers'], data=test_form['data'])
 
 @polyforms.route('/ajax')
 def ajax():
@@ -99,11 +110,11 @@ def ajax():
 
 @polyforms.route('/my/forms')
 def my_forms():
-    return ""
+    return render_template("ownforms.html", username=session.get("user",""), forms_user_made={str(n):random_form("This is a randomly generated form #"+str(n), 5, 20) for n in range(0, 4)})
 
 @polyforms.route('/my/settings')
 def settings_page():
-    return ""
+    return render_template("settings.html", username=session.get("user",""))
 
 @polyforms.route('/logout')
 def logout():
