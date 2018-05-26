@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, request, session, redirect, url_for, flash, Response
 import os
 import random #for the generate_questions random word generator
 
@@ -103,6 +103,15 @@ def responses_page():
     id = request.args.get("id", "0")
     test_form = random_form("This is a randomly generated form #"+id, 5, 20)
     return render_template("spreadsheet.html", username=session.get("user", ""), title=test_form['title'], headers=test_form['headers'], data=test_form['data'])
+
+#CSV
+@polyforms.route('/form/view/form.csv')
+def responses_csv():
+    if not ("id" in request.args):
+        return "The requested file was not found at this url"
+    else:
+        test_form = random_form("This is a randomly generated form", 5, 20)
+        return Response(render_template("csv_results.csv", headers=test_form['headers'], data=test_form['data']), mimetype="text/csv")
 
 @polyforms.route('/ajax')
 def ajax():
