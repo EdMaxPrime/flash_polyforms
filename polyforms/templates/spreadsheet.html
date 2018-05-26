@@ -1,32 +1,36 @@
 {% extends "base.html" %}
 {% block title %} {{title}} | Polyforms {% endblock %}
 {% block body %}
-{% set number_cols = headers | length %}
-<div class="row">
-  <div class="col-12 col-md-2">
+<!-- This is the toolbar for the spreadsheet. Includes form title, make chart button, and filter input box -->
+<div class="row my-3">
+  <div class="col">
     <h1>{{title}}</h1>
   </div>
-  <div class="col-12 col-sm">
+  <div class="w-100"></div>
+  <div class="col-12 col-md-2 order-last order-md-2">
     <button class="btn btn-primary" id="chartDialogToggler">Make A Chart</button>
   </div>
-  <div class="col-12 col-sm-6">
-    <input type="text" id="filter" class="form-control" placeholder="filter...">
+  <div class="col-12 col-md order-2 order-md-last">
+    <input type="search" id="filter" class="form-control" placeholder="start typing filter criteria and rows that don't match will disappear">
   </div>
 </div>
-<table class="table table-sm table-bordered table-hover">
-  <thead class="thead-light">
-    <tr>
-      <th>Response Index</th>
-      {% for col in headers %}<th>{{ col }}</th>{% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in data %}
-    <tr>
-      <th scope="row">{{ loop.index }}</th>
-      {% for cell in row %}<td>{{cell}}</td>{% endfor %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!-- The actual table showing form results as rows. The outer div is for scrolling. -->
+<div class="table-responsive">
+  <table class="table table-bordered table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th>Response Index</th>
+        {% for columnName in headers %}<th>{{ columnName }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        {% for cell in row %}<td>{{cell}}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
