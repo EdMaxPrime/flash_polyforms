@@ -1,5 +1,17 @@
+maxZ michaelC andrewW gordonL -- 2018-05-15 00:58
+Design Document v1.0
+
+zlotskiyM -- 2018-05-15 01:08
+Design Document v1.5
+
 maxZ chengM wongA leiG -- 2018-05-18 14:15
 Created directory structure for our web application
+
+zlotskiyM -- 2018-05-18 14:40
+There's now a base template. The navbar changes depending on whether you're logged in or not.
+
+zlotskiyM -- 2018-05-18 15:02
+Created and styled the login and signup pages with bootstrap. They support message flashing. On the server side, hardcoded signup and login both work; database not incorporated.
 
 wongA -- 2018-05-20 16:58
 Created database structure and placeholder get functions
@@ -10,3 +22,14 @@ add_account function created
 leiG -- 2018-05-21 23:22:05
 updated database with add Form methods
 
+zlotskiyM -- 2018-05-22 18:15:13
+Made the navbar look nicer. 1) Added and resized the logo image. 2) navbar links align to the right of the page 3) when you login, your username appears to the left of navigation links
+
+zlotskiyM -- 2018-05-23 14:49
+Created a very simple template that renders all 4 question types. This will be presented to anyone who wants to respond to a form. It has no css styling, and doesn't support min and max limits on input.
+
+zlotskiyM -- 2018-05-25 18:25
+The Form Responses (spreadsheet) and My Forms (list of things user made) pages don't need hardcoded data anymore. They can display arbitrary information.
+
+zlotskiyM -- 2018-05-25 20:32
+Aesthetic changes to the Form Responses and My Forms pages, as well as the base template. Notably, the navbar collapses on small screens, and the spreadsheet toolbar splits into multiple lines.
