@@ -34,7 +34,7 @@ def hashed(foo):
 def add_form(user_id, formTitle, loginReq, publicReq, theme):
     db=sqlite3.connect("../data/database.db")
     c=db.cursor()
-    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme) VALUES (?,?,?,?,?)", (formTitle, user_id, loginReq, publicReq, theme))
+    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created) VALUES (?,?,?,?,?, datetime('now'))", (formTitle, user_id, loginReq, publicReq, theme))
     db.commit()
     db.close()
 
@@ -75,9 +75,41 @@ def add_account(username, password):
     c.execute("INSERT INTO accounts (username, password) VALUES ('%s', '%s')" % (username, hashed(password)))
     close_db(db)
 
+#Returns true if this username+password pair matches, false if it does not
+def validate_login(username, password):
+    db, c = open_db()
+    c.execute("SELECT username FROM accounts WHERE username = '%s' AND password = '%s';" % (username, hashed(password)))
+    results = c.fetchone()
+    close_db(db)
+    return len(results) > 0
+
+#Returns true if this username is already taken, false otherwise
+def user_exists(username):
+    db, c = open_db()
+    c.execute("SELECT username FROM accounts WHERE username = '%s';" % (username,)) #comma needed for this
+    whos_there = c.fetchone()
+    close_db(db)
+    return len(whos_there) > 0
+
+"""#Given a form's ID number, returns a dictionary representing this form
+{
+  title: "My Form",
+  owner: "XD",
+  id: "100",
+  created: "2018-05-26 12:00:00",
+  headers: ["Name?", "Age?", <question>],
+  types: ["short", "number", <short|long|number|choice>],
+  data: [
+    ["gir", 40, <answer to a question>],
+    ["zim", 12]
+  ]
+}"""
+def get_form_responses(form_id):
+    return {}
+
 def create_tables():
     db, c = open_db()
-    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT);")
+    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER PRIMARY KEY, response BLOB, timestamp TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER PRIMARY KEY, question integer, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")

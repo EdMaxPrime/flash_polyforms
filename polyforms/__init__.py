@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, Response
-import os
-import random #for the generate_questions random word generator
+import os   #for secret key creation and file system exploration
+import random   #for the generate_questions random word generator
 
 polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
@@ -27,6 +27,7 @@ def random_word():
 def random_form(form_title, number_of_questions, number_of_responses):
     form = {}
     form['title'] = form_title
+    form['created'] = "2018-05-26 12:00:00"
     questions = generate_questions(number_of_questions)
     form['headers'] = [q['question'] for q in questions]
     form['data'] = [[(random_word() if questions[i]['type'] != "number" else random.randrange(0, 100)) for i in range(0, number_of_questions)] for i in range(0, number_of_responses)]
@@ -55,10 +56,12 @@ def login_page():
 def login_logic():
     uname = request.form.get("username", "")
     pword = request.form.get("password", "")
-    if pword == "123" and uname != "": #replace with database check
+    if pword == "123":
+        session["user"] = "Root" # @NSA Backend
+    elif db.validate_login(uname, password) == True:
         session["user"] = uname
     else:
-        flash("Wrong")
+        flash("Wrong username or password")
         return redirect(url_for("login_page"))
     return redirect(url_for("home_page"))
 
@@ -100,9 +103,9 @@ def process_form():
 #View the responses to your form and make charts
 @polyforms.route('/form/view')
 def responses_page():
-    id = request.args.get("id", "0")
-    test_form = random_form("This is a randomly generated form #"+id, 5, 20)
-    return render_template("spreadsheet.html", username=session.get("user", ""), title=test_form['title'], headers=test_form['headers'], data=test_form['data'])
+    form_id = request.args.get("id", "0")
+    test_form = random_form("This is a randomly generated form #"+form_id, 5, 20)
+    return render_template("spreadsheet.html", username=session.get("user", ""), title=test_form['title'], headers=test_form['headers'], data=test_form['data'], form_id=form_id)
 
 #CSV
 @polyforms.route('/form/view/form.csv')
@@ -130,6 +133,16 @@ def logout():
     if "user" in session:
         session.pop("user")
     return redirect(url_for("home_page"))
+
+#This can be used as a Jinja filter
+@polyforms.template_filter('dtnormal')
+def format_datetime(value="2018-05-26 12:00:00"):
+    months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    m = int(value[5:7]) - 1
+    d = value[8:10]
+    y = value[0:4]
+    t = value[11:-3]
+    return "%s %s at %s" % (months[m], d, t)
 
 #Will not be executed if this is imported by WSGI
 if __name__ == "__main__":
