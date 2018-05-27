@@ -33,3 +33,9 @@ The Form Responses (spreadsheet) and My Forms (list of things user made) pages d
 
 zlotskiyM -- 2018-05-25 20:32
 Aesthetic changes to the Form Responses and My Forms pages, as well as the base template. Notably, the navbar collapses on small screens, and the spreadsheet toolbar splits into multiple lines.
+
+zlotskiyM -- 2018-05-26 18:18
+Added a dropdown menu and modal boxes to facilitate chart/graph creation
+
+zlotskiyM -- 2018-05-26 23:54
+You can now download form results as a CSV file
