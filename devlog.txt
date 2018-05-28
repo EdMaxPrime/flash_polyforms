@@ -38,4 +38,6 @@ zlotskiyM -- 2018-05-26 18:18
 Added a dropdown menu and modal boxes to facilitate chart/graph creation
 
 zlotskiyM -- 2018-05-26 23:54
-You can now download form results as a CSV file
+You can now download form results as a CSV fileglei -- 2018-05-27 21:21:46
+login + creation of account done. No security question part yet
+

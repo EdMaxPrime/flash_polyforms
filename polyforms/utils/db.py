@@ -6,7 +6,7 @@ from flask import session   # interact with cookie
 #f = "data/database.db"
 
 #temp
-f = "../data/database.db"
+f = "data/database.db"
 
 def open_db():
     db = sqlite3.connect(f) # open if f exists, otherwise create
@@ -78,10 +78,25 @@ def add_account(username, password):
 #Returns true if this username+password pair matches, false if it does not
 def validate_login(username, password):
     db, c = open_db()
-    c.execute("SELECT username FROM accounts WHERE username = '%s' AND password = '%s';" % (username, hashed(password)))
+    #print  "SELECT username FROM accounts WHERE username" + " = '" + str(username) + "' AND password = '" + str(hashed(password)) + "';"
+    c.execute("SELECT username FROM accounts WHERE username" + " = '" + str(username) + "' AND password = '" + str(hashed(password)) + "';")
     results = c.fetchone()
     close_db(db)
-    return len(results) > 0
+    if results == None:
+        return False
+    else:
+        return len(results) > 0
+
+def checkExist(table, colName, query):
+    db, c = open_db()
+    #print "SELECT " + str(colName) + " FROM " + table + " WHERE " + colName + "=" + query +";"
+    c.execute("SELECT " + str(colName) + " FROM " + str(table) + " WHERE " + str(colName) + " = '" + str(query) +"';")
+    results = c.fetchone()
+    close_db(db)
+    if results == None:
+        return False
+    else:
+        return len(results) > 0
 
 #Returns true if this username is already taken, false otherwise
 def user_exists(username):

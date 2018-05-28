@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, Response
 import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
+from utils import db
 
 polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
@@ -58,7 +59,7 @@ def login_logic():
     pword = request.form.get("password", "")
     if pword == "123":
         session["user"] = "Root" # @NSA Backend
-    elif db.validate_login(uname, password) == True:
+    elif db.validate_login(uname, pword) == True:
         session["user"] = uname
     else:
         flash("Wrong username or password")
@@ -83,10 +84,10 @@ def signup_logic():
         flash("Password can't be blank")
     elif pword != request.form.get("password2", ""):
         flash("You didn't type the password correctly the 2nd time")
-    elif uname == "taken": #check its not already existing
+    elif db.checkExist("accounts", "username", uname): #check its not already existing
         flash("This username already exists")
     else:
-        #insert into database, then...
+        db.add_account(uname, pword)
         flash("Success! Your account has been made. Please login.")
         return redirect(url_for("login_page"))
     return redirect(url_for("signup_page"))
