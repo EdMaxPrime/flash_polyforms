@@ -21,8 +21,8 @@ def generate_questions(num):
 
 #Used to test viewing of results in a table. Returns a random word
 def random_word():
-    length = random.randrange(2, 10)
-    return reduce(lambda s, c: s+c, [chr(random.randrange(ord('A'), ord('Z'))) for i in range(0, length)], "")
+    length = random.randrange(2, 4)
+    return reduce(lambda s, c: s+c, [chr(random.randrange(ord('A'), ord('D'))) for i in range(0, length)], "")
 
 #Returns a dictionary with the keys {title: form_title, headers: [], data: [[]]}
 def random_form(form_title, number_of_questions, number_of_responses):
