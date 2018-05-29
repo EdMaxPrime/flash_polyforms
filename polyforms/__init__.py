@@ -31,7 +31,7 @@ def random_form(form_title, number_of_questions, number_of_responses):
     form['created'] = "2018-05-26 12:00:00"
     questions = generate_questions(number_of_questions)
     form['headers'] = [q['question'] for q in questions]
-    form['data'] = [[(random_word() if questions[i]['type'] != "number" else random.randrange(0, 100)) for i in range(0, number_of_questions)] for i in range(0, number_of_responses)]
+    form['data'] = [[(random_word() if questions[i]['type'] != "number" else random.randrange(0, 3)) for i in range(0, number_of_questions)] for i in range(0, number_of_responses)]
     return form
 
 @polyforms.route('/test')
