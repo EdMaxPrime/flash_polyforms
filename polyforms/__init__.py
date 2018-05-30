@@ -14,9 +14,9 @@ def generate_questions(num):
     types = ["short", "long", "number", "choice"]
     for x in range(0, num):
         qtype = random.choice(types)
-        results.append({'type':qtype, 'question': 8 * (random.choice(words)+' ')+'?', 'index': str(x), 'min':None, 'max':None})
+        results.append({'type':qtype, 'question': 8 * (random.choice(words)+' ')+'?', 'index': str(x), 'min':None, 'max':None, 'required':True})
         if qtype == "choice":
-            results[-1]["choices"] = random.randrange(1, 10) * [random.choice(words)]
+            results[-1]["choices"] = [{'text': random.choice(words), 'value': str(i)} for i in range (0, 4)]
     return results
 
 #Used to test viewing of results in a table. Returns a random word
@@ -95,7 +95,7 @@ def signup_logic():
 #This is where the respondent sees the form to fill out their answers
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
-    return render_template('form_themes/basic.html', title="This is the title of a form", questions=generate_questions(10))
+    return render_template('form_themes/basic.html', title="This is the title of a form", questions=generate_questions(10), form_id="0")
 
 #This will store the responses to the form and then redirect to a Thank You
 @polyforms.route('/form/submit', methods=['POST'])
@@ -145,6 +145,23 @@ def format_datetime(value="2018-05-26 12:00:00"):
     y = value[0:4]
     t = value[11:-3]
     return "%s %s at %s" % (months[m], d, t)
+
+@polyforms.template_filter('attributes')
+def conditional_attributes(question):
+    result = ""
+    if question['required'] == True:
+        result += "required "
+    if question['min'] != None:
+        if question['type'] == "long" or question['type'] == "short":
+            result += 'minlength="%d" ' % question['min']
+        elif question['type'] == "number":
+            result +='min="%d" ' % question['min']
+    if question['max'] != None:
+        if question['type'] == "long" or question['type'] == "short":
+            result += 'maxlength="%d" ' % question['max']
+        elif question['type'] == "number":
+            result +='max="%d" ' % question['max']
+    return result
 
 #Will not be executed if this is imported by WSGI
 if __name__ == "__main__":

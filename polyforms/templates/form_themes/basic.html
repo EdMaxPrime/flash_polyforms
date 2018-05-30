@@ -1,31 +1,62 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title> {{title}} | Polyforms </title>
-  </head>
-  <body>
+    <style type="text/css">
+        div.container {
+            margin: 2em;
+        }
+        #error {
+            border: 1px solid #FF6666;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
     <h1>{{title}}</h1>
+    {% set messages = get_flashed_messages() %}
+    {% if messages|length > 0 %}
+    <div id="error">
+        <p>Please fix the following before your responses can be submitted</p>
+        <ul>
+            {% for m in messages %}
+            <li>{{ m }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
     <form method="POST" action="/form/submit">
       {% for q in questions %}
-        <div>
-          <label for="q{{q.index}}">
-	  {{q.question}}
-          {% if q.type == "short" %}
-            <input type="text" name="{{q.index}}">
-	  {% elif q.type == "long" %}
-	    <textarea name="{{q.index}}"></textarea>
-	  {% elif q.type == "number" %}
-	    <input type="number" name="{{q.index}}">
-	  {% elif q.type == "choice" %}
-	    {% for c in q.choices %}
-	      <input type="checkbox" name="{{q.index}}" value="lol"> {{c}}<br>
-	    {% endfor %}
-	  {% endif %}
-	  </label>
-	</div>
+        <div class="container">
+            <label for="q{{q.index}}">{% if q.required %}<b>required</b>{% endif %} {{q.question}}</label>
+
+            {% if q.type == "short" %}
+            <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes}}>
+
+            {% elif q.type == "long" %}<br>
+            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes}}></textarea>
+
+            {% elif q.type == "number" %}
+            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes}}>
+
+            <!-- If the maximum selectable choices is more than 1, then checkboxes -->
+            {% elif q.type == "choice" and q.max != 1 %}
+            {% for c in q.choices %}
+            <br><input type="checkbox" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}"> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
+            {% endfor %}
+
+            <!-- If the maximum selectable choices is 1, then radio buttons -->
+            {% else %}
+            {% for c in q.choices %}
+            <br><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}"> <label fpr="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
+            {% endfor %}
+
+            {% endif %}
+       </div>
       {% endfor %}
+      <input type="hidden" name="id" value="{{form_id}}">
       <input type="submit" name="submit" value="Submit">	
     </form>
-  </body>
+</body>
 </html>
 
