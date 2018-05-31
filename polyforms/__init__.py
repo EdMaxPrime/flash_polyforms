@@ -99,7 +99,8 @@ def signup_logic():
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
-    return render_template('form_themes/basic.html', title="This is the title of a form", questions=generate_questions(10), form_id="0")
+    template_name = "light.html"
+    return render_template("form_themes/"+template_name, title="This is the title of a form", questions=generate_questions(10), form_id="0")
 
 #This will store the responses to the form and then redirect to a Thank You
 @polyforms.route('/form/submit', methods=['POST'])
