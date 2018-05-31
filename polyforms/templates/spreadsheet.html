@@ -161,16 +161,6 @@
           <div class="form-group">
             <label for="thing3">X-axis:</label>
             <select class="form-control" id="thing3" name="x">
-              <option value="0">Response Index</option>
-              {% for columnName in headers %}
-              <option value="{{loop.index}}">{{columnName}}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="thing3a">Y-Axis:</label>
-            <select class="form-control" id="thing3a" name="y">
-              <option value="0">Response Index</option>
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
@@ -180,12 +170,12 @@
             <input class="form-check-input" type="checkbox" name="order" value="height" id="thing3b">
             <label class="form-check-label" for="thing3b">Order bars by height from shortest to tallest?</label>
           </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <a type="button" class="btn btn-primary" href="#" data-dismiss="modal" data-toggle="modal" data-target="#chartModal" onclick="makeBarChart()">Make Chart</a>
+          </div>
         </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary">Make Chart</button>
-      </div>
+      </div>    
     </div>
   </div>
 </div>
@@ -222,5 +212,36 @@ function makePieChart(){
     }
 });
 };
+
+function makeBarChart(){
+  var x = document.getElementById("thing3").value - 1;
+  d3.select("#chartModalLabel").text({{headers|safe}}[x]);
+  var counts = {};
+  for (var i = 0; i < {{data|safe}}.length; i++) {
+    if({{data|safe}}[i][x] in counts){
+      counts[{{data|safe}}[i][x]]++;
+    }
+    else{
+      counts[{{data|safe}}[i][x]] = 1;
+    }
+  }
+  //console.log(counts);
+  var chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      json: counts,
+      type: 'bar',
+    },
+    size: {
+      width: 500,
+      height: 500
+    },
+    axis:{
+      x:{
+        type:'category'
+      }
+    }   
+});
+}
 </script>
 {% endblock %}
