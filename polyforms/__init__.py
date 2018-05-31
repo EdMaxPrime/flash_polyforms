@@ -45,6 +45,9 @@ def deploy_test():
 
 @polyforms.route('/')
 def home_page():
+    #print db.returnFormData(1)
+    #print db.getFormDataNoResponse(1)
+    #print db.getFormData(2)
     return render_template("index.html", username=session.get("user", ""))
 
 #Shows the form to login
@@ -61,6 +64,8 @@ def login_logic():
         session["user"] = "Root" # @NSA Backend
     elif db.validate_login(uname, pword) == True:
         session["user"] = uname
+        session["userID"] = db.getID("accounts", "user_id", "username", str(uname))
+        #print session["userID"]
     else:
         flash("Wrong username or password")
         return redirect(url_for("login_page"))
@@ -92,7 +97,6 @@ def signup_logic():
         return redirect(url_for("login_page"))
     return redirect(url_for("signup_page"))
 
-#This is where the respondent sees the form to fill out their answers
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
     return render_template('form_themes/basic.html', title="This is the title of a form", questions=generate_questions(10), form_id="0")
