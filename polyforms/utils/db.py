@@ -82,6 +82,7 @@ def validate_login(username, password):
     c.execute("SELECT username FROM accounts WHERE username" + " = '" + str(username) + "' AND password = '" + str(hashed(password)) + "';")
     results = c.fetchone()
     close_db(db)
+    #print results
     if results == None:
         return False
     else:
@@ -106,19 +107,183 @@ def user_exists(username):
     close_db(db)
     return len(whos_there) > 0
 
-"""#Given a form's ID number, returns a dictionary representing this form
-{
-  title: "My Form",
-  owner: "XD",
-  id: "100",
-  created: "2018-05-26 12:00:00",
-  headers: ["Name?", "Age?", <question>],
-  types: ["short", "number", <short|long|number|choice>],
-  data: [
-    ["gir", 40, <answer to a question>],
-    ["zim", 12]
-  ]
-}"""
+def getID(tableName, idCol, queryCol, query):
+    db, c = open_db()
+    c.execute("SELECT " + str(idCol) + " FROM " + str(tableName) + " WHERE " + str(queryCol) + " = '%s';" % (query,)) #comma needed for this
+    ID = c.fetchone()
+    close_db(db)
+    return ID[0]
+
+def getFormData(formID):
+    #=================
+    # "Global" Holder variables
+    formData = {}
+    headerArray = []
+    typeArray = []
+    dataArray = []
+    #==================
+    # Top parts of Dictionary
+    db, c = open_db()
+    c.execute("SELECT * FROM forms WHERE form_id = " + str(formID))
+    tempResult = c.fetchone()
+    #Basic form stuff
+    formData["title"] = str(tempResult[1])
+    formData["id"] = str(tempResult[0])
+    formData["created"] = str(tempResult[6])
+    #Add creator ID
+    ownerID = tempResult[2]
+    c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
+    #print ownerID
+    tempResult = c.fetchone()
+    #print tempResult
+    formData["owner"] = (str(tempResult[0]))
+    #========================
+    # headers + types
+    question_id_array = []
+    c.execute("SELECT * FROM questions WHERE form_id = " + str(formID) + ";")
+    tempResult = c.fetchall()
+    if tempResult is not None:
+        for each in tempResult:
+            question_id_array.append(each[0])
+            headerArray.append(str(each[1]))
+            typeArray.append(str(each[2]))
+        formData["headers"] = headerArray
+        formData["types"] = typeArray
+    if tempResult == None:
+        question_id_array = None
+        formData["headers"] = None
+        formData["types"] = None
+    #========================
+    # DATA 
+    tempArray = []
+    if question_id_array is not None:
+        for questionID in question_id_array:
+            c.execute("SELECT * FROM responses WHERE question_id = " + str(questionID) + ";")
+            tempResult = c.fetchall()
+            for each in tempResult:
+                tempArray.append(each[4])
+            dataArray.append(tempArray)
+        formData["data"] = dataArray
+    else:
+        formData["data"] = None
+    close_db(db)
+    return formData
+'''
+This returns a dictionary with the same syntax of returnFormDataNoResponse(formID) but with responses
+
+def getFormData(formID):
+    #=================
+    # "Global" Holder variables
+    formData = {}
+    questionArray = []
+    #==================
+    # Top parts of Dictionary
+    db, c = open_db()
+    c.execute("SELECT * FROM forms WHERE form_id = " + str(formID))
+    tempResult = c.fetchone()
+    #Basic form stuff
+    formData["title"] = str(tempResult[1])
+    formData["id"] = str(tempResult[0])
+    formData["theme"] = str(tempResult[5])
+    #Add creator ID
+    ownerID = tempResult[2]
+    c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
+    #print ownerID
+    tempResult = c.fetchone()
+    #print tempResult
+    formData["owner"] = (str(tempResult[0]))
+    #========================
+    # questions
+    c.execute("SELECT * FROM questions WHERE form_id = " + str(formID) + ";")
+    tempResult = c.fetchall()
+    for each in tempResult:
+        tempDict = {}
+        optionArray = []
+        responseArray = []
+        tempDict["question_id"] = each[0]
+        tempDict["question"] = str(each[1])
+        tempDict["type"] = str(each[2])
+        tempDict["min"] = each[4]
+        tempDict["max"] = each[5]
+
+        c.execute("SELECT * from options WHERE question_id = " + str(each[0]) + ";")
+        optionDump = c.fetchall()
+        if optionDump is not None:
+            for eachOption in optionDump:
+                tempOptionDict = {}
+                tempOptionDict["text_user_sees"] = str(eachOption[3])
+                tempOptionDict["value"] = str(eachOption[4])
+                optionArray.append(tempOptionDict)
+            tempDict["option"] = optionArray
+        if optionDump == None:
+            tempDict["option"] = None
+
+        #===
+        c.execute("SELECT * from responses WHERE question_id = " + str(each[0]) + ";")
+        responseDump = c.fetchall()
+        if responseDump is not None:
+            for eachResponse in responseDump:
+                responseArray.append(str(eachResponse[4]))
+            tempDict["response"] = responseArray
+        if responseDump == None:
+            tempDict["response"] = None
+        #===
+        questionArray.append(tempDict)
+
+    formData["questions"] = questionArray
+    close_db(db)
+    return formData
+'''
+def getFormDataNoResponse(formID):
+    #=================
+    # "Global" Holder variables
+    formData = {}
+    questionArray = []
+    #==================
+    # Top parts of Dictionary
+    db, c = open_db()
+    c.execute("SELECT * FROM forms WHERE form_id = " + str(formID))
+    tempResult = c.fetchone()
+    #Basic form stuff
+    formData["title"] = str(tempResult[1])
+    formData["id"] = str(tempResult[0])
+    formData["theme"] = str(tempResult[5])
+    #Add creator ID
+    ownerID = tempResult[2]
+    c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
+    #print ownerID
+    tempResult = c.fetchone()
+    #print tempResult
+    formData["owner"] = (str(tempResult[0]))
+    #========================
+    # questions
+    c.execute("SELECT * FROM questions WHERE form_id = " + str(formID) + ";")
+    tempResult = c.fetchall()
+    for each in tempResult:
+        tempDict = {}
+        optionArray = []
+        tempDict["question_id"] = each[0]
+        tempDict["question"] = each[1]
+        tempDict["type"] = each[2]
+        tempDict["min"] = each[4]
+        tempDict["max"] = each[5]
+
+        c.execute("SELECT * from options WHERE question_id = " + str(each[0]) + ";")
+        optionDump = c.fetchall()
+        if optionDump is not None:
+            for eachOption in optionDump:
+                tempOptionDict = {}
+                tempOptionDict["text_user_sees"] = eachOption[3]
+                tempOptionDict["value"] = eachOption[4]
+                optionArray.append(tempOptionDict)
+            tempDict["option"] = optionArray
+        else:
+            tempDict["option"] = None
+        questionArray.append(tempDict)
+    formData["questions"] = questionArray
+    close_db(db)
+    return formData
+
 def get_form_responses(form_id):
     return {}
 
