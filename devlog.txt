@@ -44,3 +44,5 @@ login + creation of account done. No security question part yet
 leiG -- 2018-05-30 21:49:03
 fixed up the login and now verifies password. made 3 different functions to pull form data from database
 
+wongA -- 2018-05-31 14:41:09
+added create.html for form creation, js functions not in place yet
