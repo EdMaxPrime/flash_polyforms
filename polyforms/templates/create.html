@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %} Settings | Polyforms {% endblock %}
+{% block title %} Form Creation | Polyforms {% endblock %}
 {% block body %}<br>
-	<div id="q0" style="outline: 2px dashed black;">
+	<div id="q0" style="outline: 2px dashed black; padding:5px;">
+
+	<button id="q0b" style="position:relative; top:0; float:right;">X</button>
     <script>
 		var x = document.getElementById("q0");
 		x.addEventListener("focus", myFocusFunction, true);
@@ -22,7 +24,7 @@
 	  <option value="d">multiple-choice</option>
 	</select><br>
 	Question: <input type="text"><br>
-    Max. characters: <input type="text" maxlength="4" size="1">
+    Max. characters: <input type="text" maxlength="4" size="3">
 	</div><br>
 	
     
@@ -43,4 +45,5 @@
     <input type=radio name="ans1"><input type="text"><br>
     </div>
 </div>
+ <script src="create.js"></script> 
 {% endblock %}
