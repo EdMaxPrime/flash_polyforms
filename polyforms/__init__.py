@@ -160,7 +160,7 @@ def responses_csv():
         return Response(render_template("csv_results.csv", headers=test_form['headers'], data=test_form['data']), mimetype="text/csv")
 #JSON
 @polyforms.route('/form/view/form.json')
-def responses_csv():
+def responses_json():
     if not ("id" in request.args):
         return "The requested file was not found at this url", 404
     else:

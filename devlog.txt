@@ -38,7 +38,9 @@ zlotskiyM -- 2018-05-26 18:18
 Added a dropdown menu and modal boxes to facilitate chart/graph creation
 
 zlotskiyM -- 2018-05-26 23:54
-You can now download form results as a CSV fileglei -- 2018-05-27 21:21:46
+You can now download form results as a CSV file
+
+glei -- 2018-05-27 21:21:46
 login + creation of account done. No security question part yet
 
 leiG -- 2018-05-30 21:49:03
@@ -46,3 +48,18 @@ fixed up the login and now verifies password. made 3 different functions to pull
 
 wongA -- 2018-05-31 14:41:09
 added create.html for form creation, js functions not in place yet
+
+maxZ -- 2018-06-02 14:40:15
+The home page now displays pblicly viewable forms from a hardcoded array. It also looks different with the jumbotron.
+
+maxZ -- 2018-06-02 15:56:59
+Rearranged the menubar on the spreadsheet page and added javascript to make the filter search bar work.
+
+maxZ -- 2018-06-02 16:31:55
+Added a dark theme for displaying forms.
+
+maxZ -- 2018-06-02 19:21:51
+Created password reset pages and logic
+
+maxZ -- 2018-06-02 19:39:04
+Now you can download form results as json

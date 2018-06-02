@@ -1,0 +1,9 @@
+[
+{% for row in data %}
+    {
+    {% for col in row %}
+        "{{headers[loop.index0]}}": "{{col}}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+]
