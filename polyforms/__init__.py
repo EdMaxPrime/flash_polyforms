@@ -61,13 +61,14 @@ def home_page():
 #Shows the form to login
 @polyforms.route('/login')
 def login_page():
-    return render_template('login.html', username=session.get("user", ""))
+    return render_template('login.html', username=session.get("user", ""), redirect=request.args.get("redirect", ""))
 
 #Verifies username and password, redirects home on success
 @polyforms.route('/login/verify', methods=["POST"])
 def login_logic():
     uname = request.form.get("username", "")
     pword = request.form.get("password", "")
+    form_id = request.form.get("redirect")
     if pword == "123":
         session["user"] = "Root" # @NSA Backend
     elif db.validate_login(uname, pword) == True:
@@ -76,8 +77,11 @@ def login_logic():
         #print session["userID"]
     else:
         flash("Wrong username or password")
-        return redirect(url_for("login_page"))
-    return redirect(url_for("home_page"))
+        return redirect(url_for("login_page", redirect=form_id))
+    if form_id == None or form_id == "":
+        return redirect(url_for("home_page"))
+    else:
+        return redirect(url_for("display_form", id=form_id))
 
 #Shows the form to signup
 @polyforms.route('/join')
@@ -107,17 +111,25 @@ def signup_logic():
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
-    test = [{'type':'section', 'question':'Parent 1', 'index':0, 'required':False, 'min':None, 'max':None}, {'type':'short', 'question':'Name', 'required':True, 'index':1, 'min': 1, 'max': 30, 'value':'lol'}]
-    template_name = "dark.html"
-    flash('Answer "How many siblings do you have?"')
-    flash('Answer "Do you think freshman should be allowed to go out for frees?"')
-    flash('Select atleast 3 but no more than 4 choices for "Ice cream flavors?"')
-    return render_template("form_themes/"+template_name, title="This is the title of a form", questions=(test+generate_questions(10)), form_id="0")
+    form_id = request.args.get("id")
+    username = session.get("user")
+    if form_id == None or 5 > 6: #insert db check for existing form
+        return render_template("404.html", username=username), 404
+    elif username == None and 4 < 5: #insert db check for login required
+        flash("Please login to view this form. You will be redirected after you login.")
+        return redirect(url_for("login_page", redirect=form_id))
+    else:
+        test = [{'type':'section', 'question':'Parent 1', 'index':0, 'required':False, 'min':None, 'max':None}, {'type':'short', 'question':'Name', 'required':True, 'index':1, 'min': 1, 'max': 30, 'value':'lol'}]
+        template_name = "dark.html"
+        flash('Answer "How many siblings do you have?"')
+        flash('Answer "Do you think freshman should be allowed to go out for frees?"')
+        flash('Select atleast 3 but no more than 4 choices for "Ice cream flavors?"')
+        return render_template("form_themes/"+template_name, title="This is the title of a form", questions=(test+generate_questions(10)), form_id=form_id)
 
 #Shortcut URLS
 @polyforms.route('/f/<form_id>')
 def display_form_shortcut(form_id):
-    if 5 > 6: #check if this shortcut registered in DB
+    if 5 > 6: #insert check if this shortcut registered in DB
         return redirect(url_for("display_form"))
     else:
         return render_template("404.html", username=session.get("user", "")), 404
@@ -146,6 +158,14 @@ def responses_csv():
     else:
         test_form = random_form("This is a randomly generated form", 5, 20)
         return Response(render_template("csv_results.csv", headers=test_form['headers'], data=test_form['data']), mimetype="text/csv")
+#JSON
+@polyforms.route('/form/view/form.json')
+def responses_csv():
+    if not ("id" in request.args):
+        return "The requested file was not found at this url", 404
+    else:
+        test_form = random_form("This is a randomly generated form", 5, 20)
+        return Response(render_template("json_results.json", headers=test_form['headers'], data=test_form['data']), mimetype="application/json")
 
 @polyforms.route('/ajax')
 def ajax():
@@ -163,13 +183,20 @@ def settings_page():
 def reset_password_page():
     return render_template("pass_reset.html", username=session.get("user", ""))
 
+#This is where the password reset form redirects. This method will check the DB for security question. Then it will change the password. Then it will redirect to login
 @polyforms.route('/my/settings/password-update', methods=["POST"])
 def reset_password_logic():
-    #insert db check
-    if "user" in session:
-        session.pop("user")
-    flash("Success! Your password has been changed.")
-    return redirect(url_for("login_page"))
+    #insert db check for username
+    #insert db check for security question
+    if request.form.get("password") == request.form.get("password2"):
+        #insert new password into db
+        if "user" in session:
+            session.pop("user")
+        flash("Success! Your password has been changed.")
+        return redirect(url_for("login_page"))
+    else:
+        flash("The new password doesn't match in both boxes")
+        return redirect(url_for("reset_password_page"))
 
 @polyforms.route('/logout')
 def logout():
