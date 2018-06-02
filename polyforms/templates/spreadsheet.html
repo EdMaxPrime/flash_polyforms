@@ -8,17 +8,27 @@
     <h1>{{title}}</h1>
   </div>
   <div class="w-100"></div>
-  <div class="col-12 col-md-2 order-last order-md-2">
-    <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" id="chartMenuToggler" data-toggle="dropdown" type="button">Make A Chart</button>
-      <div class="dropdown-menu" aria-labelledby="chartMenuToggler">
-        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#pieModal">Pie Chart</a>
-        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#lineModal">Line Chart</a>
-        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#barModal">Bar Chart</a>
-        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#histModal">Histogram</a>
-        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#plotModal">Scatter Plot</a>
-        <a class="dropdown-item" href="/form/view/form.csv?id={{form_id}}">Download CSV</a>
+  <div class="col-12 col-md-7 order-last order-md-2">
+    <div class="btn-group" role="group">
+      <div class="button-group" role="group">
+        <button class="btn btn-secondary dropdown-toggle" id="downloadMenuToggler" data-toggle="dropdown" type="button">Download</button>
+        <div class="dropdown-menu" aria-labelledby="downloadMenuToggler">
+          <a class="dropdown-item" href="/form/view/form.csv?id={{form_id}}">CSV</a>
+          <a class="dropdown-item" href="/form/view/form.json?id={{form_id}}">JSON</a>
+        </div>
       </div>
+      <div class="btn-group" role="group">
+        <button class="btn btn-secondary dropdown-toggle" id="chartMenuToggler" data-toggle="dropdown" type="button">Make A Chart</button>
+        <div class="dropdown-menu" aria-labelledby="chartMenuToggler">
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#pieModal">Pie Chart</a>
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#lineModal">Line Chart</a>
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#barModal">Bar Chart</a>
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#histModal">Histogram</a>
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#plotModal">Scatter Plot</a>
+        </div>
+      </div>
+      <button class="btn btn-secondary" type="button">Publish</button>
+      <button class="btn btn-secondary" type="button" title="This form will stop accepting responses, but you will still be able to view this page.">Close</button>
     </div>
   </div>
   <div class="col-12 col-md order-2 order-md-last">
