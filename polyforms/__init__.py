@@ -5,6 +5,7 @@ from utils import db
 
 polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
+polyforms.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) + "/"
 
 #Used for testing the display of questions
@@ -48,7 +49,14 @@ def home_page():
     #print db.returnFormData(1)
     #print db.getFormDataNoResponse(1)
     #print db.getFormData(2)
-    return render_template("index.html", username=session.get("user", ""))
+    form = [
+    {'title':'Hello', 'owner':'me', 'id':'0', 'questions':(12*[{}]), 'login_required': False},
+    {'title':'Dogs or Cats?', 'owner':'me', 'id':'1', 'questions':(2*[{}]), 'login_required': True},
+    {'title':'Are you a teacher?', 'owner':'me', 'id':'2', 'questions':(4*[{}]), 'login_required': True},
+    {'title':'Big Sib applications', 'owner':'chairs', 'id':'3', 'questions':(5*[{}]), 'login_required': False},
+    {'title':'Big Sib applications', 'owner':'chairs', 'id':'4', 'questions':(5*[{}]), 'login_required': False}
+    ]
+    return render_template("index.html", username=session.get("user", ""), forms=form)
 
 #Shows the form to login
 @polyforms.route('/login')
@@ -89,7 +97,7 @@ def signup_logic():
         flash("Password can't be blank")
     elif pword != request.form.get("password2", ""):
         flash("You didn't type the password correctly the 2nd time")
-    elif db.checkExist("accounts", "username", uname): #check its not already existing
+    elif db.user_exists(uname): #check its not already existing
         flash("This username already exists")
     else:
         db.add_account(uname, pword)
@@ -109,7 +117,11 @@ def display_form():
 #This will store the responses to the form and then redirect to a Thank You
 @polyforms.route('/form/submit', methods=['POST'])
 def process_form():
-    return redirect(url_for("display_form"))
+    if "form_id" not in request.form:
+        return "Error"
+    else:
+        form_id = request.form["form_id"]
+        return redirect(url_for("display_form"))
 
 #View the responses to your form and make charts
 @polyforms.route('/form/view')
