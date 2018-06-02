@@ -99,8 +99,12 @@ def signup_logic():
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
+    test = [{'type':'section', 'question':'Parent 1', 'index':0, 'required':False, 'min':None, 'max':None}, {'type':'short', 'question':'Name', 'required':True, 'index':1, 'min': 1, 'max': 30, 'value':'lol'}]
     template_name = "light.html"
-    return render_template("form_themes/"+template_name, title="This is the title of a form", questions=generate_questions(10), form_id="0")
+    flash('Answer "How many siblings do you have?"')
+    flash('Answer "Do you think freshman should be allowed to go out for frees?"')
+    flash('Select atleast 3 but no more than 4 choices for "Ice cream flavors?"')
+    return render_template("form_themes/"+template_name, title="This is the title of a form", questions=(test+generate_questions(10)), form_id="0")
 
 #This will store the responses to the form and then redirect to a Thank You
 @polyforms.route('/form/submit', methods=['POST'])
