@@ -2,18 +2,24 @@
 <html>
 <head>
     <title> {{title}} | Polyforms </title>
+    <link rel="shortcut icon" href="/static/img/logo_square.png">
     <style type="text/css">
         div.container {
             margin: 2em;
         }
         #error {
-            border: 1px solid #FF6666;
+            border: 4px solid red;
+            background-color: rgba(255, 102, 102, 0.25);
             padding: 20px;
+        }
+        h2.section {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <h1>{{title}}</h1>
+    <hr>
     {% set messages = get_flashed_messages() %}
     {% if messages|length > 0 %}
     <div id="error">
@@ -28,27 +34,33 @@
     <form method="POST" action="/form/submit">
       {% for q in questions %}
         <div class="container">
+            {% if q.type == "section" %}
+            <h2 class="section">{{ q.question }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2>
+            {% elif q.type == "username" %}
+            <input type="hidden" name="{{q.index}}" value="{{username}}">
+            {% else %}
             <label for="q{{q.index}}">{% if q.required %}<b>required</b>{% endif %} {{q.question}}</label>
+            {% endif %}
 
             {% if q.type == "short" %}
-            <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes}}>
+            <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes}} value="{{q.value|default('')}}">
 
             {% elif q.type == "long" %}<br>
-            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes}}></textarea>
+            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes}}>{{q.value|default('')}}</textarea>
 
             {% elif q.type == "number" %}
-            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes}}>
+            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes}} value="{{q.value|default(''),true}}">
 
             <!-- If the maximum selectable choices is more than 1, then checkboxes -->
             {% elif q.type == "choice" and q.max != 1 %}
             {% for c in q.choices %}
-            <br><input type="checkbox" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}"> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
+            <br><input type="checkbox" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ 'checked' if c.selected|default(false, true)}}> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
             {% endfor %}
 
             <!-- If the maximum selectable choices is 1, then radio buttons -->
             {% else %}
             {% for c in q.choices %}
-            <br><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}"> <label fpr="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
+            <br><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ 'checked' if c.selected|default(false, true)}}> <label fpr="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
             {% endfor %}
 
             {% endif %}
