@@ -1,11 +1,23 @@
 {% extends "base.html" %}
 {% block title %} Settings | Polyforms {% endblock %}
-{% block body %}<br>
-<input id="forms_public_by_default" type="checkbox"> Make forms public by default<br>
-<input id="" type="checkbox"><br>
-<input id="" type="checkbox"><br>
-<input id="" type="checkbox"><br>
-<input id="" type="checkbox"><br>
-<input id="" type="checkbox"><br>
-<input id="" type="checkbox" checked disabled><br>
+{% block body %}
+<form action="/my/settings/update" method="POST">
+    <div class="form-check">
+        <input id="forms_public_by_default" name="forms_public_by_default" type="checkbox" class="form-check-input">
+        <label for="forms_public_by_default" class="form-check-label">Make forms public by default</label>
+    </div>
+    <input id="" type="checkbox"><br>
+    <input id="" type="checkbox"><br>
+    <input id="" type="checkbox"><br>
+    <input id="" type="checkbox"><br>
+    <input id="" type="checkbox"><br>
+    <input id="" type="checkbox" checked disabled><br>
+    <div class="form-group">
+        <input type="submit" class="form-control" name="update" value="Update Settings">
+    </div>
+</form>
+<div>
+    <p>To change your password, click the link below. You will be logged out then sent to a page where you must input the answer to the security question you chose when making your account.</p>
+    <a href="/my/settings/password" class="btn btn-link">Change Password</a>
+</div>
 {% endblock %}

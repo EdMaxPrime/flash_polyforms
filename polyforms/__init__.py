@@ -159,6 +159,18 @@ def my_forms():
 def settings_page():
     return render_template("settings.html", username=session.get("user",""))
 
+@polyforms.route('/my/settings/password')
+def reset_password_page():
+    return render_template("pass_reset.html", username=session.get("user", ""))
+
+@polyforms.route('/my/settings/password-update', methods=["POST"])
+def reset_password_logic():
+    #insert db check
+    if "user" in session:
+        session.pop("user")
+    flash("Success! Your password has been changed.")
+    return redirect(url_for("login_page"))
+
 @polyforms.route('/logout')
 def logout():
     if "user" in session:
