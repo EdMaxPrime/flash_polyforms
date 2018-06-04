@@ -167,6 +167,9 @@ def responses_json():
         test_form = random_form("This is a randomly generated form", 5, 20)
         return Response(render_template("json_results.json", headers=test_form['headers'], data=test_form['data']), mimetype="application/json")
 
+@polyforms.route('/form/new')
+def create():
+    return render_template("create.html")
 @polyforms.route('/ajax')
 def ajax():
     return redirect(url_for('/form'))

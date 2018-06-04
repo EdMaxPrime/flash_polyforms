@@ -1,49 +1,41 @@
 {% extends "base.html" %}
 {% block title %} Form Creation | Polyforms {% endblock %}
 {% block body %}<br>
+    <ol>
+    <li>
 	<div id="q0" style="outline: 2px dashed black; padding:5px;">
 
 	<button id="q0b" style="position:relative; top:0; float:right;">X</button>
-    <script>
-		var x = document.getElementById("q0");
-		x.addEventListener("focus", myFocusFunction, true);
-		x.addEventListener("blur", myBlurFunction, true);
-
-		function myFocusFunction() {
-		    document.getElementById("q0").style.outline = "2px dashed black;";  
-		}
-
-		function myBlurFunction() {
-		    document.getElementById("q0").style.backgroundColor = "1px solid black;";  
-		}
-		</script>
 	Question Type:<select>
-	  <option value="a">one-line response</option>
-	  <option value="b">extended response</option>
-	  <option value="c">numerical</option>
-	  <option value="d">multiple-choice</option>
+	  <option value="0">one-line response</option>
+	  <option value="1">extended response</option>
+	  <option value="2">numerical</option>
+	  <option value="3">multiple-choice</option>
 	</select><br>
 	Question: <input type="text"><br>
     Max. characters: <input type="text" maxlength="4" size="3">
-	</div><br>
-	
-    
-    
-    <div id="q1" style="outline: 1px solid black;">
+	</div>
+	</li><br>
+
+    <li>
+    <div id="q1" style="outline: 1px solid black; padding:5px;">
+    <button id="q0b" style="position:relative; top:0; float:right;">X</button>
 	Question Type:<select >
-	  <option value="a">one-line response</option>
-	  <option value="b">extended response</option>
-	  <option value="c">numerical</option>
-	  <option value="d" selected>multiple-choice</option>
+	  <option value="0">one-line response</option>
+	  <option value="1">extended response</option>
+	  <option value="2">numerical</option>
+	  <option value="3" selected>multiple-choice</option>
 	</select><br>
     Question: <input type="text">
-    <div>
-    Answer choices:<br>
-    <input type=radio name="ans1"><input type="ans1"><input type="button" value="X"><br>
-    <input type=radio name="ans1"><input type="ans2"><input type="button" value="X"><br>
-    <input type=radio name="ans1"><input type="text"><input type="button" value="X"><br>
-    <input type=radio name="ans1"><input type="text"><br>
+        <div>
+        Answer choices:<br>
+        <input type=radio name="ans1"><input type="ans1"><input type="button" value="X"><br>
+        <input type=radio name="ans1"><input type="ans2"><input type="button" value="X"><br>
+        <input type=radio name="ans1"><input type="text"><input type="button" value="X"><br>
+        <input type=radio name="ans1"><input type="text"><br>
+        </div>
     </div>
-</div>
- <script src="create.js"></script> 
+    </li>
+    </ol>
+    <script src="{{url_for('/static/js', filename='create.js') }}></script> 
 {% endblock %}
