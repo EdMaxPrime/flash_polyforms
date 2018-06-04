@@ -70,9 +70,9 @@ def add_style(formID, row, column, property, value):
 
 # add security questions later
 # sqlite automatically increments all integer primary keys (user_id)
-def add_account(username, password):
+def add_account(username, password, security_question, security_question_answer):
     db, c = open_db()
-    c.execute("INSERT INTO accounts (username, password) VALUES ('%s', '%s')" % (username, hashed(password)))
+    c.execute("INSERT INTO accounts (username, password, security_question, security_question_answer) VALUES ('%s', '%s', '%s', '%s')" % (username, hashed(password), str(security_question), hashed(str(username) + str(security_question_answer))))
     close_db(db)
 
 #Returns true if this username+password pair matches, false if it does not
@@ -88,6 +88,18 @@ def validate_login(username, password):
     else:
         return len(results) > 0
 
+#Returns true if this username+password pair matches, false if it does not
+def validate_resetPassword(username, security_question, security_question_answer):
+    db, c = open_db()
+    c.execute("SELECT username FROM accounts WHERE username" + " = '" + str(username) + "' AND security_question = '" + str(security_question) +"' AND security_question_answer = '" + str(hashed(str(username) + str(security_question_answer))) + "';")
+    results = c.fetchone()
+    close_db(db)
+    if results == None:
+        return False
+    else:
+        return len(results) > 0
+
+#Checks if something exists in a specific Column within a table. Returns true if it is found
 def checkExist(table, colName, query):
     db, c = open_db()
     #print "SELECT " + str(colName) + " FROM " + table + " WHERE " + colName + "=" + query +";"
@@ -103,10 +115,14 @@ def checkExist(table, colName, query):
 def user_exists(username):
     db, c = open_db()
     c.execute("SELECT username FROM accounts WHERE username = '%s';" % (username,)) #comma needed for this
-    whos_there = c.fetchone()
+    results = c.fetchone()
     close_db(db)
-    return len(whos_there) > 0
+    if results == None:
+        return False
+    else:
+        return len(results) > 0
 
+#returns the ID # for a specific form / question / user based off 1 thing you know about a column in the Table + the colName of the ID
 def getID(tableName, idCol, queryCol, query):
     db, c = open_db()
     c.execute("SELECT " + str(idCol) + " FROM " + str(tableName) + " WHERE " + str(queryCol) + " = '%s';" % (query,)) #comma needed for this
@@ -114,6 +130,11 @@ def getID(tableName, idCol, queryCol, query):
     close_db(db)
     return ID[0]
 
+# This returns a dictionary that represents a form.
+# Keys are title, id, created, headers, types, data.
+# Header is an array of questions.
+# Types is an array of what types of question each question is
+# Data is a 2d Array that holds the arrays of responses per question
 def getFormData(formID):
     #=================
     # "Global" Holder variables
@@ -130,6 +151,8 @@ def getFormData(formID):
     formData["title"] = str(tempResult[1])
     formData["id"] = str(tempResult[0])
     formData["created"] = str(tempResult[6])
+    formData["login_required"] = str(tempResult[3])
+    formData["public_results"] = str(tempResult[4])
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
@@ -211,7 +234,7 @@ def getFormData(formID):
         if optionDump is not None:
             for eachOption in optionDump:
                 tempOptionDict = {}
-                tempOptionDict["text_user_sees"] = str(eachOption[3])
+                tempOptionDict["text"] = str(eachOption[3])
                 tempOptionDict["value"] = str(eachOption[4])
                 optionArray.append(tempOptionDict)
             tempDict["option"] = optionArray
@@ -234,6 +257,13 @@ def getFormData(formID):
     close_db(db)
     return formData
 '''
+
+# Returns a dictionary for the from
+# First layer of keys are title, id, theme, owner, and questions
+# The "Question" key is an array of dictionaries with each dictionary being a question
+#   Each dictionary has the keys: question_id, question, type max, and options
+#   Options is an array of dictionaries, each dictionary representing an option for the question
+#       These dictionaries have keys, text and values. 
 def getFormDataNoResponse(formID):
     #=================
     # "Global" Holder variables
@@ -245,8 +275,10 @@ def getFormDataNoResponse(formID):
     c.execute("SELECT * FROM forms WHERE form_id = " + str(formID))
     tempResult = c.fetchone()
     #Basic form stuff
-    formData["title"] = str(tempResult[1])
     formData["id"] = str(tempResult[0])
+    formData["title"] = str(tempResult[1])
+    formData["login_required"] = str(tempResult[3])
+    formData["public_results"] = str(tempResult[4])
     formData["theme"] = str(tempResult[5])
     #Add creator ID
     ownerID = tempResult[2]
@@ -273,7 +305,7 @@ def getFormDataNoResponse(formID):
         if optionDump is not None:
             for eachOption in optionDump:
                 tempOptionDict = {}
-                tempOptionDict["text_user_sees"] = eachOption[3]
+                tempOptionDict["text"] = eachOption[3]
                 tempOptionDict["value"] = eachOption[4]
                 optionArray.append(tempOptionDict)
             tempDict["option"] = optionArray
@@ -284,6 +316,46 @@ def getFormDataNoResponse(formID):
     close_db(db)
     return formData
 
+# This returns an array of Dictionaries. Each dictionary represents a form.
+# Dictionary keys are: form_id, title, owner_id, owner, theme
+def getPublicForms():
+    formArray = []
+    db, c = open_db()
+    c.execute("SELECT * FROM forms WHERE login_required = 0 ORDER BY created DESC;")
+    tempResult = c.fetchmany(size=24)
+    for each in tempResult:
+        tempDict = {}
+        tempDict["form_id"] = each[0]
+        tempDict["title"] = each[1]
+        tempDict["owner_id"] = each[2]
+
+        ownerID = each[2]
+        c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
+        #print ownerID
+        tempResult = c.fetchone()
+        #print tempResult
+        tempDict["owner"] = (str(tempResult[0]))
+        tempDict["theme"] = each[5]
+        formArray.append(tempDict)
+
+
+    #c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created) VALUES ('form 3',1,0,0,'no theme', datetime('now'));")
+    close_db(db)
+    return formArray
+
+def getSQ(username):
+    db, c = open_db()
+    c.execute("SELECT security_question FROM accounts WHERE username = " + "'" + str(username) + "';")
+    tempResult = c.fetchone()[0]
+    close_db(db)
+    return str(tempResult)
+
+def update_account(username, password):
+    db, c = open_db()
+    c.execute("UPDATE accounts SET password = " + "'" + str(hashed(password)) + "' WHERE username = '" + str(username) + "';")
+    close_db(db)
+
+
 def get_form_responses(form_id):
     return {}
 
@@ -293,7 +365,7 @@ def create_tables():
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER PRIMARY KEY, response BLOB, timestamp TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER PRIMARY KEY, question integer, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")
-    c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT);")
+    c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT, security_question TEXT, security_question_answer TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS styles(form_id INTEGER, row INTEGER, column INTEGER, property TEXT, value TEXT);")
     close_db(db)
     

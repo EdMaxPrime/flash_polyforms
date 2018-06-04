@@ -46,6 +46,8 @@ def deploy_test():
 
 @polyforms.route('/')
 def home_page():
+    db.create_tables()
+    print "created table"
     #print db.returnFormData(1)
     #print db.getFormDataNoResponse(1)
     #print db.getFormData(2)
@@ -61,16 +63,24 @@ def home_page():
 #Shows the form to login
 @polyforms.route('/login')
 def login_page():
+    db.create_tables()
+    print "created table"
     return render_template('login.html', username=session.get("user", ""), redirect=request.args.get("redirect", ""))
 
 #Verifies username and password, redirects home on success
 @polyforms.route('/login/verify', methods=["POST"])
 def login_logic():
+    db.create_tables()
+    print "created table"
     uname = request.form.get("username", "")
     pword = request.form.get("password", "")
     form_id = request.form.get("redirect")
+    submitType = request.form.get("submit", "")
     if pword == "123":
         session["user"] = "Root" # @NSA Backend
+    elif (submitType == "Reset Password" and (not (uname == "") and db.user_exists(uname))):
+        session["tempUser"] = uname
+        return redirect(url_for("reset_page"))
     elif db.validate_login(uname, pword) == True:
         session["user"] = uname
         session["userID"] = db.getID("accounts", "user_id", "username", str(uname))
@@ -86,13 +96,19 @@ def login_logic():
 #Shows the form to signup
 @polyforms.route('/join')
 def signup_page():
+    db.create_tables()
+    print "created table"
     return render_template("signup.html", username=session.get("user", ""))
 
 #Verifies that this account can be made, redirects to login page on success
 @polyforms.route('/join/verify', methods=['POST'])
 def signup_logic():
+    db.create_tables()
+    print "created table"
     uname = request.form.get("username1", "")
     pword = request.form.get("password1", "")
+    sq = request.form.get("question", "")
+    sqAns = request.form.get("answer", "")
     if len(uname) == 0:
         flash("Username can't be blank")
     elif uname != request.form.get("username2", ""):
@@ -104,13 +120,15 @@ def signup_logic():
     elif db.user_exists(uname): #check its not already existing
         flash("This username already exists")
     else:
-        db.add_account(uname, pword)
+        print sq
+        db.add_account(uname, pword, sq, sqAns)
         flash("Success! Your account has been made. Please login.")
         return redirect(url_for("login_page"))
     return redirect(url_for("signup_page"))
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
+    db.create_tables()
     form_id = request.args.get("id")
     username = session.get("user")
     if form_id == None or 5 > 6: #insert db check for existing form
@@ -187,16 +205,24 @@ def reset_password_page():
 @polyforms.route('/my/settings/password-update', methods=["POST"])
 def reset_password_logic():
     #insert db check for username
+    uname = request.form.get("username")
+    question = request.form.get("question")
+    answer = request.form.get("answer")
+    if not (db.user_exists(uname)):
+        flash("Username is wrong or does not exist. Please re-enter an username")
     #insert db check for security question
-    if request.form.get("password") == request.form.get("password2"):
+    elif not db.validate_resetPassword(uname, question, answer):
+        flash("Security Question and/or answer is wrong.")
+    elif request.form.get("password") == request.form.get("password2"):
         #insert new password into db
+        db.update_account(uname, request.form.get("password"))
         if "user" in session:
             session.pop("user")
         flash("Success! Your password has been changed.")
         return redirect(url_for("login_page"))
     else:
         flash("The new password doesn't match in both boxes")
-        return redirect(url_for("reset_password_page"))
+    return redirect(url_for("reset_password_page"))
 
 @polyforms.route('/logout')
 def logout():
