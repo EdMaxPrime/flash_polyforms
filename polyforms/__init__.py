@@ -2,11 +2,13 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
 from utils import db
+from utils import test
 
 polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
 polyforms.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) + "/"
+db.create_tables()
 
 #Used for testing the display of questions
 def generate_questions(num):
@@ -46,48 +48,32 @@ def deploy_test():
 
 @polyforms.route('/')
 def home_page():
-    db.create_tables()
-    print "created table"
     #print db.returnFormData(1)
     #print db.getFormDataNoResponse(1)
     #print db.getFormData(2)
-    form = [
-    {'title':'Hello', 'owner':'me', 'id':'0', 'questions':(12*[{}]), 'login_required': False},
-    {'title':'Dogs or Cats?', 'owner':'me', 'id':'1', 'questions':(2*[{}]), 'login_required': True},
-    {'title':'Are you a teacher?', 'owner':'me', 'id':'2', 'questions':(4*[{}]), 'login_required': True},
-    {'title':'Big Sib applications', 'owner':'chairs', 'id':'3', 'questions':(5*[{}]), 'login_required': False},
-    {'title':'Big Sib applications', 'owner':'chairs', 'id':'4', 'questions':(5*[{}]), 'login_required': False}
-    ]
-    return render_template("index.html", username=session.get("user", ""), forms=form)
+    return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
 
 #Shows the form to login
 @polyforms.route('/login')
 def login_page():
-    db.create_tables()
-    print "created table"
     return render_template('login.html', username=session.get("user", ""), redirect=request.args.get("redirect", ""))
 
 #Verifies username and password, redirects home on success
 @polyforms.route('/login/verify', methods=["POST"])
 def login_logic():
-    db.create_tables()
-    print "created table"
     uname = request.form.get("username", "")
     pword = request.form.get("password", "")
     form_id = request.form.get("redirect")
     submitType = request.form.get("submit", "")
     if pword == "123":
         session["user"] = "Root" # @NSA Backend
-    elif (submitType == "Reset Password" and (not (uname == "") and db.user_exists(uname))):
-        session["tempUser"] = uname
-        return redirect(url_for("reset_page"))
     elif db.validate_login(uname, pword) == True:
         session["user"] = uname
         session["userID"] = db.getID("accounts", "user_id", "username", str(uname))
-        #print session["userID"]
     else:
         flash("Wrong username or password")
         return redirect(url_for("login_page", redirect=form_id))
+    #This is to redirect people that are filling out a form that requires login
     if form_id == None or form_id == "":
         return redirect(url_for("home_page"))
     else:
@@ -96,15 +82,11 @@ def login_logic():
 #Shows the form to signup
 @polyforms.route('/join')
 def signup_page():
-    db.create_tables()
-    print "created table"
     return render_template("signup.html", username=session.get("user", ""))
 
 #Verifies that this account can be made, redirects to login page on success
 @polyforms.route('/join/verify', methods=['POST'])
 def signup_logic():
-    db.create_tables()
-    print "created table"
     uname = request.form.get("username1", "")
     pword = request.form.get("password1", "")
     sq = request.form.get("question", "")
@@ -120,7 +102,6 @@ def signup_logic():
     elif db.user_exists(uname): #check its not already existing
         flash("This username already exists")
     else:
-        print sq
         db.add_account(uname, pword, sq, sqAns)
         flash("Success! Your account has been made. Please login.")
         return redirect(url_for("login_page"))
@@ -128,27 +109,27 @@ def signup_logic():
 
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
-    db.create_tables()
     form_id = request.args.get("id")
     username = session.get("user")
-    if form_id == None or 5 > 6: #insert db check for existing form
+    if form_id == None or test.form_exists(form_id) == False: #insert db check for existing form
         return render_template("404.html", username=username), 404
-    elif username == None and 4 < 5: #insert db check for login required
+    #now that we know the form exists...
+    form = test.get_form(form_id)
+    if username == None and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
     else:
-        test = [{'type':'section', 'question':'Parent 1', 'index':0, 'required':False, 'min':None, 'max':None}, {'type':'short', 'question':'Name', 'required':True, 'index':1, 'min': 1, 'max': 30, 'value':'lol'}]
-        template_name = "dark.html"
+        template_name = form["theme"]
         flash('Answer "How many siblings do you have?"')
         flash('Answer "Do you think freshman should be allowed to go out for frees?"')
         flash('Select atleast 3 but no more than 4 choices for "Ice cream flavors?"')
-        return render_template("form_themes/"+template_name, title="This is the title of a form", questions=(test+generate_questions(10)), form_id=form_id)
+        return render_template("form_themes/"+template_name, title=form["title"], questions=form["questions"], form_id=form_id)
 
 #Shortcut URLS
 @polyforms.route('/f/<form_id>')
 def display_form_shortcut(form_id):
-    if 5 > 6: #insert check if this shortcut registered in DB
-        return redirect(url_for("display_form"))
+    if test.form_exists(form_id): #insert check if this shortcut registered in DB
+        return redirect(url_for("display_form", id=form_id))
     else:
         return render_template("404.html", username=session.get("user", "")), 404
 
@@ -164,7 +145,7 @@ def process_form():
 #View the responses to your form and make charts
 @polyforms.route('/form/view')
 def responses_page():
-    form_id = request.args.get("id", "0")
+    form_id = request.args.get("id", "-1")
     test_form = random_form("This is a randomly generated form #"+form_id, 5, 20)
     return render_template("spreadsheet.html", username=session.get("user", ""), title=test_form['title'], headers=test_form['headers'], data=test_form['data'], form_id=form_id)
 
@@ -204,18 +185,15 @@ def reset_password_page():
 #This is where the password reset form redirects. This method will check the DB for security question. Then it will change the password. Then it will redirect to login
 @polyforms.route('/my/settings/password-update', methods=["POST"])
 def reset_password_logic():
-    #insert db check for username
     uname = request.form.get("username")
     question = request.form.get("question")
     answer = request.form.get("answer")
     if not (db.user_exists(uname)):
         flash("Username is wrong or does not exist. Please re-enter an username")
-    #insert db check for security question
     elif not db.validate_resetPassword(uname, question, answer):
-        flash("Security Question and/or answer is wrong.")
+        flash("Security Question and/or answer is wrong. Please make sure the answer and question match the ones you used when signing up. Capitalization matters.")
     elif request.form.get("password") == request.form.get("password2"):
-        #insert new password into db
-        db.update_account(uname, request.form.get("password"))
+        db.update_account(uname, request.form.get("password", ""))
         if "user" in session:
             session.pop("user")
         flash("Success! Your password has been changed.")
