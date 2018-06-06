@@ -6,7 +6,7 @@ import db as main
 f = main.f
 
 def open_db():
-    db = sqlite3.connect(f) # open if f exists, otherwise create
+    db = sqlite3.connect(main.f) # open if f exists, otherwise create
     c = db.cursor()         # facilitate db ops
     return db, c
 
