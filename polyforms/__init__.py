@@ -8,6 +8,7 @@ polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
 polyforms.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) + "/"
+db.f = DIR + '/' + db.f 
 db.create_tables()
 
 #Used for testing the display of questions
