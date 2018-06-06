@@ -3,7 +3,7 @@ import hashlib   # allows for passwords and emails to be encrypted and decrypted
 import db as main
 
 #this will be the one we use when routes work
-f = "data/database.db"
+f = main.f
 
 def open_db():
     db = sqlite3.connect(f) # open if f exists, otherwise create
@@ -60,7 +60,9 @@ def get_form(form_id):
     form["questions"] = []
     questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ?;", (form_id,)).fetchall()
     for q in questions:
-        form["questions"].append(tuple_to_dictionary(q, ["index", "question", "type", "required", "min", "max"]))
+        questionAsDict = tuple_to_dictionary(q, ["index", "question", "type", "required", "min", "max"])
+        if questionAsDict["type"] == "choice":
+            questionAsDict
     close_db(db)
     return form
 
