@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %} Form Creation | Polyforms {% endblock %}
 {% block body %}<br>
-    <ol>
+    <ol id="questionList">
     <li>
-	<div id="q0" style="outline: 2px dashed black; padding:5px;">
+	<div class="question" id="q0" style="outline: 1px solid black; padding:5px;">
 
-	<button id="q0b" style="position:relative; top:0; float:right;">X</button>
+	<button class="close" style="position:relative; top:0; float:right;">X</button>
 	Question Type:<select>
 	  <option value="0">one-line response</option>
 	  <option value="1">extended response</option>
@@ -18,8 +18,8 @@
 	</li><br>
 
     <li>
-    <div id="q1" style="outline: 1px solid black; padding:5px;">
-    <button id="q0b" style="position:relative; top:0; float:right;">X</button>
+    <div class="question" id="q1" style="outline: 1px solid black; padding:5px;">
+    <button class="close" style="position:relative; top:0; float:right;">X</button>
 	Question Type:<select >
 	  <option value="0">one-line response</option>
 	  <option value="1">extended response</option>
@@ -37,5 +37,6 @@
     </div>
     </li>
     </ol>
-    <script src="{{url_for('/static/js', filename='create.js') }}></script> 
+    <button id="addButton">Add Question</button>
+    <script src="{{url_for('static', filename='js/create.js') }}"></script> 
 {% endblock %}

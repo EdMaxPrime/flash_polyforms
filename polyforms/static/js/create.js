@@ -1,9 +1,9 @@
-var question = document.getElementById('q0');
-var theButton = q0.getElementById('q0b');
-var ans = seqList.getElementsByTagName('li');
+var q0 = document.getElementById('q0');
+var q1 = document.getElementById('q1');
+var closeButtons = document.getElementsByClassName('close');
+var questions = document.getElementsByClassName('question');
+var addButton = document.getElementById('addButton');
 
-q0.addEventListener('mouseover', q0.attr("style","outline: 2px dashed black; padding:5px;"));
-q0.addEventListener('mouseout', q0.attr("style","outline: 2px solid black; padding:5px;"));
 
 var addElement = function(e) {
 };
@@ -11,14 +11,23 @@ var addElement = function(e) {
 var changeHeading = function(e) {
 };
 
-var rmItem = function(e) {    
-    this.remove();
+var rmItem = function(e) {
+    this.parentElement.parentElement.remove();
 };
 
-theButton.addEventListener('click', rmItem);
-
-for (var i=0;i<listItem.length;i++){
-    listItem[i].addEventListener('mouseover', changeHeading);
-    listItem[i].addEventListener('mouseout', revertHeading);
-    listItem[i].addEventListener('click', rmItem);
+var addQuestion= function(e) {
 };
+
+addButton.addEventListener('click', addQuestion);
+
+for (var i=0; i<closeButtons.length; i++){
+	closeButtons[i].addEventListener('click', rmItem);
+};
+
+for (var i=0; i<questions.length; i++){
+    questions[i].addEventListener('mouseover',function(){ this.setAttribute("style","outline: 2px dashed black; padding:5px;");});
+    questions[i].addEventListener('mouseout', function(){ this.setAttribute("style","outline: 1px solid black; padding:5px;");});
+};
+
+console.log(questions);
+
