@@ -56,7 +56,8 @@ def home_page():
     #db.add_option(6, 7, "Ghost Busters", "ghost busters")
     #db.add_option(6, 7, "The Breakfast Club", "breakfast")
     #db.add_option(6, 7, "Pulp Fiction", "pf")
-    return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
+    print db.getPublicForms(24)
+    return render_template("index.html", username=session.get("user", ""), forms=db.getPublicForms(24))
 
 #Shows the form to login
 @polyforms.route('/login')

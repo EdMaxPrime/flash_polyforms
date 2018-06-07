@@ -37,9 +37,9 @@ def increment_id(table):
 def hashed(foo):
     return hashlib.md5(str(foo)).hexdigest()
     
-def add_form(user_id, formTitle, loginReq, publicReq, theme):
+def add_form(user_id, formTitle, loginReq, publicReq, theme, open):
     db, c = open_db()
-    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created) VALUES (?,?,?,?,?, datetime('now'))", (formTitle, user_id, loginReq, publicReq, theme))
+    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created, open) VALUES (?,?,?,?,?, datetime('now'), ?)", (formTitle, user_id, loginReq, publicReq, theme, open))
     form_id = c.execute("SELECT max(form_id) FROM forms;").fetchone()
     close_db(db)
     return form_id[0]
@@ -152,6 +152,7 @@ def getFormData(formID):
     formData["created"] = str(tempResult[6])
     formData["login_required"] = str(tempResult[3])
     formData["public_results"] = str(tempResult[4])
+    formData["open"] = tempResult[7]
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
@@ -207,6 +208,7 @@ def getFormData(formID):
     formData["title"] = str(tempResult[1])
     formData["id"] = str(tempResult[0])
     formData["theme"] = str(tempResult[5])
+    formData["open"] = tempResult[7]
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
@@ -279,6 +281,7 @@ def getFormDataNoResponse(formID):
     formData["login_required"] = str(tempResult[3])
     formData["public_results"] = str(tempResult[4])
     formData["theme"] = str(tempResult[5])
+    formData["open"] = tempResult[7]
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
@@ -317,25 +320,27 @@ def getFormDataNoResponse(formID):
 
 # This returns an array of Dictionaries. Each dictionary represents a form.
 # Dictionary keys are: form_id, title, owner_id, owner, theme
-def getPublicForms():
+def getPublicForms(number):
     formArray = []
     db, c = open_db()
     c.execute("SELECT * FROM forms WHERE login_required = 0 ORDER BY created DESC;")
-    tempResult = c.fetchmany(size=24)
+    tempResult = c.fetchmany(size=number)
     for each in tempResult:
-        tempDict = {}
-        tempDict["form_id"] = each[0]
-        tempDict["title"] = each[1]
-        tempDict["owner_id"] = each[2]
+        #tempDict = {}
+        #tempDict["form_id"] = each[0]
+        #tempDict["title"] = each[1]
+        #tempDict["owner_id"] = each[2]
 
-        ownerID = each[2]
-        c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
+        #ownerID = each[2]
+        #c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
         #print ownerID
-        tempResult = c.fetchone()
+        #tempResult = c.fetchone()
         #print tempResult
-        tempDict["owner"] = (str(tempResult[0]))
-        tempDict["theme"] = each[5]
-        formArray.append(tempDict)
+        #tempDict["owner"] = (str(tempResult[0]))
+        #tempDict["theme"] = each[5]
+        #tempDict["open"] = each[7]
+        #formArray.append(tempDict)
+        formArray.append(getFormData(each[0]))
 
 
     #c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created) VALUES ('form 3',1,0,0,'no theme', datetime('now'));")
@@ -354,13 +359,17 @@ def update_account(username, password):
     c.execute("UPDATE accounts SET password = " + "'" + str(hashed(password)) + "' WHERE username = '" + str(username) + "';")
     close_db(db)
 
+def update_form(formID, status):
+    db, c = open_db()
+    c.execute("UPDATE forms SET password = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
+    close_db(db)
 
 def get_form_responses(form_id):
     return {}
 
 def create_tables():
     db, c = open_db()
-    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT);")
+    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open);")
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER PRIMARY KEY, response BLOB, timestamp TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")
