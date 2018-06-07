@@ -3,11 +3,9 @@ import hashlib   # allows for passwords and emails to be encrypted and decrypted
 import db as main
 
 #this will be the one we use when routes work
-f = main.f
-
 def open_db():
-    db = sqlite3.connect(main.f) # open if f exists, otherwise create
-    c = db.cursor()         # facilitate db ops
+    db = sqlite3.connect(main.path_to_db) # open if f exists, otherwise create
+    c = db.cursor()                       # facilitate db ops
     return db, c
 
 def close_db(db):
@@ -58,11 +56,29 @@ def get_form(form_id):
     print form_id
     form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created"])
     form["questions"] = []
-    questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ?;", (form_id,)).fetchall()
+    questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
     for q in questions:
+        #convert the query result into a dictionary
         questionAsDict = tuple_to_dictionary(q, ["index", "question", "type", "required", "min", "max"])
+        #If this question lists options, then add them as a list under the key "choices"
         if questionAsDict["type"] == "choice":
-            questionAsDict
+            c.execute("SELECT text_user_sees, value FROM options WHERE form_id = ? AND question_id = ? ORDER BY option_index ASC;", (form_id, questionAsDict["index"]))
+            result = c.fetchall()
+            questionAsDict["choices"] = [tuple_to_dictionary(choice, ["text", "value"]) for choice in result]
+        #add this to the list of questions
+        form["questions"].append(questionAsDict)
     close_db(db)
     return form
+
+
+#This will clear the database, keeps tables
+def reset():
+    db, c = open_db()
+    c.execute("DELETE FROM forms;")
+    c.execute("DELETE FROM responses;")
+    c.execute("DELETE FROM questions;")
+    c.execute("DELETE FROM options;")
+    c.execute("DELETE FROM accounts;")
+    c.execute("DELETE FROM styles;")
+    close_db(db)
 

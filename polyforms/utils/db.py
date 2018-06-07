@@ -6,11 +6,17 @@ from flask import session   # interact with cookie
 #f = "data/database.db"
 
 #temp
-f = "data/database.db"
+local_db_location = "data/database.db"
+path_to_db = local_db_location
+
+def use_database(path):
+    if len(path) > 0 and path[-1] != "/":
+        path += "/"
+    path_to_db = path + local_db_location
 
 def open_db():
-    db = sqlite3.connect(f) # open if f exists, otherwise create
-    c = db.cursor()         # facilitate db ops
+    db = sqlite3.connect(path_to_db) # open if f exists, otherwise create
+    c = db.cursor()                  # facilitate db ops
     return db, c
 
 def close_db(db):
@@ -32,40 +38,31 @@ def hashed(foo):
     return hashlib.md5(str(foo)).hexdigest()
     
 def add_form(user_id, formTitle, loginReq, publicReq, theme):
-    db=sqlite3.connect(f)
-    c=db.cursor()
+    db, c = open_db()
     c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created) VALUES (?,?,?,?,?, datetime('now'))", (formTitle, user_id, loginReq, publicReq, theme))
     form_id = c.execute("SELECT max(form_id) FROM forms;").fetchone()
-    db.commit()
-    db.close()
+    close_db(db)
     return form_id[0]
 
 def add_response(userID, formID, question_id, response, timestamp):
-    db=sqlite3.connect(f)
-    c=db.cursor()
+    db, c = open_db()
     c.execute("INSERT INTO responses (form_id, question_id, user_id, response, timestamp) VALUES (?,?,?,?,?)", (formID, question_id, userID, response, timestamp))
-    db.commit()
-    db.close()
+    close_db(db)
     
 def add_question(formID, question, type, required, min, max):
-    db=sqlite3.connect(f)
-    c=db.cursor()
-    #access cookie
-    #print formID
+    db, c = open_db()
     c.execute("INSERT INTO questions (question, form_id, type, required, min, max) VALUES (?,?,?,?,?,?);", (question, int(formID), type, required, min, max))
     db.commit()
     db.close()
 
 def add_option(formID, questionID, text_user_sees, value):
-    db=sqlite3.connect("../data/database.db")
-    c=db.cursor()
+    db, c = open_db()
     c.execute("INSERT INTO options (form_id, question_id, text_user_sees, value) VALUES (?,?,?,?)", (formID, questionID, text_user_sees, value))
     db.commit()
     db.close()
     
 def add_style(formID, row, column, property, value):
-    db=sqlite3.connect("../data/database.db")
-    c=db.cursor()
+    db, c = open_db()
     c.execute("INSERT INTO styles (form_id, row, column, property, value) VALUES (?,?,?,?,?)", (formID, row, column, property, value))
     db.commit()
     db.close()
@@ -365,7 +362,7 @@ def create_tables():
     db, c = open_db()
     c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER PRIMARY KEY, response BLOB, timestamp TEXT);")
-    c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER PRIMARY KEY, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
+    c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT, security_question TEXT, security_question_answer TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS styles(form_id INTEGER, row INTEGER, column INTEGER, property TEXT, value TEXT);")

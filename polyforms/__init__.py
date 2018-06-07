@@ -7,8 +7,8 @@ from utils import test
 polyforms = Flask(__name__)
 polyforms.secret_key = os.urandom(32)
 polyforms.config['TEMPLATES_AUTO_RELOAD'] = True
-DIR = os.path.dirname(__file__) + "/"
-db.f = DIR + '/' + db.f 
+DIR = os.path.dirname(__file__)
+db.use_database(DIR)
 db.create_tables()
 
 #Used for testing the display of questions
@@ -52,6 +52,10 @@ def home_page():
     #print db.returnFormData(1)
     #print db.getFormDataNoResponse(1)
     #print db.getFormData(2)
+    #db.add_question(6, "Favorite movie", "choice", 0, None, 1)
+    #db.add_option(6, 7, "Ghost Busters", "ghost busters")
+    #db.add_option(6, 7, "The Breakfast Club", "breakfast")
+    #db.add_option(6, 7, "Pulp Fiction", "pf")
     return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
 
 #Shows the form to login
