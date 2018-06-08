@@ -52,10 +52,6 @@ def home_page():
     #print db.returnFormData(1)
     #print db.getFormDataNoResponse(1)
     #print db.getFormData(2)
-    #db.add_question(6, "Favorite movie", "choice", 0, None, 1)
-    #db.add_option(6, 7, "Ghost Busters", "ghost busters")
-    #db.add_option(6, 7, "The Breakfast Club", "breakfast")
-    #db.add_option(6, 7, "Pulp Fiction", "pf")
     return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
 
 #Shows the form to login
@@ -115,7 +111,7 @@ def signup_logic():
 @polyforms.route('/form/respond', methods=["GET"])
 def display_form():
     form_id = request.args.get("id")
-    username = session.get("user")
+    username = session.get("user", "")
     if form_id == None or test.form_exists(form_id) == False: #insert db check for existing form
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
@@ -133,19 +129,22 @@ def display_form():
 #Shortcut URLS
 @polyforms.route('/f/<form_id>')
 def display_form_shortcut(form_id):
-    if test.form_exists(form_id): #insert check if this shortcut registered in DB
-        return redirect(url_for("display_form", id=form_id))
-    else:
-        return render_template("404.html", username=session.get("user", "")), 404
+    return redirect(url_for("display_form", id=form_id))
+
 
 #This will store the responses to the form and then redirect to a Thank You
 @polyforms.route('/form/submit', methods=['POST'])
 def process_form():
-    if "form_id" not in request.form:
-        return "Error"
+    form_id = request.form.get("id", "")
+    username = session.get("user", "")
+    if not test.form_exists(form_id):
+        return render_template("404.html", username=username), 404
     else:
-        form_id = request.form["form_id"]
-        return redirect(url_for("display_form"))
+        qnumber = 1
+        while str(qnumber) in request.form:
+            test.add_response(form_id, qnumber, request.form[str(qnumber)], qnumber == 1)
+            qnumber += 1
+        return redirect(url_for("display_form", id=form_id))
 
 #View the responses to your form and make charts
 @polyforms.route('/form/view')
