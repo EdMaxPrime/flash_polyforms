@@ -51,7 +51,13 @@ def add_response(userID, formID, question_id, response, timestamp):
     
 def add_question(formID, question, type, required, min, max):
     db, c = open_db()
-    c.execute("INSERT INTO questions (question, form_id, type, required, min, max) VALUES (?,?,?,?,?,?);", (question, int(formID), type, required, min, max))
+    c.execute("SELECT question_id FROM questions where form_id = " + str(formID) + ";")
+    tempCounter = c.fetchall()
+    if tempCounter == None:
+        question_id = 1
+    else:
+        question_ID = len(c.fetchall()) + 1
+    c.execute("INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max))
     db.commit()
     db.close()
 
@@ -191,10 +197,10 @@ def getFormData(formID):
         formData["data"] = None
     close_db(db)
     return formData
-'''
-This returns a dictionary with the same syntax of returnFormDataNoResponse(formID) but with responses
 
-def getFormData(formID):
+#This returns a dictionary with the same syntax of returnFormDataNoResponse(formID) but with responses
+
+def getFormDataWithResponse(formID):
     #=================
     # "Global" Holder variables
     formData = {}
@@ -204,6 +210,8 @@ def getFormData(formID):
     db, c = open_db()
     c.execute("SELECT * FROM forms WHERE form_id = " + str(formID))
     tempResult = c.fetchone()
+    #print "===TEMP RESULT ==="
+    #print tempResult
     #Basic form stuff
     formData["title"] = str(tempResult[1])
     formData["id"] = str(tempResult[0])
@@ -253,11 +261,9 @@ def getFormData(formID):
             tempDict["response"] = None
         #===
         questionArray.append(tempDict)
-
     formData["questions"] = questionArray
     close_db(db)
     return formData
-'''
 
 # Returns a dictionary for the from
 # First layer of keys are title, id, theme, owner, and questions

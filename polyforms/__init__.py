@@ -56,7 +56,13 @@ def home_page():
     #db.add_option(6, 7, "Ghost Busters", "ghost busters")
     #db.add_option(6, 7, "The Breakfast Club", "breakfast")
     #db.add_option(6, 7, "Pulp Fiction", "pf")
-    print db.getPublicForms(24)
+    #print db.getPublicForms(24)
+    #print "==== GetFormData ===="
+    #print db.getFormData(1)
+    #print "==== GetFormDataNoResponse ===="
+    #print db.getFormDataNoResponse(1)
+    #print "==== GetFormDataWithResponse ===="
+    #print db.getFormDataWithResponse(1)
     return render_template("index.html", username=session.get("user", ""), forms=db.getPublicForms(24))
 
 #Shows the form to login

@@ -70,3 +70,6 @@ facilitated security questions
 leiG -- 2018-06-07 17:28:12
 updated db so forms can be open/close to response. changed some functions too
 
+leiG -- 2018-06-08 09:56:57
+revised some functions. question_id now not unique (resets for every form)
+
