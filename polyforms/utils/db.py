@@ -370,8 +370,30 @@ def update_form(formID, status):
     c.execute("UPDATE forms SET password = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
     close_db(db)
 
-def get_form_responses(form_id):
-    return {}
+def get_form_questionResponses(form_id, question_id):
+    formDict = getFormDataWithResponse(form_id)
+    question = formDict["questions"][question_id - 1]
+    if question["responses"] == "" or question["responses"] == None:
+        responses = []
+    else:
+        responses = question["responses"]
+    return responses
+
+def get_form_questionsText(form_id):
+    formDict = getFormDataNoResponse(form_id)
+    tempArray = formDict["questions"]
+    questionArray =[]
+    for each in tempArray:
+        questionArray.append(each["question"])
+    return questionArray
+    
+def get_form_questionsOptions(form_id, question_id):
+    formDict = getFormDataNoResponse(form_id)
+    question = formDict["questions"][question_id - 1]
+    optionArray = []
+    for each in question:
+        optionArray.append(each["option"])
+    return optionArray
 
 def create_tables():
     db, c = open_db()
