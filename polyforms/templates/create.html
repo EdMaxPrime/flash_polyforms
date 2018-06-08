@@ -3,23 +3,24 @@
 {% block body %}<br>
     <ol id="questionList">
     <li>
-	<div class="question" id="q0" style="outline: 1px solid black; padding:5px;">
+	<div class="question" style="outline: 1px solid black; padding:5px;">
 
-	<button class="close" style="position:relative; top:0; float:right;">X</button>
+	<button class="remove" style="position:relative; top:0; float:right;">X</button>
+	Question: <input type="text" name="0"><br>
 	Question Type:<select>
-	  <option value="0">one-line response</option>
-	  <option value="1">extended response</option>
-	  <option value="2">numerical</option>
-	  <option value="3">multiple-choice</option>
+	  <option name="0.type" value="0">one-line response</option>
+	  <option name="0.type" value="1">extended response</option>
+	  <option name="0.type" value="2">numerical</option>
+	  <option name="0.type" value="3">multiple-choice</option>
 	</select><br>
-	Question: <input type="text"><br>
+	Required? <input type="checkbox" name="">
     Max. characters: <input type="text" maxlength="4" size="3">
 	</div>
 	</li><br>
 
     <li>
-    <div class="question" id="q1" style="outline: 1px solid black; padding:5px;">
-    <button class="close" style="position:relative; top:0; float:right;">X</button>
+    <div class="question" name="1" style="outline: 1px solid black; padding:5px;">
+    <button class="remove" style="position:relative; top:0; float:right;">X</button>
 	Question Type:<select >
 	  <option value="0">one-line response</option>
 	  <option value="1">extended response</option>
