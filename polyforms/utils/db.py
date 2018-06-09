@@ -46,7 +46,13 @@ def add_form(user_id, formTitle, loginReq, publicReq, theme, open):
 
 def add_response(userID, formID, question_id, response, timestamp):
     db, c = open_db()
-    c.execute("INSERT INTO responses (form_id, question_id, user_id, response, timestamp) VALUES (?,?,?,?,?)", (formID, question_id, userID, response, timestamp))
+    c.execute("SELECT response_id FROM responses where form_id = " + str(formID) + ";")
+    tempCounter = c.fetchall()
+    if tempCounter == None:
+        response_id = 1
+    else:
+        response_ID = len(c.fetchall()) + 1
+    c.execute("INSERT INTO responses (response_id, form_id, question_id, user_id, response, timestamp) VALUES (?,?,?,?,?,?)", (response_id, formID, question_id, userID, response, timestamp))
     close_db(db)
     
 def add_question(formID, question, type, required, min, max):
@@ -395,10 +401,25 @@ def get_form_questionsOptions(form_id, question_id):
         optionArray.append(each["option"])
     return optionArray
 
+def delete_question(form_id, question_id):
+    db, c = open_db()
+    # Delete the question from th DB
+    c.execute("DELETE FROM questions WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
+    c.fetchall() # do this to clear / reset the cache 
+    # Re-number all the existing ones
+    c.execute("SELECT question_id FROM questions where form_id = " + str(form_id) + ";")
+    tempCounter = c.fetchall()
+    if tempCounter == 0 or tempCounter == None:
+        pass
+    else:
+        #tempCounter = question_id + 1
+        c.execute("UPDATE questions SET question_id = question_id + 1 WHERE question_id > " + str(tempCounter) + ";")
+    close_db(db)
+
 def create_tables():
     db, c = open_db()
     c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open);")
-    c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER PRIMARY KEY, response BLOB, timestamp TEXT);")
+    c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER, response BLOB, timestamp TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT, security_question TEXT, security_question_answer TEXT);")

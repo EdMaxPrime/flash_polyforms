@@ -67,6 +67,9 @@ Now you can download form results as json
 leiG -- 2018-06-04 14:59:53
 facilitated security questions
 
+maxZ -- 2018-06-07 22:23:05
+We can store responses to forms in the database. No validation yet.
+
 leiG -- 2018-06-07 17:28:12
 updated db so forms can be open/close to response. changed some functions too
 
@@ -75,4 +78,7 @@ revised some functions. question_id now not unique (resets for every form)
 
 leiG -- 2018-06-08 13:08:00
 added functions if needed
+
+leiG -- 2018-06-09 17:35:29
+maybe fixed merge conflict + added delet question
 

@@ -70,6 +70,25 @@ def get_form(form_id):
     close_db(db)
     return form
 
+#Add a question, return its id
+def add_question(form_id, question, _type, required=False, _min=None, _max=None):
+    db, c = open_db()
+    question_id = c.execute("SELECT max(question_id) FROM questions WHERE form_id = ?;", (form_id,)).fetchone()
+    question_id = (question_id[0] + 1) if question_id[0] != None else 1
+    c.execute("INSERT INTO questions VALUES (?,?,?,?,?,?,?);", (question_id, question, _type, form_id, required, _min, _max))
+    close_db(db)
+    return question_id
+
+
+#Add a response to a question, returns its id
+def add_response(form_id, question_id, response, new_row=False):
+    db, c = open_db()
+    response_id = c.execute("SELECT max(response_id) FROM responses WHERE form_id = ?;", (form_id,)).fetchone()[0] or 0
+    if new_row:
+        response_id += 1
+    c.execute("INSERT INTO responses (form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?, datetime('now'));", (form_id, question_id, response_id, response))
+    close_db(db)
+    return response_id
 
 #This will clear the database, keeps tables
 def reset():
