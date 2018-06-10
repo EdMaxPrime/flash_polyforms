@@ -52,18 +52,7 @@ def home_page():
     #print db.returnFormData(1)
     #print db.getFormDataNoResponse(1)
     #print db.getFormData(2)
-    #db.add_question(6, "Favorite movie", "choice", 0, None, 1)
-    #db.add_option(6, 7, "Ghost Busters", "ghost busters")
-    #db.add_option(6, 7, "The Breakfast Club", "breakfast")
-    #db.add_option(6, 7, "Pulp Fiction", "pf")
-    #print db.getPublicForms(24)
-    #print "==== GetFormData ===="
-    #print db.getFormData(1)
-    #print "==== GetFormDataNoResponse ===="
-    #print db.getFormDataNoResponse(1)
-    #print "==== GetFormDataWithResponse ===="
-    #print db.getFormDataWithResponse(1)
-    return render_template("index.html", username=session.get("user", ""), forms=db.getPublicForms(24))
+    return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
 
 #Shows the form to login
 @polyforms.route('/login')
@@ -140,10 +129,7 @@ def display_form():
 #Shortcut URLS
 @polyforms.route('/f/<form_id>')
 def display_form_shortcut(form_id):
-    if test.form_exists(form_id): #insert check if this shortcut registered in DB
-        return redirect(url_for("display_form", id=form_id))
-    else:
-        return redirect(url_for("display_form", id=form_id))
+    return redirect(url_for("display_form", id=form_id))
 
 #This will store the responses to the form and then redirect to a Thank You
 @polyforms.route('/form/submit', methods=['POST'])

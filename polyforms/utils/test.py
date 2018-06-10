@@ -90,6 +90,7 @@ def add_response(form_id, question_id, response, new_row=False):
     close_db(db)
     return response_id
 
+
 #This will clear the database, keeps tables
 def reset():
     db, c = open_db()
