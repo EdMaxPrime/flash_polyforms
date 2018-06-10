@@ -38,13 +38,16 @@
             {% endif %}
 
             {% if q.type == "short" %}
-            <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes}} value="{{q.value|default('')}}" class="form-control" aria-describedby="help-{{q.index}}">
+            <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}} value="{{q.value|default('')}}" class="form-control" aria-describedby="help-{{q.index}}">
 
             {% elif q.type == "long" %}<br>
-            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes}} class="form-control" aria-describedby="help-{{q.index}}">{{q.value|default('')}}</textarea>
+            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}} class="form-control" aria-describedby="help-{{q.index}}">{{q.value|default('')}}</textarea>
 
             {% elif q.type == "number" %}
-            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes}} value="{{q.value|default('',true)}}" class="form-control" aria-describedby="help-{{q.index}}">
+            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" step="any" {{q|attributes|safe}} value="{{q.value|default('',true)}}" class="form-control" aria-describedby="help-{{q.index}}">
+            
+            {% elif q.type == "int" %}
+            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes|safe}} value="{{q.value|default('',true)}}" class="form-control" aria-describedby="help-{{q.index}}">
 
             <!-- If the maximum selectable choices is more than 1, then checkboxes -->
             {% elif q.type == "choice" and q.max != 1 %}
@@ -55,7 +58,7 @@
             <!-- If the maximum selectable choices is 1, then radio buttons -->
             {% else %}
             {% for c in q.choices %}
-            <div class="form-check"><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ "checked" if c.selected|default(false, true) }} class="form-check-input"> <label fpr="{{q.index}}.{{loop.index}}" class="form-check-label">{{ c.text }}</label></div>
+            <div class="form-check"><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ "checked" if c.selected|default(false, true) }} class="form-check-input"> <label for="{{q.index}}.{{loop.index}}" class="form-check-label">{{ c.text }}</label></div>
             {% endfor %}
 
             {% endif %}
