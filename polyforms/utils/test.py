@@ -53,7 +53,6 @@ def get_form(form_id):
     db, c = open_db()
     c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created FROM forms WHERE form_id = ?;", (str(form_id),))
     result = c.fetchone()
-    print form_id
     form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created"])
     form["questions"] = []
     questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
@@ -70,11 +69,21 @@ def get_form(form_id):
     close_db(db)
     return form
 
+#Returns the number of answerable questions in the form
+def number_of_questions(form_id):
+    questions = get_form(form_id)["questions"]
+    if len(questions) == 0:
+        return 0
+    else:
+        return reduce(lambda num, q: (num+1 if q["type"] != "section" else num), questions, 0)
+
 #Add a question, return its id
 def add_question(form_id, question, _type, required=False, _min=None, _max=None):
     db, c = open_db()
     question_id = c.execute("SELECT max(question_id) FROM questions WHERE form_id = ?;", (form_id,)).fetchone()
     question_id = (question_id[0] + 1) if question_id[0] != None else 1
+    if _type == "section": #these <h1> tags dont count as questions, they just need to be in the right order
+        question_id -= 1
     c.execute("INSERT INTO questions VALUES (?,?,?,?,?,?,?);", (question_id, question, _type, form_id, required, _min, _max))
     close_db(db)
     return question_id
@@ -86,9 +95,68 @@ def add_response(form_id, question_id, response, new_row=False):
     response_id = c.execute("SELECT max(response_id) FROM responses WHERE form_id = ?;", (form_id,)).fetchone()[0] or 0
     if new_row:
         response_id += 1
+    if isinstance(response, list):
+        response = "\n".join(response)
     c.execute("INSERT INTO responses (form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?, datetime('now'));", (form_id, question_id, response_id, response))
     close_db(db)
     return response_id
+
+
+def validate_form_submission(form_id, data):
+    errors = []
+    form = get_form(form_id)
+    responses = []
+    index = 1
+    for q in form["questions"]:
+        print str(index) + ": " + str(data[index])
+        if q["type"] == "section":
+            continue
+        if data[index] == None or len(data[index]) == 0:
+            if (q["required"] == 1 or q["required"] == True):
+                if q["type"] == "username":
+                    errors.append("You must be logged in")
+                else:
+                    errors.append("You must answer, \"" + q["question"] + '"')
+            index += 1
+            responses.append(None)
+            continue
+        elif q["type"] == "int":
+            try:
+                responses.append(int(data[index]))
+                if q["min"] != None and responses[-1] < q["min"]:
+                    errors.append("Your answer must be greater than or equal to %d for \"%s\"" % (q["min"], q["question"]))
+                if q["max"] != None and responses[-1] > q["max"]:
+                    errors.append("Your answer must be less than or equal to %d for \"%s\"" % (q["max"], q["question"]))
+            except:
+                errors.append("You didn't enter an integer for, \"" + q["question"] + '"')
+                responses.append(data[index])
+        elif q["type"] == "number":
+            try:
+                responses.append(float(data[index]))
+                if q["min"] != None and responses[-1] < q["min"]:
+                    errors.append("Your answer must be greater than or equal to %d for \"%s\"" % (q["min"], q["question"]))
+                if q["max"] != None and responses[-1] > q["max"]:
+                    errors.append("Your answer must be less than or equal to %d for \"%s\"" % (q["max"], q["question"]))
+            except:
+                errors.append("You didn't enter a valid number for, \"" + q["question"] + '"')
+                responses.append(data[index])
+        elif q["type"] == "choice":
+            responses.append(data[index])
+            if q["min"] != None and len(responses[-1]) < q["min"]:
+                errors.append("Select at least %d choices for \"%s\"" % (q["min"], q["question"]))
+            if q["max"] != None and len(responses[-1]) > q["max"]:
+                errors.append("Select no more than %d choices for \"%s\"" % (q["max"], q["question"]))
+        elif q["type"] == "short" or q["type"] == "long":
+            responses.append(data[index])
+            if q["min"] != None and len(responses[-1]) < q["min"]:
+                errors.append("Your response must be at least %d characters long for \"%s\"" % (q["min"], q["question"]))
+            if q["max"] != None and len(responses[-1]) > q["max"]:
+                errors.append("Your response must be no longer than %d characters for \"%s\"" % (q["max"], q["question"]))
+        elif q["type"] == "username":
+            responses.append(data[index])
+        index += 1
+    return errors
+
 
 
 #This will clear the database, keeps tables

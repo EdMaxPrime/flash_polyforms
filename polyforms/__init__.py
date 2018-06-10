@@ -121,9 +121,6 @@ def display_form():
         return redirect(url_for("login_page", redirect=form_id))
     else:
         template_name = form["theme"]
-        flash('Answer "How many siblings do you have?"')
-        flash('Answer "Do you think freshman should be allowed to go out for frees?"')
-        flash('Select atleast 3 but no more than 4 choices for "Ice cream flavors?"')
         return render_template("form_themes/"+template_name, title=form["title"], questions=form["questions"], form_id=form_id)
 
 #Shortcut URLS
@@ -139,10 +136,23 @@ def process_form():
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
-        qnumber = 1
-        while str(qnumber) in request.form:
-            test.add_response(form_id, qnumber, request.form[str(qnumber)], qnumber == 1)
-            qnumber += 1
+        number_of_questions = test.number_of_questions(form_id)
+        data = {}
+        form = test.get_form(form_id)
+        for qnumber in range(1, number_of_questions+1):
+            if form["questions"][qnumber-1]["type"] == "choice":
+                data[qnumber] = request.form.getlist(str(qnumber), None)
+            else:
+                data[qnumber] = request.form.get(str(qnumber), None)
+        errors = test.validate_form_submission(form_id, data)
+        if len(errors) > 0:
+            for e in errors:
+                flash(e)
+        else:
+            qnumber = 1
+            while qnumber <= number_of_questions:
+                test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
+                qnumber += 1
         return redirect(url_for("display_form", id=form_id))
 
 #View the responses to your form and make charts
