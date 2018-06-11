@@ -153,7 +153,8 @@ def responses_csv():
     if not ("id" in request.args):
         return render_template("404.html", username=session.get("user", "")), 404
     else:
-        form = db.getFormData(session.get("form_id", ""))
+        form_id = request.args.get("id", "-1")
+        form = db.getFormData(form_id)
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
@@ -165,7 +166,8 @@ def responses_json():
     if not ("id" in request.args):
         return render_template("404.html", username=session.get("user", "")), 404
     else:
-        form = db.getFormData(session.get("form_id", ""))
+        form_id = request.args.get("id", "-1")
+        form = db.getFormData(form_id)
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
