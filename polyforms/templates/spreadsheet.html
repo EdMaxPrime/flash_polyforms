@@ -78,8 +78,51 @@
         <hr>
         <form id="pie-form">
           <div class="form-group">
-            <label for="pieColumn">Frequency Column:</label>
-            <select class="form-control" id="pieColumn" name="f">
+            <label for="thing2">X-axis:</label>
+            <select class="form-control" id="plotX" name="x">
+              <option value="0">Response Index</option>
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="thing2a">Y-Axis:</label>
+            <select class="form-control" id="plotY" name="y">
+              <option value="0">Response Index</option>
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+          </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <a type="button" class="btn btn-primary" href="#" data-dismiss="modal" data-toggle="modal" data-target="#chartModal" onclick="makePieChart()">Make Chart</a>
+      </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="plotModal" tabindex="-1" role="dialog" aria-labelledby="plotModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="plotModalLabel">Pie Chart</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        To make a new scatter plot, please fill out the fields below. The dropdown menus list the questions in your form as options.
+        Select one to use as an x-axis, and then one as a y-axis. Both axes must be numerical.
+        <hr>
+        <form id="plot-form">
+          <div class="form-group">
+            <label for="plotColumn">Frequency Column:</label>
+            <select class="form-control" id="plotColumn" name="f">
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
@@ -87,7 +130,7 @@
           </div>
           <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <a type="button" class="btn btn-primary" href="#" data-dismiss="modal" data-toggle="modal" data-target="#chartModal" onclick="makePieChart()">Make Chart</a>
+        <a type="button" class="btn btn-primary" href="#" data-dismiss="modal" data-toggle="modal" data-target="#chartModal" onclick="makeScatterChart()">Make Chart</a>
       </div>
         </form>
       </div>
@@ -197,16 +240,17 @@
 
 
 <script type="text/javascript">
+console.log({{jsonData | safe}});
 function makePieChart(){
   var column = document.getElementById("pieColumn").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[column]);
   var counts = {};
-  for (var i = 0; i < {{data|safe}}.length; i++) {
-    if({{data|safe}}[i][column] in counts){
-      counts[{{data|safe}}[i][column]]++;
+  for (var i = 0; i < {{jsonData|safe}}.length; i++) {
+    if({{jsonData|safe}}[i][column] in counts){
+      counts[{{jsonData|safe}}[i][column]]++;
     }
     else{
-      counts[{{data|safe}}[i][column]] = 1;
+      counts[{{jsonData|safe}}[i][column]] = 1;
     }
   }
   //console.log(counts);
@@ -225,19 +269,19 @@ function makePieChart(){
         show: false
       }
     }
-});
+  });
 };
 
 function makeBarChart(){
   var x = document.getElementById("thing3").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[x]);
   var counts = {};
-  for (var i = 0; i < {{data|safe}}.length; i++) {
-    if({{data|safe}}[i][x] in counts){
-      counts[{{data|safe}}[i][x]]++;
+  for (var i = 0; i < {{jsonData|safe}}.length; i++) {
+    if({{jsonData|safe}}[i][x] in counts){
+      counts[{{jsonData|safe}}[i][x]]++;
     }
     else{
-      counts[{{data|safe}}[i][x]] = 1;
+      counts[{{jsonData|safe}}[i][x]] = 1;
     }
   }
   //console.log(counts);
@@ -256,9 +300,58 @@ function makeBarChart(){
         type:'category'
       }
     }   
-});
+  });
+};
+
+function makeLineChart(){
+  var x = document.getElementById("thing2").value - 1;
+  var y = document.getElementById("thing2a").value - 1;
+  var counts = {};
+  for(var i = 0; i < {{jsonData|safe}}.length; i++){
+    counts[{{jsonData|safe}}[i][x]] = {{jsonData|safe}}[i][y];
+  }
+  var chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      json: counts,
+      type: 'line',
+    },
+    size: {
+      width: 500,
+      height: 500
+    },
+    axis:{
+      x:{
+        type:'category'
+      }
+    }   
+  });  
 }
 
+function makeScatterChart(){
+  var x = document.getElementById("plotX").value - 1;
+  var y = document.getElementById("plotY").value - 1;
+  var counts = {};
+  for(var i = 0; i < {{jsonData|safe}}.length; i++){
+    counts[{{jsonData|safe}}[i][x]] = {{jsonData|safe}}[i][y];
+  }
+  var chart = c3.generate({
+    bindto: '#chart',
+    data: {
+      json: counts,
+      type: 'scatter',
+    },
+    size: {
+      width: 500,
+      height: 500
+    },
+    axis:{
+      x:{
+        type:'category'
+      }
+    }   
+  }); 
+};
 /* Attach event listeners to the filter search bar */
 var filter = document.getElementById("filter");
 //Select all <tr> elements in the table

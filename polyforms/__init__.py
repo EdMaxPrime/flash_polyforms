@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash, Response, abort
+from flask import Flask, render_template, request, session, redirect, url_for, flash, Response, abort, json
 import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
 from utils import db
@@ -143,7 +143,7 @@ def responses_page():
         print form
         print form["data"]
         if form["owner"] == username or username == "Root": #you have permission to view this
-            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], form_id=form_id)
+            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id)
         else: #you dont have permission to view this
             return render_template("unauthorized.html", username=username)
 
