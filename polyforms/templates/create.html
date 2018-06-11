@@ -2,46 +2,47 @@
 {% block title %} Form Creation | Polyforms {% endblock %}
 {% block body %}<br>
     <form>
-    <ol id="questionList">
-    <li>
-	<div class="question" style="outline: 1px solid black; padding:5px; margin-bottom: 15px;">
+        <ol id="questionList">
+            <li>
+                <div class="question" style="outline: 1px solid black; padding:5px; margin-bottom: 15px;">
+                    <button class="remove" style="position:relative; top:0; float:right;">X</button>
+                    Question Type:<select class="select" name="0.type">
+                      <option value="0">one-line response</option>
+                      <option value="1">extended response</option>
+                      <option value="2">numerical</option>
+                      <option value="3">multiple-choice</option>
+                    </select><br>
+                    Question: <input type="text" name="0"><br>
+                    Required? <input type="checkbox" name="0.required"><br>
+                    <div class="answer">
+                        Min. characters: <input name="0.min" type="text" maxlength="4" size="3">
+                        Max. characters: <input name="0.max" type="text" maxlength="4" size="3">
+                    </div>
+                </div>
+                </li>
 
-	<button class="remove" style="position:relative; top:0; float:right;">X</button>
-	Question: <input type="text" name="0"><br>
-	Question Type:<select>
-	  <option name="0.type" value="0">one-line response</option>
-	  <option name="0.type" value="1">extended response</option>
-	  <option name="0.type" value="2">numerical</option>
-	  <option name="0.type" value="3">multiple-choice</option>
-	</select><br>
-	Required? <input type="checkbox" name=""><br>
-    Min. characters: <input name="0.min" type="text" maxlength="4" size="3">
-    Max. characters: <input name="0.max" type="text" maxlength="4" size="3">
-	</div>
-	</li>
-
-    <li>
-    <div class="question" style="outline: 1px solid black; padding: 5px; margin-bottom: 15px;">
-    <button class="remove" style="position:relative; top:0; float:right;">X</button>
-	Question Type:<select >
-	  <option value="0">one-line response</option>
-	  <option value="1">extended response</option>
-	  <option value="2">numerical</option>
-	  <option value="3" selected>multiple-choice</option>
-	</select><br>
-    Question: <input type="text" name="1">
-        <div>
-        Answer choices:<br>
-        <input type=radio name="ans0"><input type="text"><input type="button" value="X"><br>
-        <input type=radio name="ans1"><input type="text"><input type="button" value="X"><br>
-        <input type=radio name="ans2"><input type="text"><input type="button" value="X"><br>
-        <input type=radio name="ans3"><input type="text"><br>
-        </div>
-    </div>
-    </li>
-    </ol>
-    <button type="button" id="addButton" style="margin-bottom: 150px;">Add Question</button>
-    <input type="submit">
+                <li>
+                <div class="question" style="outline: 1px solid black; padding: 5px; margin-bottom: 15px;">
+                    <button class="remove" style="position:relative; top:0; float:right;">X</button>
+                    Question Type:<select class="select" name="1.type" >
+                      <option value="0">one-line response</option>
+                      <option value="1">extended response</option>
+                      <option value="2">numerical</option>
+                      <option value="3" selected>multiple-choice</option>
+                    </select><br>
+                    Question: <input type="text" name="1">
+                    Required? <input type="checkbox" name="1.required"><br>
+                    <div class="answer">Answer choices:<br>
+                        <input type="text"><input type="button" value="X"><br>
+                        <input type="text"><input type="button" value="X"><br>
+                        <input type="text"><input type="button" value="X"><br>
+                        <input type="text"><br>
+                    </div>
+                </div>
+            </li>
+        </ol>
+        <button type="button" id="addButton" style="margin-bottom: 150px;">Add Question</button>
+        <input type="submit">
     </form>
-    <script src="{{url_for('static', filename='js/create.js') }}"></script> 
+    <script src="{{url_for('static', filename='js/create.js')}}"></script> 
 {% endblock %}
