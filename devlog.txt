@@ -85,3 +85,6 @@ maybe fixed merge conflict + added delet question
 maxZ -- 2018-06-10 16:57
 Form validation on server-side. Checks for required, min and max values as well as numbers.
 
+leiG -- 2018-06-10 22:16:31
+revised getFormData to intended return result + debugged it
+

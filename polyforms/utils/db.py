@@ -174,12 +174,11 @@ def getFormData(formID):
     formData["owner"] = (str(tempResult[0]))
     #========================
     # headers + types
-    question_id_array = []
     c.execute("SELECT * FROM questions WHERE form_id = " + str(formID) + " AND type != 'section';")
     tempResult = c.fetchall()
     if tempResult is not None:
         for each in tempResult:
-            question_id_array.append(each[0])
+            #question_id_array.append(each[0])
             headerArray.append(str(each[1]))
             typeArray.append(str(each[2]))
         formData["headers"] = headerArray
@@ -190,14 +189,18 @@ def getFormData(formID):
         formData["types"] = None
     #========================
     # DATA 
-    tempArray = []
-    if question_id_array is not None:
-        for questionID in question_id_array:
-            c.execute("SELECT * FROM responses WHERE question_id = ? AND form_id = ?;", (questionID, formID))
-            tempResult = c.fetchall()
-            for each in tempResult:
+    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ?;", (formID,)).fetchall()    
+    if responseArray is not None or responseArray is not []:
+        currentResponseID = -1
+        tempArray = []
+        for each in responseArray:
+            if each[3] == currentResponseID:
                 tempArray.append(each[4])
-            dataArray.append(tempArray)
+            else:
+                dataArray.append(tempArray)
+                tempArray = []
+                currentResponseID = each[3]
+                tempArray.append(each[4])
         formData["data"] = dataArray
     else:
         formData["data"] = None
@@ -405,6 +408,8 @@ def delete_question(form_id, question_id):
     db, c = open_db()
     # Delete the question from th DB
     c.execute("DELETE FROM questions WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
+    c.execute("DELETE FROM responses WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
+    c.execute("DELETE FROM options WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
     c.fetchall() # do this to clear / reset the cache 
     # Re-number all the existing ones
     c.execute("SELECT question_id FROM questions where form_id = " + str(form_id) + ";")

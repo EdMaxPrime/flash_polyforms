@@ -140,6 +140,7 @@ def responses_page():
         return render_template("404.html", username=username)
     else:
         form = db.getFormData(form_id)
+        print form
         print form["data"]
         if form["owner"] == username or username == "Root": #you have permission to view this
             return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], form_id=form_id)
@@ -152,7 +153,7 @@ def responses_csv():
     if not ("id" in request.args):
         return render_template("404.html", username=session.get("user", "")), 404
     else:
-        form = db.getFormData(form_id)
+        form = db.getFormData(session.get("form_id", ""))
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
@@ -164,7 +165,7 @@ def responses_json():
     if not ("id" in request.args):
         return render_template("404.html", username=session.get("user", "")), 404
     else:
-        form = db.getFormData(form_id)
+        form = db.getFormData(session.get("form_id", ""))
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
@@ -229,6 +230,8 @@ def about_page():
 def logout():
     if "user" in session:
         session.pop("user")
+        session.pop("user_id")
+        session.pop("form_id")
     return redirect(url_for("home_page"))
 
 #This can be used as a Jinja filter
