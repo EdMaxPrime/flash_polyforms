@@ -170,9 +170,10 @@ def responses_json():
 @polyforms.route('/form/new')
 def create():
     return render_template("create.html")
+
 @polyforms.route('/ajax')
 def ajax():
-    return redirect(url_for('/form'))
+    return redirect(url_for('display_form'))
 
 @polyforms.route('/my/forms')
 def my_forms():

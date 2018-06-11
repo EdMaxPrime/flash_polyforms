@@ -1,42 +1,8 @@
 {% extends "base.html" %}
 {% block title %} Form Creation | Polyforms {% endblock %}
 {% block body %}<br>
-    <form>
+    <form action="/ajax">
         <ol id="questionList">
-           <li>
-              <div class="question" name="0" style="outline: 1px solid black; padding:5px; margin-bottom: 15px;">
-                  <button class="remove" style="position:relative; top:0; float:right;">X</button>
-                  Question Type:<select class="select" name="0.type">
-                      <option value="0">one-line response</option>
-                      <option value="1">extended response</option>
-                      <option value="2">numerical</option>
-                      <option value="3">multiple-choice</option>
-                  </select><br>
-                  Question: <input type="text" name="0.question"><br>
-                  Required? <input type="checkbox" name="0.required"><br>
-                  <div class="answer">
-                      Min. characters: <input name="0.min" type="text" maxlength="4" size="3">
-                      Max. characters: <input name="0.max" type="text" maxlength="4" size="3">
-                  </div>
-              </div>
-           </li>
-
-           <li>
-              <div class="question" name="1" style="outline: 1px solid black; padding: 5px; margin-bottom: 15px;">
-                  <button class="remove" style="position:relative; top:0; float:right;">X</button>
-                  Question Type:<select class="select" name="1.type" >
-                      <option value="0">one-line response</option>
-                      <option value="1">extended response</option>
-                      <option value="2">numerical</option>
-                      <option value="3" selected>multiple-choice</option>
-                  </select><br>
-                  Question: <input type="text" name="1.question">
-                  Required? <input type="checkbox" name="1.required"><br>
-                  <div class="answer">Answer choices:<br>
-                      <input type="text">
-                  </div>
-               </div>
-            </li>
         </ol>
         <button type="button" id="addButton" style="margin-bottom: 150px;">Add Question</button>
         <input type="submit">
