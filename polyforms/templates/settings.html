@@ -2,19 +2,16 @@
 {% block title %} Settings | Polyforms {% endblock %}
 {% block body %}
 <form action="/my/settings/update" method="POST">
-    <div class="form-check">
-        <input id="forms_public_by_default" name="forms_public_by_default" type="checkbox" class="form-check-input">
-        <label for="forms_public_by_default" class="form-check-label">Make forms public by default</label>
-    </div>
-    <input id="" type="checkbox"><br>
-    <input id="" type="checkbox"><br>
-    <input id="" type="checkbox"><br>
-    <input id="" type="checkbox"><br>
-    <input id="" type="checkbox"><br>
-    <input id="" type="checkbox" checked disabled><br>
-    <div class="form-group">
-        <input type="submit" class="form-control" name="update" value="Update Settings">
-    </div>
+    <fieldset style="border: 2px groove #555; padding: 10px" class="my-5">
+        <legend style="display: inline-block; width: 200px; background-color: #777; color:white;" class="px-3">Settings</legend>
+        <div class="form-check">
+            <input id="forms_public_by_default" name="forms_public_by_default" type="checkbox" value="on" class="form-check-input">
+            <label for="forms_public_by_default" class="form-check-label">Make forms public by default</label>
+        </div>
+        <div class="form-group mt-3">
+            <input type="submit" class="form-control btn-primary" name="update" value="Update Settings">
+        </div>
+    </fieldset>
 </form>
 <div>
     <p>To change your password, click the link below. You will be logged out then sent to a page where you must input the answer to the security question you chose when making your account.</p>

@@ -221,6 +221,10 @@ def reset_password_logic():
         flash("The new password doesn't match in both boxes")
     return redirect(url_for("reset_password_page"))
 
+@polyforms.route('/about')
+def about_page():
+    return render_template("about.html")
+
 @polyforms.route('/logout')
 def logout():
     if "user" in session:
