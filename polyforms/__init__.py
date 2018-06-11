@@ -173,9 +173,13 @@ def responses_json():
         else: #you do have permission to download
             return Response(render_template("json_results.json", headers=form['headers'], data=form['data']), mimetype="application/json")
 
+@polyforms.route('/form/new')
+def create():
+    return render_template("create.html")
+
 @polyforms.route('/ajax')
 def ajax():
-    return redirect(url_for('/form'))
+    return redirect(url_for('display_form'))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @polyforms.route('/my/forms')
