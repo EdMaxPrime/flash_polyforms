@@ -175,7 +175,7 @@ def getFormData(formID):
     #========================
     # headers + types
     question_id_array = []
-    c.execute("SELECT * FROM questions WHERE form_id = " + str(formID) + ";")
+    c.execute("SELECT * FROM questions WHERE form_id = " + str(formID) + " AND type != 'section';")
     tempResult = c.fetchall()
     if tempResult is not None:
         for each in tempResult:
@@ -193,7 +193,7 @@ def getFormData(formID):
     tempArray = []
     if question_id_array is not None:
         for questionID in question_id_array:
-            c.execute("SELECT * FROM responses WHERE question_id = " + str(questionID) + ";")
+            c.execute("SELECT * FROM responses WHERE question_id = ? AND form_id = ?;", (questionID, formID))
             tempResult = c.fetchall()
             for each in tempResult:
                 tempArray.append(each[4])

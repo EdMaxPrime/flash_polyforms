@@ -5,12 +5,12 @@
     <h1>You currently do not have any forms.</h1>
 {% else %}
     <div class="container">
-        {% for key in forms_user_made.keys() %}
-        <a href="/form/view?id={{key}}" class="list-group-item list-group-item-action">
+        {% for f in forms_user_made %}
+        <a href="/form/view?id={{f.id}}" class="list-group-item list-group-item-action">
             <div class="row">
-                <div class="col-12 col-md">{{forms_user_made[key].title}}</div>
-                <div class="col-12 col-md-2"><span>{{forms_user_made[key].data|length}} responses</span></div>
-                <div class="col-12 col-md-2"><span>{{forms_user_made[key]['created']|dtnormal}}</span></div>
+                <div class="col-12 col-md">{{f.title}}</div>
+                <div class="col-12 col-md-2"><span>{{f.data|length}} responses</span></div>
+                <div class="col-12 col-md-2"><span>{{f['created']|dtnormal}}</span></div>
             </div>
         </a>
         {% endfor %}

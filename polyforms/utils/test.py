@@ -28,9 +28,9 @@ def tuple_to_dictionary(tuuple, list_of_keys):
 def is_valid_id(thing):
     thing = str(thing)
     chars_are_digits = [(c in "0123456789") for c in thing]
-    return not (False in chars_are_digits)
+    return (not (False in chars_are_digits)) and (len(thing) > 0)
 
-#Returns a form
+#Returns a list of forms with responses in the given amount. These are the most recently created ones
 def get_recent_forms(amount):
     db, c = open_db()
     c.execute("SELECT form_id FROM forms ORDER BY created DESC LIMIT %s;" % str(amount))
@@ -48,12 +48,18 @@ def form_exists(form_id):
     close_db(db)
     return result != None
 
-#Returns form info with more question data
+#Returns form info with more question data. Top level keys are: id, title, owner, login_required, public_results, theme, created, open
+#The questions array has items with these keys: index, question, type, required, min, max
+#Choices in the choices key of a question have these keys: text and value
 def get_form(form_id):
     db, c = open_db()
-    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created FROM forms WHERE form_id = ?;", (str(form_id),))
+    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open FROM forms WHERE form_id = ?;", (str(form_id),))
     result = c.fetchone()
-    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created"])
+    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open"])
+    form["login_required"] = (form["login_required"] == 1)
+    form["public_results"] = (form["public_results"] == 1)
+    form["open"] = (form["open"] == 1)
+    form["owner"] = c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone()[0]
     form["questions"] = []
     questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
     for q in questions:
@@ -76,6 +82,14 @@ def number_of_questions(form_id):
         return 0
     else:
         return reduce(lambda num, q: (num+1 if q["type"] != "section" else num), questions, 0)
+
+#Returns a list of forms that are owned by the given user
+def get_forms_by(user_id):
+    db, c = open_db()
+    result = c.execute("SELECT form_id FROM forms WHERE owner_id=?;", (user_id,)).fetchall()
+    close_db(db)
+    list_of_forms = [get_form(r[0]) for r in result]
+    return list_of_forms
 
 #Add a question, return its id
 def add_question(form_id, question, _type, required=False, _min=None, _max=None):
@@ -101,7 +115,8 @@ def add_response(form_id, question_id, response, new_row=False):
     close_db(db)
     return response_id
 
-
+#Returns a list of errors in processing this form. If everything goes right, the error list is empty. DOES NOT store responses
+#data should be an array of size equal to the number of questions in the form. Elements can be None or "". Choice questions must be inner lists.
 def validate_form_submission(form_id, data):
     errors = []
     form = get_form(form_id)

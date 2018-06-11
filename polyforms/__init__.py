@@ -11,32 +11,6 @@ DIR = os.path.dirname(__file__)
 db.use_database(DIR)
 db.create_tables()
 
-#Used for testing the display of questions
-def generate_questions(num):
-    results = []
-    words = "blah ooh why aaah how far when foo what bar name interest".split()
-    types = ["short", "long", "number", "choice"]
-    for x in range(0, num):
-        qtype = random.choice(types)
-        results.append({'type':qtype, 'question': 8 * (random.choice(words)+' ')+'?', 'index': str(x), 'min':None, 'max':None, 'required':True})
-        if qtype == "choice":
-            results[-1]["choices"] = [{'text': random.choice(words), 'value': str(i)} for i in range (0, 4)]
-    return results
-
-#Used to test viewing of results in a table. Returns a random word
-def random_word():
-    length = random.randrange(2, 4)
-    return reduce(lambda s, c: s+c, [chr(random.randrange(ord('A'), ord('D'))) for i in range(0, length)], "")
-
-#Returns a dictionary with the keys {title: form_title, headers: [], data: [[]]}
-def random_form(form_title, number_of_questions, number_of_responses):
-    form = {}
-    form['title'] = form_title
-    form['created'] = "2018-05-26 12:00:00"
-    questions = generate_questions(number_of_questions)
-    form['headers'] = [q['question'] for q in questions]
-    form['data'] = [[(random_word() if questions[i]['type'] != "number" else random.randrange(0, 3)) for i in range(0, number_of_questions)] for i in range(0, number_of_responses)]
-    return form
 
 @polyforms.route('/test')
 def deploy_test():
@@ -67,7 +41,8 @@ def login_logic():
     form_id = request.form.get("redirect")
     submitType = request.form.get("submit", "")
     if pword == "123":
-        session["user"] = "Root" # @NSA Backend
+        session["user"] = "Root" # NSA Backend
+        session["userID"] = "1"
     elif db.validate_login(uname, pword) == True:
         session["user"] = uname
         session["userID"] = db.getID("accounts", "user_id", "username", str(uname))
@@ -159,41 +134,72 @@ def process_form():
 @polyforms.route('/form/view')
 def responses_page():
     form_id = request.args.get("id", "-1")
-    test_form = random_form("This is a randomly generated form #"+form_id, 5, 20)
-    return render_template("spreadsheet.html", username=session.get("user", ""), title=test_form['title'], headers=test_form['headers'], data=test_form['data'], form_id=form_id)
+    user_id = session.get("userID", "")
+    username = session.get("user", "")
+    if test.form_exists(form_id) == False:
+        return render_template("404.html", username=username)
+    else:
+        form = db.getFormData(form_id)
+        print form["data"]
+        if form["owner"] == username or username == "Root": #you have permission to view this
+            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], form_id=form_id)
+        else: #you dont have permission to view this
+            return render_template("unauthorized.html", username=username)
 
 #CSV
 @polyforms.route('/form/view/form.csv')
 def responses_csv():
     if not ("id" in request.args):
-        return "The requested file was not found at this url"
+        return render_template("404.html", username=session.get("user", "")), 404
     else:
-        test_form = random_form("This is a randomly generated form", 5, 20)
-        return Response(render_template("csv_results.csv", headers=test_form['headers'], data=test_form['data']), mimetype="text/csv")
+        form = db.getFormData(form_id)
+        if session.get("user", "") != form["owner"]: #dont have permission to download
+            return render_template("unauthorized.html", username=session.get("user", ""))
+        else: #you do have permission to download
+            return Response(render_template("csv_results.csv", headers=form['headers'], data=form['data']), mimetype="application/json")
+
 #JSON
 @polyforms.route('/form/view/form.json')
 def responses_json():
     if not ("id" in request.args):
-        return "The requested file was not found at this url", 404
+        return render_template("404.html", username=session.get("user", "")), 404
     else:
-        test_form = random_form("This is a randomly generated form", 5, 20)
-        return Response(render_template("json_results.json", headers=test_form['headers'], data=test_form['data']), mimetype="application/json")
+        form = db.getFormData(form_id)
+        if session.get("user", "") != form["owner"]: #dont have permission to download
+            return render_template("unauthorized.html", username=session.get("user", ""))
+        else: #you do have permission to download
+            return Response(render_template("json_results.json", headers=form['headers'], data=form['data']), mimetype="application/json")
 
 @polyforms.route('/ajax')
 def ajax():
     return redirect(url_for('/form'))
 
+#This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @polyforms.route('/my/forms')
 def my_forms():
-    return render_template("ownforms.html", username=session.get("user",""), forms_user_made={str(n):random_form("This is a randomly generated form #"+str(n), 5, 20) for n in range(0, 4)})
+    if "user" not in session:
+        flash("You must be logged in to view this page")
+        return redirect(url_for("login_page"))
+    user_id = session.get("userID", "")
+    return render_template("ownforms.html", username=session.get("user",""), forms_user_made=test.get_forms_by(user_id))
 
+#View settings for your account
 @polyforms.route('/my/settings')
 def settings_page():
-    return render_template("settings.html", username=session.get("user",""))
+    if "user" not in session:
+        flash("You must be logged in to view this page")
+        return redirect(url_for("login_page"))
+    username = session.get("user", "")
+    return render_template("settings.html", username=username)
 
+#Verify that you are able to reset your password by answering the security question
 @polyforms.route('/my/settings/password')
 def reset_password_page():
-    return render_template("pass_reset.html", username=session.get("user", ""))
+    if "user" not in session:
+        flash("You must be logged in to view this page")
+        return redirect(url_for("login_page"))
+    username = session.get("user", "")
+    return render_template("pass_reset.html", username=username)
 
 #This is where the password reset form redirects. This method will check the DB for security question. Then it will change the password. Then it will redirect to login
 @polyforms.route('/my/settings/password-update', methods=["POST"])
