@@ -197,16 +197,17 @@
 
 
 <script type="text/javascript">
+var mydata = {{ data|tojson }};
 function makePieChart(){
   var column = document.getElementById("pieColumn").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[column]);
   var counts = {};
-  for (var i = 0; i < {{data|safe}}.length; i++) {
-    if({{data|safe}}[i][column] in counts){
-      counts[{{data|safe}}[i][column]]++;
+  for (var i = 0; i < mydata.length; i++) {
+    if(mydata[i][column] in counts){
+      counts[mydata[i][column]]++;
     }
     else{
-      counts[{{data|safe}}[i][column]] = 1;
+      counts[mydata[i][column]] = 1;
     }
   }
   //console.log(counts);
@@ -232,12 +233,12 @@ function makeBarChart(){
   var x = document.getElementById("thing3").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[x]);
   var counts = {};
-  for (var i = 0; i < {{data|safe}}.length; i++) {
-    if({{data|safe}}[i][x] in counts){
-      counts[{{data|safe}}[i][x]]++;
+  for (var i = 0; i < mydata.length; i++) {
+    if(mydata[i][x] in counts){
+      counts[mydata[i][x]]++;
     }
     else{
-      counts[{{data|safe}}[i][x]] = 1;
+      counts[mydata[i][x]] = 1;
     }
   }
   //console.log(counts);
