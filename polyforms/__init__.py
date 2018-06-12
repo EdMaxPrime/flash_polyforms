@@ -178,10 +178,10 @@ def create():
 
 @polyforms.route('/ajax')
 def ajax():
-    db.add_form(session.get("userID", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
+    formID = db.add_form(session.get("userID", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
     i=0
     while (request.args.get(i)):
-        db.add_question(session, request.args.get(i + ".question"), request.args.get(i + ".type"), request.args.get(i + ".required"), request.args.get(i + ".min"), request.args.get( i + ".max"))
+        db.add_question(formID, request.args.get(i + ".question"), request.args.get(i + ".type"), request.args.get(i + ".required"), request.args.get(i + ".min"), request.args.get( i + ".max"))
         i+=1
     return redirect(url_for("home_page"))
 
