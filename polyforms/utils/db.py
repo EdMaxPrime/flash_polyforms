@@ -62,10 +62,13 @@ def add_question(formID, question, type, required, min, max):
     db, c = open_db()
     c.execute("SELECT question_id FROM questions where form_id = " + str(formID) + ";")
     tempCounter = c.fetchall()
-    if tempCounter == None:
+    print tempCounter
+    if tempCounter == None or tempCounter == []:
         question_id = 1
     else:
-        question_ID = len(c.fetchall()) + 1
+        question_id = len(c.fetchall()) + 1
+    print question_id
+    print "INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max)
     c.execute("INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max))
     db.commit()
     db.close()
@@ -433,6 +436,6 @@ def create_tables():
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER, optional INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT, security_question TEXT, security_question_answer TEXT);")
-    c.execute("CREATE TABLE IF NOT EXISTS styles(form_id INTEGER, row INTEGER, column INTEGER, property TEXT, value TEXT);")
+    #c.execute("CREATE TABLE IF NOT EXISTS styles(form_id INTEGER, row INTEGER, column INTEGER, property TEXT, value TEXT);")
     close_db(db)
     

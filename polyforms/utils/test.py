@@ -59,7 +59,10 @@ def get_form(form_id):
     form["login_required"] = (form["login_required"] == 1)
     form["public_results"] = (form["public_results"] == 1)
     form["open"] = (form["open"] == 1)
-    form["owner"] = c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone()[0]
+    try:
+        form["owner"] = c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone()[0]
+    except:
+        pass
     form["questions"] = []
     questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
     for q in questions:

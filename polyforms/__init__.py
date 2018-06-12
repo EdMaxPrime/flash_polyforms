@@ -180,13 +180,49 @@ def create():
         flash("You need an account to make a form")
         return redirect(url_for("login_page"))
 
-@app.route('/ajax')
-def ajax():
+@app.route('/addQuestions', methods = ["POST", "GET"])
+def addQuestions():
     formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
     i=0
-    while (request.args.get(i)):
-        db.add_question(formID, request.args.get(i + ".question"), request.args.get(i + ".type"), request.args.get(i + ".required"), request.args.get(i + ".min"), request.args.get( i + ".max"))
+    print "start"
+    print request.args[str(0) + ".question"]
+    #print request.args[0]
+    print request.args
+    while (str(i) + ".question" in request.args.keys()):
+        print "loop beigns " + str(i)
+        print request.args[str(i) + ".question"]
+        print request.args.keys()
+        if (str(i) + ".required" not in request.args.keys()):
+            required = 0
+        else:
+            required = 1
+        if (str(i) + ".min" not in request.args.keys()):
+            min = ""
+        else:
+            min = request.args[str(i) + ".min"]
+        if (str(i) + ".max" not in request.args.keys()):
+            max = ""
+        else:
+            max = request.args[str(i) + ".max"]
+        if (str(i) + ".answers" in request.args.keys()):
+            options = request.args[str(i) + ".answers"].split(",")
+            for each in options:
+                db.add_option(formID,i+1, each, each)
+        if request.args[str(i) + ".type"] == "0":
+            type = "short"
+        elif request.args[str(i) + ".type"] == "1":
+            type = "long"
+        elif request.args[str(i) + ".type"] == "2":
+            type = "number"
+        elif request.args[str(i) + ".type"] == "3":
+            type = "choice"
+        else:
+            type = request.args[str(i) + ".type"]
+        print formID, request.args[str(i) + ".question"], request.args[str(i) + ".type"], required, min, max
+        db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
         i+=1
+        print "next i is" + str(i)
+    print "loop ends"
     return redirect(url_for("home_page"))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view

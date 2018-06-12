@@ -92,3 +92,6 @@ wongA -- 2018-06-11 22:45:34
 form creation fully functional, requires non-blank usernameleiG -- 2018-06-12 08:18:18
 minor edits and error catching
 
+leiG -- 2018-06-12 12:24:21
+pushing into db now works. form creation complete
+
