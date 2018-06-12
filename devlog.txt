@@ -88,3 +88,5 @@ Form validation on server-side. Checks for required, min and max values as well 
 leiG -- 2018-06-10 22:16:31
 revised getFormData to intended return result + debugged it
 
+wongA -- 2018-06-11 22:45:34
+form creation fully functional, requires non-blank username

@@ -2,6 +2,9 @@
 {% block title %} Form Creation | Polyforms {% endblock %}
 {% block body %}<br>
     <form action="/ajax">
+        Form Title: <input type="text" name="title"><br>
+        Login Required? <input type="checkbox" name="loginReq">
+        Public Results? <input type="checkbox" name="publicReq">
         <ol id="questionList">
         </ol>
         <button type="button" id="addButton" style="margin-bottom: 150px;">Add Question</button>

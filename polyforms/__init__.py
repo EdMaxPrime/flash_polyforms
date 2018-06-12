@@ -11,7 +11,6 @@ DIR = os.path.dirname(__file__)
 db.use_database(DIR)
 db.create_tables()
 
-
 @polyforms.route('/test')
 def deploy_test():
     print "=====================================\nConsole Message\n"
@@ -179,7 +178,12 @@ def create():
 
 @polyforms.route('/ajax')
 def ajax():
-    return redirect(url_for('display_form'))
+    db.add_form(session.get("userID", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
+    i=0
+    while (request.args.get(i)):
+        db.add_question(session, request.args.get(i + ".question"), request.args.get(i + ".type"), request.args.get(i + ".required"), request.args.get(i + ".min"), request.args.get( i + ".max"))
+        i+=1
+    return redirect(url_for("home_page"))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @polyforms.route('/my/forms')
