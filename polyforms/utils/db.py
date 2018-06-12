@@ -196,7 +196,11 @@ def getFormData(formID):
     #========================
     # DATA 
     responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (formID,)).fetchall()    
-    if responseArray is not None or responseArray is not []:
+    if len(responseArray) > 0:
+        print "======== start"
+        print not responseArray
+        print responseArray
+        print "============ end"
         currentResponseID = responseArray[0][3]
         tempArray = []
         dataArray.append([])

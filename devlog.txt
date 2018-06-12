@@ -98,3 +98,6 @@ pushing into db now works. form creation complete
 leiG -- 2018-06-12 13:46:40
 form insertion + answering question complete
 
+leiG -- 2018-06-12 18:36:31
+error catching + debugging
+

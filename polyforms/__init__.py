@@ -89,7 +89,8 @@ def display_form():
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
     form = test.get_form(form_id)
-    if username == None and form["login_required"]: #insert db check for login required
+    print username == ""
+    if (username == None or username == "") and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
     else:
