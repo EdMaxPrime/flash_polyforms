@@ -82,16 +82,7 @@
         <form id="pie-form">
           <div class="form-group">
             <label for="thing2">X-axis:</label>
-            <select class="form-control" id="plotX" name="x">
-              <option value="0">Response Index</option>
-              {% for columnName in headers %}
-              <option value="{{loop.index}}">{{columnName}}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="thing2a">Y-Axis:</label>
-            <select class="form-control" id="plotY" name="y">
+            <select class="form-control" id="pieColumn" name="x">
               <option value="0">Response Index</option>
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
@@ -113,7 +104,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="plotModalLabel">Pie Chart</h5>
+        <h5 class="modal-title" id="plotModalLabel">Scatter Plot</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -124,8 +115,14 @@
         <hr>
         <form id="plot-form">
           <div class="form-group">
-            <label for="plotColumn">Frequency Column:</label>
-            <select class="form-control" id="plotColumn" name="f">
+            <label for="plotX">X Axis:</label>
+            <select class="form-control" id="plotX" name="f">
+              {% for columnName in headers %}
+              <option value="{{loop.index}}">{{columnName}}</option>
+              {% endfor %}
+            </select>
+            <label for="plotY">Y Axis:</label>
+            <select class="form-control" id="plotY" name="f">
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
@@ -244,7 +241,8 @@
 
 <script type="text/javascript">
 var mydata = {{ data|tojson }};
-
+console.log({{headers|tojson}})
+console.log(mydata)
 function makePieChart(){
   var column = document.getElementById("pieColumn").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[column]);
@@ -265,8 +263,8 @@ function makePieChart(){
       type: 'pie'
     },
     size: {
-      width: 500,
-      height: 500
+      width: 400,
+      height: 400
     },
     pie: {
       label: {
@@ -296,8 +294,8 @@ function makeBarChart(){
       type: 'bar',
     },
     size: {
-      width: 500,
-      height: 500
+      width: 400,
+      height: 400
     },
     axis:{
       x:{
@@ -310,51 +308,62 @@ function makeBarChart(){
 function makeLineChart(){
   var x = document.getElementById("thing2").value - 1;
   var y = document.getElementById("thing2a").value - 1;
-  var counts = {};
+  var xLabels = ['x'];
+  var data = [{{headers|tojson}}[x]];
+  console.log(data);
   for(var i = 0; i < mydata.length; i++){
-    counts[mydata[i][x]] = mydata[i][y];
+    xLabels.push(mydata[i][x])
+    data.push(mydata[i][y])
   }
+  console.log(xLabels);
+  console.log(data)
   var chart = c3.generate({
     bindto: '#chart',
     data: {
-      json: counts,
-      type: 'line',
+      x: 'x',
+      columns: [xLabels, data]
     },
     size: {
-      width: 500,
-      height: 500
+      width: 400,
+      height: 400
     },
-    axis:{
-      x:{
-        type:'category'
-      }
-    }   
+    axis: {
+        x: {
+            type: 'category' // this needed to load string x value
+        }
+    }
   });  
 }
 
 function makeScatterChart(){
   var x = document.getElementById("plotX").value - 1;
   var y = document.getElementById("plotY").value - 1;
-  var counts = {};
+  var xLabels = ['x'];
+  var data = ["y"];
+  console.log(data);
   for(var i = 0; i < mydata.length; i++){
-    counts[mydata[i][x]] = mydata[i][y];
+    xLabels.push(mydata[i][x])
+    data.push(mydata[i][y])
   }
+  console.log(xLabels);
+  console.log(data)
   var chart = c3.generate({
     bindto: '#chart',
     data: {
-      json: counts,
-      type: 'scatter',
+      x: 'x',
+      columns: [xLabels, data],
+      type: "scatter"
     },
     size: {
-      width: 500,
-      height: 500
+      width: 400,
+      height: 400
     },
-    axis:{
-      x:{
-        type:'category'
-      }
-    }   
-  }); 
+    axis: {
+        x: {
+            type: 'category' // this needed to load string x value
+        }
+    }
+  });  
 };
 
 var activateToolbar = function() {
