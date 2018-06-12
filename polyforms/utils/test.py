@@ -1,6 +1,7 @@
 import sqlite3   # enable control of an sqlite database
 import hashlib   # allows for passwords and emails to be encrypted and decrypted
 import db as main
+from flask import session
 
 #this will be the one we use when routes work
 def open_db():
@@ -114,7 +115,10 @@ def add_response(form_id, question_id, response, new_row=False):
         response_id += 1
     if isinstance(response, list):
         response = "\n".join(response)
-    c.execute("INSERT INTO responses (form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?, datetime('now'));", (form_id, question_id, response_id, response))
+    try:
+        c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (session["user_id"],form_id, question_id, response_id, response))
+    except KeyError:
+        c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (None,form_id, question_id, response_id, response))
     close_db(db)
     return response_id
 
@@ -166,10 +170,13 @@ def validate_form_submission(form_id, data):
                 errors.append("Select no more than %d choices for \"%s\"" % (q["max"], q["question"]))
         elif q["type"] == "short" or q["type"] == "long":
             responses.append(data[index])
-            if q["min"] != None and len(responses[-1]) < q["min"]:
-                errors.append("Your response must be at least %d characters long for \"%s\"" % (q["min"], q["question"]))
-            if q["max"] != None and len(responses[-1]) > q["max"]:
-                errors.append("Your response must be no longer than %d characters for \"%s\"" % (q["max"], q["question"]))
+            try:
+                if q["min"] != None and len(responses[-1]) < q["min"]:
+                    errors.append("Your response must be at least %d characters long for \"%s\"" % (q["min"], q["question"]))
+                if q["max"] != None and len(responses[-1]) > q["max"]:
+                    errors.append("Your response must be no longer than %d characters for \"%s\"" % (q["max"], q["question"]))
+            except:
+                pass
         elif q["type"] == "username":
             responses.append(data[index])
         index += 1

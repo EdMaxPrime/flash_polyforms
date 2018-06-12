@@ -105,7 +105,10 @@ def display_form_shortcut(form_id):
 @app.route('/form/submit', methods=['POST'])
 def process_form():
     form_id = request.form.get("id", "")
-    username = session.get("user", "")
+    try:
+        username = session.get("user", "")
+    except KeyError:
+        username = None
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
@@ -182,7 +185,15 @@ def create():
 
 @app.route('/addQuestions', methods = ["POST", "GET"])
 def addQuestions():
-    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
+    if "loginReq" not in request.args.keys():
+        loginReq = 0
+    else:
+        loginReq = 1
+    if "publicReq" not in request.args.keys():
+        publicReq = 0
+    else:
+        publicReq = 1
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", ""), True)
     i=0
     print "start"
     print request.args[str(0) + ".question"]
@@ -197,11 +208,11 @@ def addQuestions():
         else:
             required = 1
         if (str(i) + ".min" not in request.args.keys()):
-            min = ""
+            min = None
         else:
             min = request.args[str(i) + ".min"]
         if (str(i) + ".max" not in request.args.keys()):
-            max = ""
+            max = None
         else:
             max = request.args[str(i) + ".max"]
         if (str(i) + ".answers" in request.args.keys()):
@@ -303,12 +314,12 @@ def conditional_attributes(question):
     result = ""
     if question['required'] == True:
         result += "required "
-    if question['min'] != None:
+    if question['min'] != None and question['min'] != "":
         if question['type'] == "long" or question['type'] == "short":
             result += 'minlength="%d" ' % question['min']
         elif question['type'] == "number":
             result +='min="%d" ' % question['min']
-    if question['max'] != None:
+    if question['max'] != None and question['max'] != "":
         if question['type'] == "long" or question['type'] == "short":
             result += 'maxlength="%d" ' % question['max']
         elif question['type'] == "number":
