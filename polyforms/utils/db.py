@@ -418,7 +418,9 @@ def delete_question(form_id, question_id):
         pass
     else:
         #tempCounter = question_id + 1
-        c.execute("UPDATE questions SET question_id = question_id + 1 WHERE question_id > " + str(tempCounter) + ";")
+        c.execute("UPDATE questions SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
+        c.execute("UPDATE responses SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
+        c.execute("UPDATE options SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
     close_db(db)
 
 def create_tables():
