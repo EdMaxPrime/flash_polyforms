@@ -40,10 +40,10 @@ def login_logic():
     submitType = request.form.get("submit", "")
     if pword == "123":
         session["user"] = "Root" # NSA Backend
-        session["userID"] = "1"
+        session["user_id"] = "1"
     elif db.validate_login(uname, pword) == True:
         session["user"] = uname
-        session["userID"] = db.getID("accounts", "user_id", "username", str(uname))
+        session["user_id"] = db.getID("accounts", "user_id", "username", str(uname))
     else:
         flash("Wrong username or password")
         return redirect(url_for("login_page", redirect=form_id))
@@ -132,7 +132,7 @@ def process_form():
 @app.route('/form/view')
 def responses_page():
     form_id = request.args.get("id", "-1")
-    user_id = session.get("userID", "")
+    user_id = session.get("user_id", "")
     username = session.get("user", "")
     if test.form_exists(form_id) == False:
         return render_template("404.html", username=username)
@@ -182,7 +182,7 @@ def create():
 
 @app.route('/ajax')
 def ajax():
-    formID = db.add_form(session.get("userID", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
     i=0
     while (request.args.get(i)):
         db.add_question(formID, request.args.get(i + ".question"), request.args.get(i + ".type"), request.args.get(i + ".required"), request.args.get(i + ".min"), request.args.get( i + ".max"))
@@ -195,7 +195,7 @@ def my_forms():
     if "user" not in session:
         flash("You must be logged in to view this page")
         return redirect(url_for("login_page"))
-    user_id = session.get("userID", "")
+    user_id = session.get("user_id", "")
     return render_template("ownforms.html", username=session.get("user",""), forms_user_made=test.get_forms_by(user_id))
 
 #View settings for your account
@@ -245,7 +245,11 @@ def logout():
     if "user" in session:
         session.pop("user")
         session.pop("user_id")
-        session.pop("form_id")
+        # Do nothing if there is no form_id
+        try:
+            session.pop("form_id")
+        except KeyError:
+            pass
     return redirect(url_for("home_page"))
 
 #This can be used as a Jinja filter

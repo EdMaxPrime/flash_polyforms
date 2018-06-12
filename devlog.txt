@@ -89,4 +89,6 @@ leiG -- 2018-06-10 22:16:31
 revised getFormData to intended return result + debugged it
 
 wongA -- 2018-06-11 22:45:34
-form creation fully functional, requires non-blank username
+form creation fully functional, requires non-blank usernameleiG -- 2018-06-12 08:18:18
+minor edits and error catching
+
