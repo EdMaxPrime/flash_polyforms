@@ -89,7 +89,8 @@ def display_form():
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
     form = test.get_form(form_id)
-    if username == None and form["login_required"]: #insert db check for login required
+    print username == ""
+    if (username == None or username == "") and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
     else:
@@ -105,10 +106,7 @@ def display_form_shortcut(form_id):
 @app.route('/form/submit', methods=['POST'])
 def process_form():
     form_id = request.form.get("id", "")
-    try:
-        username = session.get("user", "")
-    except KeyError:
-        username = None
+    username = session.get("user", "")
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
@@ -129,7 +127,17 @@ def process_form():
             while qnumber <= number_of_questions:
                 test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
-        return redirect(url_for("display_form", id=form_id))
+        return redirect(url_for("thankyou", id=form_id))
+
+#Thank you message once form is filled out
+@app.route('/form/end')
+def thankyou():
+    id = request.args.get("id", "-1")
+    if test.form_exists(id):
+        form = test.get_form(id)
+        return render_template("form_themes/end_basic.html", owner=form["owner"], title=form["title"], message=form["message"])
+    else:
+        return render_template("unauthorized.html", username=session.get("user", ""))
 
 #View the responses to your form and make charts
 @app.route('/form/view')
@@ -174,6 +182,54 @@ def responses_json():
         else: #you do have permission to download
             return Response(render_template("json_results.json", headers=form['headers'], data=form['data']), mimetype="application/json")
 
+#change form settings
+@app.route('/form/toggle')
+def change_form():
+    username = session.get("user", "")
+    user_id = session.get("user_id", "")
+    form_id = request.args.get("id", "-1")
+    setting = request.args.get("setting", "")
+    result = False
+    if test.can_edit(user_id, form_id):
+        if setting == "open":
+            result = test.toggle_form(form_id, "open")
+            if result == True:
+                result = "Your form is now accepting responses"
+            else:
+                result = "Your form is no longer accepting responses"
+        elif setting == "public":
+            result = test.toggle_form(form_id, "public_results")
+            if result == True:
+                result = "Your form's results are now public. Anyone with the link can view them. Press the button below and then copy the link in the address bar."
+            else:
+                result = "Your form's results are now private"
+        elif setting == "basic":
+            result = "Your form has the basic theme"
+            test.set_theme(form_id, "basic.html")
+        elif setting == "light":
+            result = "Your form has the light theme"
+            test.set_theme(form_id, "light.html")
+        elif setting == "dark":
+            result = "Your form has the dark theme"
+            test.set_theme(form_id, "light.html")
+        elif setting == "delete":
+            return render_template("delete.html", username=username, form_id=form_id)
+        return render_template("update.html", message=result, form_id=form_id, username=username)
+    else:
+        return render_template("unauthorized.html", username=username)
+
+#Delete a form
+@app.route('/form/delete')
+def delete_form():
+    username = session.get("username", "")
+    user_id = session.get("user_id", "")
+    form_id = request.args.get("id", "-1")
+    if test.can_edit(user_id, form_id):
+        db.delete_form(form_id)
+        return redirect(url_for("my_forms"), username=username)
+    else:
+        return render_template("unauthorized.html", username=username)
+
 #Make a new form
 @app.route('/form/new')
 def create():
@@ -193,7 +249,7 @@ def addQuestions():
         publicReq = 0
     else:
         publicReq = 1
-    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", ""), True)
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, request.args.get("message", "Your responses have been recorded"))
     i=0
     print "start"
     print request.args[str(0) + ".question"]

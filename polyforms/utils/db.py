@@ -40,9 +40,9 @@ def increment_id(table):
 def hashed(foo):
     return hashlib.md5(str(foo)).hexdigest()
     
-def add_form(user_id, formTitle, loginReq, publicReq, theme, open):
+def add_form(user_id, formTitle, loginReq, publicReq, theme, open, message):
     db, c = open_db()
-    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created, open) VALUES (?,?,?,?,?, datetime('now'), ?)", (formTitle, user_id, loginReq, publicReq, theme, open))
+    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created, open, message) VALUES (?,?,?,?,?, datetime('now'), ?, ?)", (formTitle, user_id, loginReq, publicReq, theme, open, message))
     form_id = c.execute("SELECT max(form_id) FROM forms;").fetchone()
     close_db(db)
     return form_id[0]
@@ -196,7 +196,11 @@ def getFormData(formID):
     #========================
     # DATA 
     responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (formID,)).fetchall()    
-    if responseArray is not None or responseArray is not []:
+    if len(responseArray) > 0:
+        print "======== start"
+        print not responseArray
+        print responseArray
+        print "============ end"
         currentResponseID = responseArray[0][3]
         tempArray = []
         dataArray.append([])
@@ -385,6 +389,7 @@ def update_form(formID, status):
     c.execute("UPDATE forms SET password = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
     close_db(db)
 
+
 def get_form_questionResponses(form_id, question_id):
     formDict = getFormDataWithResponse(form_id)
     question = formDict["questions"][question_id - 1]
@@ -410,6 +415,15 @@ def get_form_questionsOptions(form_id, question_id):
         optionArray.append(each["option"])
     return optionArray
 
+#Deletes a form, questions and responses
+def delete_form(form_id):
+    db, c = open_db()
+    c.execute("DELETE FROM forms WHERE form_id=?;", (form_id,))
+    c.execute("DELETE FROM questions WHERE form_id=?;", (form_id,))
+    c.execute("DELETE FROM responses WHERE form_id=?;", (form_id,))
+    c.execute("DELETE FROM options WHERE form_id=?;", (form_id,))
+    close_db(db)
+
 def delete_question(form_id, question_id):
     db, c = open_db()
     # Delete the question from th DB
@@ -431,7 +445,7 @@ def delete_question(form_id, question_id):
 
 def create_tables():
     db, c = open_db()
-    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open INTEGER);")
+    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open INTEGER, message TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER, response BLOB, timestamp TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER, optional INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")

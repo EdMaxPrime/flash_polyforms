@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %} Delete | Polyforms {% endblock %}
+{% block body %}
+<h1 class="my-5">Are you sure you want to delete your form?</h1>
+<p>This action can't be undone. All questions and responses will be permanently deleted. Your form will not be viewable to anyone, not even you.</p>
+<br>
+<a class="btn btn-danger" href="/form/delete?id={{form_id}}">I understand and still want to delete my form</a>
+<a class="btn btn-primary" href="/form/view?id={{form_id}}">I don't want to delete my form. Take me back!</a>
+{% endblock %}
