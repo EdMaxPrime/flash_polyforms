@@ -22,9 +22,6 @@ def deploy_test():
 
 @polyforms.route('/')
 def home_page():
-    #print db.returnFormData(1)
-    #print db.getFormDataNoResponse(1)
-    #print db.getFormData(2)
     return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
 
 #Shows the form to login
@@ -174,7 +171,11 @@ def responses_json():
 
 @polyforms.route('/form/new')
 def create():
-    return render_template("create.html")
+    if "user" in session:
+        return render_template("create.html", username=session.get("user", ""))
+    else:
+        flash("You need an account to make a form")
+        return redirect(url_for("login_page"))
 
 @polyforms.route('/ajax')
 def ajax():

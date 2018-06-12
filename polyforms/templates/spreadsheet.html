@@ -30,7 +30,7 @@
       <div class="btn-group" role="group">
         <button class="btn btn-secondary dropdown-toggle" id="configureMenuToggler" data-toggle="dropdown" type="button">Configure</button>
         <div class="dropdown-menu" aria-labelledby="configureMenuToggler">
-          <a class="dropdown-item" href="#">Publish to home page</a>
+          <a class="dropdown-item" href="#">Make rows equal width</a>
           <a class="dropdown-item" href="#">Stop accepting responses</a>
         </div>
       </div>
@@ -240,17 +240,18 @@
 
 
 <script type="text/javascript">
-console.log({{jsonData | safe}});
+var mydata = {{ data|tojson }};
+
 function makePieChart(){
   var column = document.getElementById("pieColumn").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[column]);
   var counts = {};
-  for (var i = 0; i < {{jsonData|safe}}.length; i++) {
-    if({{jsonData|safe}}[i][column] in counts){
-      counts[{{jsonData|safe}}[i][column]]++;
+  for (var i = 0; i < mydata.length; i++) {
+    if(mydata[i][column] in counts){
+      counts[mydata[i][column]]++;
     }
     else{
-      counts[{{jsonData|safe}}[i][column]] = 1;
+      counts[mydata[i][column]] = 1;
     }
   }
   //console.log(counts);
@@ -276,12 +277,12 @@ function makeBarChart(){
   var x = document.getElementById("thing3").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[x]);
   var counts = {};
-  for (var i = 0; i < {{jsonData|safe}}.length; i++) {
-    if({{jsonData|safe}}[i][x] in counts){
-      counts[{{jsonData|safe}}[i][x]]++;
+  for (var i = 0; i < mydata.length; i++) {
+    if(mydata[i][x] in counts){
+      counts[mydata[i][x]]++;
     }
     else{
-      counts[{{jsonData|safe}}[i][x]] = 1;
+      counts[mydata[i][x]] = 1;
     }
   }
   //console.log(counts);
@@ -307,8 +308,8 @@ function makeLineChart(){
   var x = document.getElementById("thing2").value - 1;
   var y = document.getElementById("thing2a").value - 1;
   var counts = {};
-  for(var i = 0; i < {{jsonData|safe}}.length; i++){
-    counts[{{jsonData|safe}}[i][x]] = {{jsonData|safe}}[i][y];
+  for(var i = 0; i < mydata.length; i++){
+    counts[mydata[i][x]] = mydata[i][y];
   }
   var chart = c3.generate({
     bindto: '#chart',
@@ -332,8 +333,8 @@ function makeScatterChart(){
   var x = document.getElementById("plotX").value - 1;
   var y = document.getElementById("plotY").value - 1;
   var counts = {};
-  for(var i = 0; i < {{jsonData|safe}}.length; i++){
-    counts[{{jsonData|safe}}[i][x]] = {{jsonData|safe}}[i][y];
+  for(var i = 0; i < mydata.length; i++){
+    counts[mydata[i][x]] = mydata[i][y];
   }
   var chart = c3.generate({
     bindto: '#chart',

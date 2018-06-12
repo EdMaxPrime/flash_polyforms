@@ -189,21 +189,21 @@ def getFormData(formID):
         formData["types"] = None
     #========================
     # DATA 
-    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ?;", (formID,)).fetchall()    
+    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (formID,)).fetchall()    
     if responseArray is not None or responseArray is not []:
-        currentResponseID = -1
+        currentResponseID = responseArray[0][3]
         tempArray = []
+        dataArray.append([])
         for each in responseArray:
             if each[3] == currentResponseID:
-                tempArray.append(each[4])
+                dataArray[-1].append(each[4])
             else:
-                dataArray.append(tempArray)
-                tempArray = []
+                dataArray.append([])
                 currentResponseID = each[3]
-                tempArray.append(each[4])
+                dataArray[-1].append(each[4])
         formData["data"] = dataArray
     else:
-        formData["data"] = None
+        formData["data"] = []
     close_db(db)
     return formData
 
