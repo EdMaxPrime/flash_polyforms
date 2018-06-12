@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, Response, abort, json
+from jinja2 import escape
 import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
 from utils import db
@@ -169,6 +170,7 @@ def responses_json():
         else: #you do have permission to download
             return Response(render_template("json_results.json", headers=form['headers'], data=form['data']), mimetype="application/json")
 
+#Make a new form
 @polyforms.route('/form/new')
 def create():
     if "user" in session:
@@ -271,6 +273,11 @@ def conditional_attributes(question):
         elif question['type'] == "number":
             result +='max="%d" ' % question['max']
     return result
+
+@polyforms.template_filter('linebreaks')
+def newline_br(value):
+    lines = value.split("\n")
+    return "<br>".join([escape(s) for s in lines])
 
 #Will not be executed if this is imported by WSGI
 if __name__ == "__main__":

@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block title %} Your Forms | Polyforms {% endblock %}
 {% block body %}
+<h1 class="my-5">My Forms</h1>
 {% if forms_user_made|length == 0 %}
-    <h1>You currently do not have any forms.</h1>
+    <p>You currently do not have any forms.</p>
 {% else %}
     <div class="container">
+        <div class="row">
+            <div class="col-12 col-md">Form Title</div>
+            <div class="col-12 col-md-2">Responses</div>
+            <div class="col-12 col-md-2">Date Created</div>
+        </div>
         {% for f in forms_user_made %}
         <a href="/form/view?id={{f.id}}" class="list-group-item list-group-item-action">
             <div class="row">

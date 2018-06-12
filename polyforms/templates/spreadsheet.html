@@ -30,8 +30,11 @@
       <div class="btn-group" role="group">
         <button class="btn btn-secondary dropdown-toggle" id="configureMenuToggler" data-toggle="dropdown" type="button">Configure</button>
         <div class="dropdown-menu" aria-labelledby="configureMenuToggler">
-          <a class="dropdown-item" href="#">Make rows equal width</a>
+          <a class="dropdown-item" href="#" id="cew">Make columns equal width</a>
+          <a class="dropdown-item" href="#">Change theme</a>
+          <a class="dropdown-item" href="#">Make results publicly viewable</a>
           <a class="dropdown-item" href="#">Stop accepting responses</a>
+          <a class="dropdown-item" href="#">Delete form</a>
         </div>
       </div>
     </div>
@@ -45,7 +48,7 @@
 <div class="table-responsive">
   <table class="table table-bordered table-hover" id="responsesTable">
     <thead class="thead-dark">
-      <tr>
+      <tr id="columns">
         <th>Response Index</th>
         {% for columnName in headers %}<th>{{ columnName }}</th>{% endfor %}
       </tr>
@@ -54,7 +57,7 @@
       {% for row in data %}
       <tr>
         <th scope="row">{{ loop.index }}</th>
-        {% for cell in row %}<td>{{cell}}</td>{% endfor %}
+        {% for cell in row %}<td>{{cell|linebreaks|safe}}</td>{% endfor %}
       </tr>
       {% endfor %}
     </tbody>
@@ -353,21 +356,31 @@ function makeScatterChart(){
     }   
   }); 
 };
-/* Attach event listeners to the filter search bar */
-var filter = document.getElementById("filter");
-//Select all <tr> elements in the table
-var rows = d3.select("#responsesTable").selectAll("tbody tr");
-//This event happens whenever you type in the search bar
-filter.addEventListener("input", function(evt) {
-  filterText = filter.value;
-  rows.style("display", function(d, i) {
-    for(var i = 0; i < this.children.length; i++) {
-      if(this.children[i].innerHTML.indexOf(filterText) != -1) {
-        return "table-row";
+
+var activateToolbar = function() {
+  /* Attach event listeners to the filter search bar */
+  var filter = document.getElementById("filter");
+  //Select all <tr> elements in the table
+  var rows = d3.select("#responsesTable").selectAll("tbody tr");
+  //This event happens whenever you type in the search bar
+  filter.addEventListener("input", function(evt) {
+    filterText = filter.value;
+    rows.style("display", function(d, i) {
+      for(var i = 0; i < this.children.length; i++) {
+        if(this.children[i].innerHTML.indexOf(filterText) != -1) {
+          return "table-row";
+        }
       }
-    }
-    return "none";
+      return "none";
+    });
   });
-});
+
+  /* Make columns equal width */
+  document.getElementById("cew").addEventListener("click", function() {
+    d3.select("#columns").selectAll("th").style("width", "400px");
+  });
+};
+
+activateToolbar();
 </script>
 {% endblock %}

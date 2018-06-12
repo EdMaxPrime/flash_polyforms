@@ -1,13 +1,39 @@
 {% extends "base.html" %}
 {% block title %} Form Creation | Polyforms {% endblock %}
-{% block body %}<br>
+{% block body %}
+    <h1 class="my-3">Make a New Form</h1>
     <form action="/ajax">
-        Form Title: <input type="text" name="title"><br>
-        Login Required? <input type="checkbox" name="loginReq">
-        Public Results? <input type="checkbox" name="publicReq">
+        <fieldset style="border: 2px groove #555; padding: 10px" class="my-5">
+            <legend style="display: inline-block; width: 200px; background-color: #777; color:white;" class="px-3">Basic Info</legend>
+            <div class="form-group">
+                Form Title: <input type="text" name="title" size="50"><br>
+            </div>
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" name="loginReq" id="login_required" class="form-check-input">
+                    <label for="login_required" class="form-check-label">Check this box to only let respondents fill out this form once. Note that this will require them to make accounts on this website and be logged in to fill out the form.</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="publicReq" id="public_results" class="form-check-input">
+                    <label for="public_results" class="form-check-label">Check this box to let the results to this form be viewable by anyone with the link to the form. Otherwise, only you will be able to see the responses to thsi form.</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="theme">Choose a theme. This affects how your form will look like. You can change the theme later too.</label> 
+                <select id="theme" name="theme">
+                    <option value="basic.html">Basic</option>
+                    <option value="light.html">Light</option>
+                    <option value="dark.html">Dark</option>
+                </select>
+            </div>
+        </fieldset>
+        
+        <h2>Questions</h2>
         <ol id="questionList">
         </ol>
         <button type="button" id="addButton" style="margin-bottom: 150px;">Add Question</button>
+        <button type="button" id="secButton" style="margin-bottom: 150px;">Add Section Heading</button>
         <input type="submit">
     </form>
     <script src="{{url_for('static', filename='js/create.js')}}"></script> 

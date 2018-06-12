@@ -83,7 +83,7 @@ var removeQuestion = function(e) {
         for (var j = 0; j < children.length; j++) {
             child = children[j];
             if (child.getAttribute('name')){
-                child.setAttribute('name', i - 1 + child.getAttribute('name').substring(1));
+                child.setAttribute('name', (i - 1) + child.getAttribute('name').substring(1));
             };
         };
     };
