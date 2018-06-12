@@ -2,4 +2,4 @@
 import sys
 sys.path.insert(0, "/var/www/polyforms")
 
-from polyforms import polyforms as application
+from polyforms import app as application

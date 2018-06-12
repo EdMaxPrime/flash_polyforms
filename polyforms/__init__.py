@@ -5,15 +5,15 @@ import random   #for the generate_questions random word generator
 from utils import db
 from utils import test
 
-polyforms = Flask(__name__)
-polyforms.secret_key = os.urandom(32)
-polyforms.config['TEMPLATES_AUTO_RELOAD'] = True
+app = Flask(__name__)
+app.secret_key = os.urandom(32)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
 db.use_database(DIR)
 db.create_tables()
 
-@polyforms.route('/test')
+@app.route('/test')
 def deploy_test():
     print "=====================================\nConsole Message\n"
     print DIR + "\n====================================="
@@ -22,17 +22,17 @@ def deploy_test():
     body+= '<img src="' + url_for('static', filename='img/cat_cage.jpg') + '" width="500"</img>'
     return body
 
-@polyforms.route('/')
+@app.route('/')
 def home_page():
     return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
 
 #Shows the form to login
-@polyforms.route('/login')
+@app.route('/login')
 def login_page():
     return render_template('login.html', username=session.get("user", ""), redirect=request.args.get("redirect", ""))
 
 #Verifies username and password, redirects home on success
-@polyforms.route('/login/verify', methods=["POST"])
+@app.route('/login/verify', methods=["POST"])
 def login_logic():
     uname = request.form.get("username", "")
     pword = request.form.get("password", "")
@@ -54,12 +54,12 @@ def login_logic():
         return redirect(url_for("display_form", id=form_id))
 
 #Shows the form to signup
-@polyforms.route('/join')
+@app.route('/join')
 def signup_page():
     return render_template("signup.html", username=session.get("user", ""))
 
 #Verifies that this account can be made, redirects to login page on success
-@polyforms.route('/join/verify', methods=['POST'])
+@app.route('/join/verify', methods=['POST'])
 def signup_logic():
     uname = request.form.get("username1", "")
     pword = request.form.get("password1", "")
@@ -81,7 +81,7 @@ def signup_logic():
         return redirect(url_for("login_page"))
     return redirect(url_for("signup_page"))
 
-@polyforms.route('/form/respond', methods=["GET"])
+@app.route('/form/respond', methods=["GET"])
 def display_form():
     form_id = request.args.get("id")
     username = session.get("user", "")
@@ -97,12 +97,12 @@ def display_form():
         return render_template("form_themes/"+template_name, title=form["title"], questions=form["questions"], form_id=form_id)
 
 #Shortcut URLS
-@polyforms.route('/f/<form_id>')
+@app.route('/f/<form_id>')
 def display_form_shortcut(form_id):
     return redirect(url_for("display_form", id=form_id))
 
 #This will store the responses to the form and then redirect to a Thank You
-@polyforms.route('/form/submit', methods=['POST'])
+@app.route('/form/submit', methods=['POST'])
 def process_form():
     form_id = request.form.get("id", "")
     username = session.get("user", "")
@@ -129,7 +129,7 @@ def process_form():
         return redirect(url_for("display_form", id=form_id))
 
 #View the responses to your form and make charts
-@polyforms.route('/form/view')
+@app.route('/form/view')
 def responses_page():
     form_id = request.args.get("id", "-1")
     user_id = session.get("userID", "")
@@ -146,7 +146,7 @@ def responses_page():
             return render_template("unauthorized.html", username=username)
 
 #CSV
-@polyforms.route('/form/view/form.csv')
+@app.route('/form/view/form.csv')
 def responses_csv():
     if not ("id" in request.args):
         return render_template("404.html", username=session.get("user", "")), 404
@@ -159,7 +159,7 @@ def responses_csv():
             return Response(render_template("csv_results.csv", headers=form['headers'], data=form['data']), mimetype="application/json")
 
 #JSON
-@polyforms.route('/form/view/form.json')
+@app.route('/form/view/form.json')
 def responses_json():
     if not ("id" in request.args):
         return render_template("404.html", username=session.get("user", "")), 404
@@ -172,7 +172,7 @@ def responses_json():
             return Response(render_template("json_results.json", headers=form['headers'], data=form['data']), mimetype="application/json")
 
 #Make a new form
-@polyforms.route('/form/new')
+@app.route('/form/new')
 def create():
     if "user" in session:
         return render_template("create.html", username=session.get("user", ""))
@@ -180,7 +180,7 @@ def create():
         flash("You need an account to make a form")
         return redirect(url_for("login_page"))
 
-@polyforms.route('/ajax')
+@app.route('/ajax')
 def ajax():
     formID = db.add_form(session.get("userID", ""), request.args.get("title", ""), request.args.get("loginReq", ""), request.args.get("publicReq", ""), 'basic.html', True)
     i=0
@@ -190,7 +190,7 @@ def ajax():
     return redirect(url_for("home_page"))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
-@polyforms.route('/my/forms')
+@app.route('/my/forms')
 def my_forms():
     if "user" not in session:
         flash("You must be logged in to view this page")
@@ -199,7 +199,7 @@ def my_forms():
     return render_template("ownforms.html", username=session.get("user",""), forms_user_made=test.get_forms_by(user_id))
 
 #View settings for your account
-@polyforms.route('/my/settings')
+@app.route('/my/settings')
 def settings_page():
     if "user" not in session:
         flash("You must be logged in to view this page")
@@ -208,7 +208,7 @@ def settings_page():
     return render_template("settings.html", username=username)
 
 #Verify that you are able to reset your password by answering the security question
-@polyforms.route('/my/settings/password')
+@app.route('/my/settings/password')
 def reset_password_page():
     if "user" not in session:
         flash("You must be logged in to view this page")
@@ -217,7 +217,7 @@ def reset_password_page():
     return render_template("pass_reset.html", username=username)
 
 #This is where the password reset form redirects. This method will check the DB for security question. Then it will change the password. Then it will redirect to login
-@polyforms.route('/my/settings/password-update', methods=["POST"])
+@app.route('/my/settings/password-update', methods=["POST"])
 def reset_password_logic():
     uname = request.form.get("username")
     question = request.form.get("question")
@@ -236,11 +236,11 @@ def reset_password_logic():
         flash("The new password doesn't match in both boxes")
     return redirect(url_for("reset_password_page"))
 
-@polyforms.route('/about')
+@app.route('/about')
 def about_page():
     return render_template("about.html")
 
-@polyforms.route('/logout')
+@app.route('/logout')
 def logout():
     if "user" in session:
         session.pop("user")
@@ -249,7 +249,7 @@ def logout():
     return redirect(url_for("home_page"))
 
 #This can be used as a Jinja filter
-@polyforms.template_filter('dtnormal')
+@app.template_filter('dtnormal')
 def format_datetime(value="2018-05-26 12:00:00"):
     months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"]
     m = int(value[5:7]) - 1
@@ -258,7 +258,7 @@ def format_datetime(value="2018-05-26 12:00:00"):
     t = value[11:-3]
     return "%s %s at %s" % (months[m], d, t)
 
-@polyforms.template_filter('attributes')
+@app.template_filter('attributes')
 def conditional_attributes(question):
     result = ""
     if question['required'] == True:
@@ -275,13 +275,13 @@ def conditional_attributes(question):
             result +='max="%d" ' % question['max']
     return result
 
-@polyforms.template_filter('linebreaks')
+@app.template_filter('linebreaks')
 def newline_br(value):
     lines = value.split("\n")
     return "<br>".join([escape(s) for s in lines])
 
 #Will not be executed if this is imported by WSGI
 if __name__ == "__main__":
-    polyforms.debug = True
-    polyforms.run()
+    app.debug = True
+    app.run()
 
