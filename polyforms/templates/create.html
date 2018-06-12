@@ -27,13 +27,16 @@
                     <option value="dark.html">Dark</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="message">Write a message for users to see when they submit the form. The default is "Your responses have been recorded".</label>
+                <textarea id="message" rows="4" name="message" class="form-control"></textarea>
+            </div>
         </fieldset>
         
         <h2>Questions</h2>
         <ol id="questionList">
         </ol>
         <button type="button" id="addButton" style="margin-bottom: 150px;">Add Question</button>
-        <button type="button" id="secButton" style="margin-bottom: 150px;">Add Section Heading</button>
         <input type="submit">
     </form>
     <script src="{{url_for('static', filename='js/create.js')}}"></script> 

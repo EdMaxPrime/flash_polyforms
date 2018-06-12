@@ -54,16 +54,16 @@ def form_exists(form_id):
 #Choices in the choices key of a question have these keys: text and value
 def get_form(form_id):
     db, c = open_db()
-    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open FROM forms WHERE form_id = ?;", (str(form_id),))
+    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, message FROM forms WHERE form_id = ?;", (str(form_id),))
     result = c.fetchone()
-    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open"])
+    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "message"])
     form["login_required"] = (form["login_required"] == 1)
     form["public_results"] = (form["public_results"] == 1)
     form["open"] = (form["open"] == 1)
     try:
         form["owner"] = c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone()[0]
     except:
-        pass
+        form["owner"] = ""
     form["questions"] = []
     questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
     for q in questions:

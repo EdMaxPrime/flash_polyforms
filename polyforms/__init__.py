@@ -129,7 +129,16 @@ def process_form():
             while qnumber <= number_of_questions:
                 test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
-        return redirect(url_for("display_form", id=form_id))
+        return redirect(url_for("thankyou", id=form_id))
+
+@app.route('/form/end')
+def thankyou():
+    id = request.args.get("id", "-1")
+    if test.form_exists(id):
+        form = test.get_form(id)
+        return render_template("form_themes/end_basic.html", owner=form["owner"], title=form["title"], message=form["message"])
+    else:
+        return render_template("unauthorized.html", username=session.get("user", ""))
 
 #View the responses to your form and make charts
 @app.route('/form/view')
@@ -193,7 +202,7 @@ def addQuestions():
         publicReq = 0
     else:
         publicReq = 1
-    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", ""), True)
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, request.args.get("message", "Your responses have been recorded"))
     i=0
     print "start"
     print request.args[str(0) + ".question"]
