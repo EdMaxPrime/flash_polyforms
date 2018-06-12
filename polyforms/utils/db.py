@@ -1,13 +1,16 @@
 import sqlite3   # enable control of an sqlite database
 import hashlib   # allows for passwords and emails to be encrypted and decrypted
-from flask import session   # interact with cookie
+from flask import session  # interact with cookie
+import os
 
 #this will be the one we use when routes work
 #f = "data/database.db"
 
 #temp
-local_db_location = "data/database.db"
-path_to_db = local_db_location
+local_db_location =  os.path.abspath(os.path.dirname(__file__))
+global db_file
+db_file = local_db_location + "/../data/database.db"
+path_to_db = db_file
 
 def use_database(path):
     if len(path) > 0 and path[-1] != "/":
