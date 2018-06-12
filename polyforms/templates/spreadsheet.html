@@ -4,8 +4,9 @@
 <div id="wowie"></div>
 <!-- This is the toolbar for the spreadsheet. Includes form title, make chart button, and filter input box -->
 <div class="row my-3">
-  <div class="col">
+  <div class="col mb-1">
     <h1>{{title}}</h1>
+    Shareable link: <a href="/f/{{form_id}}">{{url_for("display_form_shortcut", form_id=form_id)}}</a>
   </div>
   <div class="w-100"></div>
   <div class="col-12 col-md-7 col-lg-6 order-last order-md-2">
@@ -31,10 +32,12 @@
         <button class="btn btn-secondary dropdown-toggle" id="configureMenuToggler" data-toggle="dropdown" type="button">Configure</button>
         <div class="dropdown-menu" aria-labelledby="configureMenuToggler">
           <a class="dropdown-item" href="#" id="cew">Make columns equal width</a>
-          <a class="dropdown-item" href="#">Change theme</a>
-          <a class="dropdown-item" href="#">Make results publicly viewable</a>
-          <a class="dropdown-item" href="#">Stop accepting responses</a>
-          <a class="dropdown-item" href="#">Delete form</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=basic">Change theme to basic</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=light">Change theme to light</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=dark">Change theme to dark</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=public">Make results publicly viewable</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=open">Stop/resume accepting responses</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=delete">Delete form</a>
         </div>
       </div>
     </div>

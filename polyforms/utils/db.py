@@ -385,6 +385,7 @@ def update_form(formID, status):
     c.execute("UPDATE forms SET password = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
     close_db(db)
 
+
 def get_form_questionResponses(form_id, question_id):
     formDict = getFormDataWithResponse(form_id)
     question = formDict["questions"][question_id - 1]
@@ -409,6 +410,15 @@ def get_form_questionsOptions(form_id, question_id):
     for each in question:
         optionArray.append(each["option"])
     return optionArray
+
+#Deletes a form, questions and responses
+def delete_form(form_id):
+    db, c = open_db()
+    c.execute("DELETE FROM forms WHERE form_id=?;", (form_id,))
+    c.execute("DELETE FROM questions WHERE form_id=?;", (form_id,))
+    c.execute("DELETE FROM responses WHERE form_id=?;", (form_id,))
+    c.execute("DELETE FROM options WHERE form_id=?;", (form_id,))
+    close_db(db)
 
 def delete_question(form_id, question_id):
     db, c = open_db()
