@@ -77,6 +77,7 @@ def add_question(formID, question, type, required, min, max):
 
 def add_option(formID, questionID, text_user_sees, value):
     db, c = open_db()
+    print "INSERT INTO options (form_id, question_id, text_user_sees, value) VALUES (?,?,?,?)", (formID, questionID, text_user_sees, value)
     c.execute("INSERT INTO options (form_id, question_id, text_user_sees, value) VALUES (?,?,?,?)", (formID, questionID, text_user_sees, value))
     close_db(db)
     

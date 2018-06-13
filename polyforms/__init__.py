@@ -290,10 +290,13 @@ def addQuestions():
             max = None
         else:
             max = request.args[str(i) + ".max"]
+        '''
         if (str(i) + ".answers" in request.args.keys()):
             options = request.args[str(i) + ".answers"].split(",")
+            print options
             for each in options:
                 db.add_option(formID,i+1, each, each)
+        '''
         if request.args[str(i) + ".type"] == "0":
             type = "short"
         elif request.args[str(i) + ".type"] == "1":
