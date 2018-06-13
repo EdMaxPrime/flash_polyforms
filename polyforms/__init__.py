@@ -152,7 +152,8 @@ def responses_page():
         return render_template("404.html", username=username)
     else:
         form = db.getFormData(form_id)
-        if form["owner"] == username or username == "Root": #you have permission to view this
+        print form["public_results"] == "1"
+        if form["owner"] == username or username == "Root" or form["public_results"] == 1 or form["public_results"] == "1": #you have permission to view this
             return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id)
         else: #you dont have permission to view this
             return render_template("unauthorized.html", username=username)
