@@ -113,11 +113,20 @@ def process_form():
         number_of_questions = test.number_of_questions(form_id)
         data = {}
         form = test.get_form(form_id)
+        print "idddd"
+        print request.form
+        print request.form.keys()
+        print request.form.get("id")
         for qnumber in range(1, number_of_questions+1):
+            print qnumber
+            print "===rquest="
+            print request.form.get(str(qnumber))
+            print "===rquest end"
             if form["questions"][qnumber-1]["type"] == "choice":
                 data[qnumber] = request.form.getlist(str(qnumber), None)
             else:
                 data[qnumber] = request.form.get(str(qnumber), None)
+        print data
         errors = test.validate_form_submission(form_id, data)
         if len(errors) > 0:
             for e in errors:
@@ -126,6 +135,7 @@ def process_form():
         else:
             qnumber = 1
             while qnumber <= number_of_questions:
+                #print data[qnumber]
                 test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
             return redirect(url_for("thankyou", id=form_id))
@@ -353,6 +363,32 @@ def reset_password_logic():
         flash("The new password doesn't match in both boxes")
     return redirect(url_for("reset_password_page"))
 
+#make all forms public (no login required)
+@app.route('/my/settings/update', methods = ["POST", "GET"])
+def update_forms():
+    username = session.get("user", "")
+    user_id = session.get("user_id", "")
+    setting = request.form.get("setting", "")
+    print "user_id = " + str(user_id)
+    print username, user_id, setting
+    listOfForms = test.get_forms_by(user_id)
+    #print listOfForms
+    print "make_all_forms_public" in request.form.keys(), "make_all_forms_result_private" in request.form.keys(), "make_all_forms_private" in request.form.keys(),"make_all_forms_result_public" in request.form.keys() 
+    print "keysssss"
+    print request.form.keys()
+    for each in listOfForms:
+        formID = each["id"]
+        print formID
+        
+        if "make_all_forms_public" in request.form.keys():
+            db.update_form(formID, "login_required", 0)
+        if "make_all_forms_result_private" in request.form.keys():
+            db.update_form(formID, "public_results", 1)
+        if "make_all_forms_private" in request.form.keys():
+            db.update_form(formID, "login_required", 1)
+        if "make_all_forms_result_public" in request.form.keys():
+            db.update_form(formID, "public_results", 0)
+    return redirect(url_for("home_page"))
 @app.route('/about')
 def about_page():
     return render_template("about.html")
@@ -398,7 +434,11 @@ def conditional_attributes(question):
 
 @app.template_filter('linebreaks')
 def newline_br(value):
-    lines = value.split("\n")
+    print value
+    if value != None and len(value) > 0:
+        lines = value.split("\n")
+    else:
+        lines = ""
     return "<br>".join([escape(s) for s in lines])
 
 #Will not be executed if this is imported by WSGI

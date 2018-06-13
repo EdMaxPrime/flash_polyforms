@@ -5,8 +5,17 @@
     <fieldset style="border: 2px groove #555; padding: 10px" class="my-5">
         <legend style="display: inline-block; width: 200px; background-color: #777; color:white;" class="px-3">Settings</legend>
         <div class="form-check">
-            <input id="forms_public_by_default" name="forms_public_by_default" type="checkbox" value="on" class="form-check-input">
-            <label for="forms_public_by_default" class="form-check-label">Make forms public by default</label>
+            <input id="make_all_forms_public" name="make_all_forms_public" type="checkbox" value="on" class="form-check-input">
+            <label for="make_all_forms_public" class="form-check-label">Make all of your forms public</label>
+            <br>
+            <input id="make_all_forms_result_private" name="make_all_forms_result_private" type="checkbox" value="on" class="form-check-input">
+            <label for="make_all_forms_result_private" class="form-check-label">Make all of your form results private</label>
+            <br>
+            <input id="make_all_forms_private" name="make_all_forms_private" type="checkbox" value="on" class="form-check-input">
+            <label for="make_all_forms_private" class="form-check-label">Make all of your forms private</label>
+            <br>
+            <input id="make_all_forms_result_public" name="make_all_forms_result_public" type="checkbox" value="on" class="form-check-input">
+            <label for="make_all_forms_result_public" class="form-check-label">Make all of your form results public</label>
         </div>
         <div class="form-group mt-3">
             <input type="submit" class="form-control btn-primary" name="update" value="Update Settings">

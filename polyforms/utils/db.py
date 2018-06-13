@@ -51,10 +51,10 @@ def add_response(userID, formID, question_id, response, timestamp):
     db, c = open_db()
     c.execute("SELECT response_id FROM responses where form_id = " + str(formID) + ";")
     tempCounter = c.fetchall()
-    if tempCounter == None:
+    if tempCounter == None or tempCounter == [] or len(tempCounter) == 0:
         response_id = 1
     else:
-        response_ID = len(c.fetchall()) + 1
+        response_id = len(tempCounter) + 1
     c.execute("INSERT INTO responses (response_id, form_id, question_id, user_id, response, timestamp) VALUES (?,?,?,?,?,?)", (response_id, formID, question_id, userID, response, timestamp))
     close_db(db)
     
@@ -62,16 +62,18 @@ def add_question(formID, question, type, required, min, max):
     db, c = open_db()
     c.execute("SELECT question_id FROM questions where form_id = " + str(formID) + ";")
     tempCounter = c.fetchall()
+    print "tempcounter/...."
     print tempCounter
-    if tempCounter == None or tempCounter == []:
+    if tempCounter == None or tempCounter == [] or len(tempCounter) == 0:
         question_id = 1
     else:
-        question_id = len(c.fetchall()) + 1
+        question_id = len(tempCounter) + 1
     print question_id
     print "INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max)
     c.execute("INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max))
     db.commit()
     db.close()
+    return question_id
 
 def add_option(formID, questionID, text_user_sees, value):
     db, c = open_db()
@@ -385,7 +387,9 @@ def update_account(username, password):
 
 def update_form(formID, colName, status):
     db, c = open_db()
-    c.execute("UPDATE forms SET " + colName +" = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
+    print "UPDATE forms SET " + "'"+ colName + "' = " + "" + str(status) + " WHERE form_id = '" + str(formID) + "';"
+    c.execute("UPDATE forms SET " + "'"+ colName + "' = " + "" + str(status) + " WHERE form_id = '" + str(formID) + "';")
+    print "updated formID" + str(formID)
     close_db(db)
 
 
