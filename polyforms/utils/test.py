@@ -60,18 +60,11 @@ def get_form(form_id):
     form["login_required"] = (form["login_required"] == 1)
     form["public_results"] = (form["public_results"] == 1)
     form["open"] = (form["open"] == 1)
-    c.execute("SELECT response_id FROM responses WHERE form_id = " + str(form_id) + ";")
-    responseIDs = c.fetchall()
-    tempCounter = len(responseIDs)
-    dataSize = 0
-    '''
-    while tempCounter >0:
-        if tempCounter - 2 < 0:
-            break
-        if responseIDs[tempCounter - 1] != responseIDs[tempCounter -2]:
-            dataSize += 1
-    '''
-    form["data"] = responseIDs#dataSize
+    c.execute("SELECT max(response_id) FROM responses WHERE form_id = " + str(form_id) + ";")
+    tempCounter = c.fetchone()[0]
+    if tempCounter == None:
+        tempCounter = 0
+    form["data"] = tempCounter
 
     try:
         form["owner"] = c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone()[0]

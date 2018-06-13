@@ -311,9 +311,9 @@ function makeBarChart(){
           x: {
             label: {
               text: {{headers|tojson}}[x],
-              position: 'outer-center',
-              type: xType
-            }
+              position: 'outer-center'
+            },
+            type: xType
           }
       }   
   });
@@ -338,7 +338,7 @@ function makeLineChart(){
       yType = 'category';
     }
   }
-  //console.log(xLabels);
+  console.log(xLabels);
   //console.log(data);
   //console.log({{headers|tojson}}[y]);
   var chart = c3.generate({
@@ -358,16 +358,16 @@ function makeLineChart(){
           x: {
             label: {
               text: {{headers|tojson}}[x],
-              position: 'outer-center',
-              type: xType
-            }
+              position: 'outer-center'
+            },
+            type: xType
           },
           y: {
             label: {
               text: {{headers|tojson}}[y],
-              position: 'outer-middle',
-              type: yType
-          }
+              position: 'outer-middle'
+          },
+          type: yType
       }
     }
   });
@@ -414,16 +414,16 @@ function makeScatterChart(){
           x: {
             label: {
               text: {{headers|tojson}}[x],
-              position: 'outer-center',
-              type: xType
-            }
+              position: 'outer-center'
+            },
+            type: xType
           },
           y: {
             label: {
               text: {{headers|tojson}}[y],
-              position: 'outer-middle',
-              type: yType
-          }
+              position: 'outer-middle'
+          },
+        type: yType
       }
     }
   });
