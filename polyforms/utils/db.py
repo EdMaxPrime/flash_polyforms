@@ -384,9 +384,9 @@ def update_account(username, password):
     c.execute("UPDATE accounts SET password = " + "'" + str(hashed(password)) + "' WHERE username = '" + str(username) + "';")
     close_db(db)
 
-def update_form(formID, status):
+def update_form(formID, colName, status):
     db, c = open_db()
-    c.execute("UPDATE forms SET password = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
+    c.execute("UPDATE forms SET " + colName +" = " + "'" + str(status) + "' WHERE form_id = '" + str(formID) + "';")
     close_db(db)
 
 

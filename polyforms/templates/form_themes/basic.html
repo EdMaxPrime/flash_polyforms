@@ -49,8 +49,8 @@
             <label for="q{{q.index}}">
                 {{ q.question }}
                 {% if q.required %} <span class="hint">required</span> {% endif %}
-                {% if q.min != None %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} at least {{q.min}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
-                {% if q.max != None %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} no more than {{q.max}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
+                {% if q.min != None and q.min != "" %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} at least {{q.min}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
+                {% if q.max != None and q.min != "" %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} no more than {{q.max}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
             </label>
             {% endif %}
 

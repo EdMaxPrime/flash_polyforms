@@ -34,7 +34,7 @@ def is_valid_id(thing):
 #Returns a list of forms with responses in the given amount. These are the most recently created ones
 def get_recent_forms(amount):
     db, c = open_db()
-    c.execute("SELECT form_id FROM forms ORDER BY created DESC LIMIT %s;" % str(amount))
+    c.execute("SELECT form_id FROM forms WHERE open = 1 ORDER BY created DESC LIMIT %s;" % str(amount))
     list_of_ids = c.fetchall()
     close_db(db)
     return [get_form(x[0]) for x in list_of_ids]
@@ -186,10 +186,13 @@ def validate_form_submission(form_id, data):
 def can_edit(user_id, form_id):
     if form_exists(form_id):
         db, c = open_db()
-        owner = c.execute("SELECT owner_id FROM forms WHERE form_id=? AND owner_id=?;", (form_id, user_id)).fetchone()
+        print "user id = " + str(user_id)
+        print "SELECT owner_id FROM forms WHERE form_id = " + str(form_id) + " AND owner_id= " + str(user_id) + ";"
+        owner = c.execute("SELECT owner_id FROM forms WHERE form_id = " + str(form_id) + " AND owner_id = " + str(user_id) + ";").fetchone()
         close_db(db)
-        return owner == None
-    return False
+        return owner != None
+    else:
+        return False
 
 #Change form settings
 def toggle_form(form_id, what):
@@ -202,7 +205,10 @@ def toggle_form(form_id, what):
 #change theme
 def set_theme(form_id, theme):
     db, c = open_db()
-    c.execute("UPDATE forms SET theme = ? WHERE form_id = ?;", (theme, form_id))
+    print "form_id = " + form_id
+    print "theme = " + theme
+    print '''UPDATE forms SET theme = ''' + theme + " WHERE form_id = " + form_id + ";"
+    c.execute("UPDATE forms SET theme = " + "'" + theme + "' WHERE form_id = " + form_id + ";")
     close_db(db)
     return theme
 

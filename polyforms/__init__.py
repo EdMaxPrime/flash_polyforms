@@ -189,6 +189,9 @@ def change_form():
     user_id = session.get("user_id", "")
     form_id = request.args.get("id", "-1")
     setting = request.args.get("setting", "")
+    print "user_id = " + str(user_id)
+    print username, user_id, form_id, setting
+    print test.can_edit(user_id, form_id)
     result = False
     if test.can_edit(user_id, form_id):
         if setting == "open":
@@ -211,7 +214,7 @@ def change_form():
             test.set_theme(form_id, "light.html")
         elif setting == "dark":
             result = "Your form has the dark theme"
-            test.set_theme(form_id, "light.html")
+            test.set_theme(form_id, "dark.html")
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
         return render_template("update.html", message=result, form_id=form_id, username=username)
@@ -249,7 +252,12 @@ def addQuestions():
         publicReq = 0
     else:
         publicReq = 1
-    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, request.args.get("message", "Your responses have been recorded"))
+    #print "len" + str(len(request.args["message"]))
+    if "message" not in request.args.keys() or len(request.args["message"]) == 0:
+        message = "Your response has been recorded"
+    else:
+        message = request.args["message"]
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, message)
     i=0
     print "start"
     print request.args[str(0) + ".question"]
