@@ -2,5 +2,37 @@
 {% block title %} About | Polyforms {% endblock %}
 {% block body %}
 <h1 class="mt-5">About</h1>
-<p>Insert text here</p>
+<p>Make forms, questionarres and surveys that you can send out by just sharing a link. It's hosted online at <a href="http://polyforms.me">http://polyforms.me</a> and it's free.</p>
+<p>Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.</p>
+<h1>Table of Contents</h1>
+<ol>
+	<li><a href="#1">How to make a form</a></li>
+	<li><a href="#2">How to make an account</a></li>
+	<li><a href="#3">How to share your form</a></li>
+	<li><a href="#4">How to see responses to your form</a></li>
+</ol>
+<hr>
+<a id="1"></a>
+<h2>How to make a form</h2>
+<p>You'll need to make an acount first. Click on the "sign up" link in the topright of the home page. After you make an account, login. The navbar on the home page will then have a "create" link. Follow it to the form creation page. There, you should enter the form's title, choose a theme and enter a thankyou message for respondents.</p>
+<p>The next task is to add questions to your form. Add as many as you like. Press the button at the bottom of the page to add questions. A box will appear with a number next to it. Put your question in there. Then, choose what type of response the question should accept. There are five supported types. You can use min and max to constrain the inputs.</p>
+<p>One-line lets respondents write a single line of text. Extended response lets respondents write longer answers with linebreaks and paragraphs. Min and max control how many characters (letters, spaces, punctuation) respondents can enter.</p>
+<p>Number and integer act as you would expect them to. Respondents can only put numbers as answers. Min and max are the inclusive range for numbers.</p>
+<p>Choice questions let respondents choose from among a set of options. Just like a multiple choice question. Min and max control the number of choices that can be selected. Making the question required implies that the minimum value is 1.</p>
+<p>If you want a question to be optional, uncheck the required box. Otherwise, make sure it is checked.</p>
+<p>When you finish creating questions, press the submit button.</p>
+
+<a id="2"></a>
+<h2>How to make an account</h2>
+<p>Go to <a href="/join">the signup page</a>. There, you will be asked to choose a username, password and security question. The security question is a safeguard to make sure that only you and no one else can change your password if you need to.</p>
+<p>We don't share your information with anyone. Still, please choose a secure password and avoid inputting sensitive information.</p>
+
+<a id="3"></a>
+<h2>How to share your form</h2>
+<p>When you are logged in, click on the "my forms" link at the top. Click on the form you want to share in the list. You will be brought to the results page. Right below the title, you will see the shareable link. Right click it and then copy it to your clipboard. You can give this link to anyone on the internet.</p>
+
+<a id="4"></a>
+<h1>How to see responses to your form</h1>
+<p>Log in to your account. Click on the "my forms" link at the top. Click on the form you want to see in the list. You will be brought to the results page. A table full of responses will appear. They are ordered from first to last submitted.</p>
+<p>The toolbar on that page will let you download the responses. There is also a textfield in which you can type search criteria to find specific responses.</p>
 {% endblock %}
