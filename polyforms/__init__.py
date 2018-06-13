@@ -92,6 +92,7 @@ def display_form():
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
     form = test.get_form(form_id)
+    print form["questions"]
     if (username == None or username == "") and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
@@ -262,14 +263,14 @@ def addQuestions():
             required = 0
         else:
             required = 1
-        if (str(i) + ".min" not in request.args.keys()):
-            min = None
-        else:
+        if (is_positive_number(request.args.get(str(i) + ".min"))):
             min = request.args[str(i) + ".min"]
-        if (str(i) + ".max" not in request.args.keys()):
-            max = None
         else:
+            min = None
+        if (is_positive_number(request.args.get(str(i) + ".max"))):
             max = request.args[str(i) + ".max"]
+        else:
+            max = None
         if request.args[str(i) + ".type"] == "0":
             type = "short"
         elif request.args[str(i) + ".type"] == "1":
@@ -391,12 +392,12 @@ def conditional_attributes(question):
     if question['min'] != None and question['min'] != "":
         if question['type'] == "long" or question['type'] == "short":
             result += 'minlength="%d" ' % question['min']
-        elif question['type'] == "number":
+        elif question['type'] == "number" or question['type'] == "int":
             result +='min="%d" ' % question['min']
     if question['max'] != None and question['max'] != "":
         if question['type'] == "long" or question['type'] == "short":
             result += 'maxlength="%d" ' % question['max']
-        elif question['type'] == "number":
+        elif question['type'] == "number" or question['type'] == "int":
             result +='max="%d" ' % question['max']
     return result
 
@@ -407,6 +408,13 @@ def newline_br(value):
     else:
         lines = ""
     return "<br>".join([escape(s) for s in lines])
+
+def is_positive_number(thing):
+    try:
+        thing = int(thing)
+        return thing > 0
+    except:
+        return False
 
 #Will not be executed if this is imported by WSGI
 if __name__ == "__main__":
