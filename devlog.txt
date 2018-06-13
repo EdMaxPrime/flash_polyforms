@@ -110,3 +110,6 @@ debug + manual merge
 leiG -- 2018-06-13 00:36:08
 clean up code + minor edits
 
+leiG -- 2018-06-13 00:50:09
+minor edits + more debugging
+
