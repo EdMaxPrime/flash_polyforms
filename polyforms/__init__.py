@@ -38,10 +38,13 @@ def login_logic():
     pword = request.form.get("password", "")
     form_id = request.form.get("redirect")
     submitType = request.form.get("submit", "")
+    '''
+    #Dummy account to test stuff
     if pword == "123":
         session["user"] = "Root" # NSA Backend
         session["user_id"] = "1"
-    elif db.validate_login(uname, pword) == True:
+    '''
+    if db.validate_login(uname, pword) == True:
         session["user"] = uname
         session["user_id"] = db.getID("accounts", "user_id", "username", str(uname))
     else:
@@ -89,7 +92,6 @@ def display_form():
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
     form = test.get_form(form_id)
-    print username == ""
     if (username == None or username == "") and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
@@ -113,20 +115,11 @@ def process_form():
         number_of_questions = test.number_of_questions(form_id)
         data = {}
         form = test.get_form(form_id)
-        print "idddd"
-        print request.form
-        print request.form.keys()
-        print request.form.get("id")
         for qnumber in range(1, number_of_questions+1):
-            print qnumber
-            print "===rquest="
-            print request.form.get(str(qnumber))
-            print "===rquest end"
             if form["questions"][qnumber-1]["type"] == "choice":
                 data[qnumber] = request.form.getlist(str(qnumber), None)
             else:
                 data[qnumber] = request.form.get(str(qnumber), None)
-        print data
         errors = test.validate_form_submission(form_id, data)
         if len(errors) > 0:
             for e in errors:
@@ -135,7 +128,6 @@ def process_form():
         else:
             qnumber = 1
             while qnumber <= number_of_questions:
-                #print data[qnumber]
                 test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
             return redirect(url_for("thankyou", id=form_id))
@@ -160,8 +152,6 @@ def responses_page():
         return render_template("404.html", username=username)
     else:
         form = db.getFormData(form_id)
-        print form
-        print form["data"]
         if form["owner"] == username or username == "Root": #you have permission to view this
             return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id)
         else: #you dont have permission to view this
@@ -200,9 +190,6 @@ def change_form():
     user_id = session.get("user_id", "")
     form_id = request.args.get("id", "-1")
     setting = request.args.get("setting", "")
-    print "user_id = " + str(user_id)
-    print username, user_id, form_id, setting
-    print test.can_edit(user_id, form_id)
     result = False
     if test.can_edit(user_id, form_id):
         if setting == "open":
@@ -260,24 +247,16 @@ def addQuestions():
     else:
         loginReq = 1
     if "publicReq" not in request.args.keys():
-        publicReq = 0
-    else:
         publicReq = 1
-    #print "len" + str(len(request.args["message"]))
+    else:
+        publicReq = 0
     if "message" not in request.args.keys() or len(request.args["message"]) == 0:
         message = "Your response has been recorded"
     else:
         message = request.args["message"]
     formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, message)
     i=0
-    print "start"
-    print request.args[str(0) + ".question"]
-    #print request.args[0]
-    print request.args
     while (str(i) + ".question" in request.args.keys()):
-        print "loop beigns " + str(i)
-        print request.args[str(i) + ".question"]
-        print request.args.keys()
         if (str(i) + ".required" not in request.args.keys()):
             required = 0
         else:
@@ -290,10 +269,6 @@ def addQuestions():
             max = None
         else:
             max = request.args[str(i) + ".max"]
-        if (str(i) + ".answers" in request.args.keys()):
-            options = request.args[str(i) + ".answers"].split(",")
-            for each in options:
-                db.add_option(formID,i+1, each, each)
         if request.args[str(i) + ".type"] == "0":
             type = "short"
         elif request.args[str(i) + ".type"] == "1":
@@ -306,14 +281,11 @@ def addQuestions():
             type = "choice"
         else:
             type = request.args[str(i) + ".type"]
-        print formID, request.args[str(i) + ".question"], request.args[str(i) + ".type"], required, min, max
         question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
         if type == "choice":
             for o in request.args.get(str(i) + ".answers", "").split(","):
                 db.add_option(formID, question_id, o, o)
         i+=1
-        print "next i is" + str(i)
-    print "loop ends"
     return redirect(url_for("home_page"))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
@@ -337,10 +309,13 @@ def settings_page():
 #Verify that you are able to reset your password by answering the security question
 @app.route('/my/settings/password')
 def reset_password_page():
-    if "user" not in session:
-        flash("You must be logged in to view this page")
-        return redirect(url_for("login_page"))
-    username = session.get("user", "")
+    #if "user" not in session:
+    #    flash("You must be logged in to view this page")
+    #    return redirect(url_for("login_page"))
+    try:
+        username = session.get("user", "")
+    except KeyError:
+        username = ""
     return render_template("pass_reset.html", username=username)
 
 #This is where the password reset form redirects. This method will check the DB for security question. Then it will change the password. Then it will redirect to login
@@ -369,17 +344,9 @@ def update_forms():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
     setting = request.form.get("setting", "")
-    print "user_id = " + str(user_id)
-    print username, user_id, setting
     listOfForms = test.get_forms_by(user_id)
-    #print listOfForms
-    print "make_all_forms_public" in request.form.keys(), "make_all_forms_result_private" in request.form.keys(), "make_all_forms_private" in request.form.keys(),"make_all_forms_result_public" in request.form.keys() 
-    print "keysssss"
-    print request.form.keys()
     for each in listOfForms:
-        formID = each["id"]
-        print formID
-        
+        formID = each["id"]        
         if "make_all_forms_public" in request.form.keys():
             db.update_form(formID, "login_required", 0)
         if "make_all_forms_result_private" in request.form.keys():
@@ -434,7 +401,6 @@ def conditional_attributes(question):
 
 @app.template_filter('linebreaks')
 def newline_br(value):
-    print value
     if value != None and len(value) > 0:
         lines = value.split("\n")
     else:

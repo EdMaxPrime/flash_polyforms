@@ -11,7 +11,7 @@
 	    <div class="alert alert-danger">{{ message }}</div>
 	{% endif %}
     {% endfor %}    
-    <p>Team Flash leave username blank and password 123</p>
+    <p>Put in your login information here</p>
     <form method="POST" action="/login/verify">
         <input type="hidden" name="redirect" value="{{redirect}}">
         <input type="text" placeholder="username" name="username" class="form-control"><br>

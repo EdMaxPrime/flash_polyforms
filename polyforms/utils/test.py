@@ -130,7 +130,6 @@ def validate_form_submission(form_id, data):
     responses = []
     index = 1
     for q in form["questions"]:
-        print str(index) + ": " + str(data[index])
         if q["type"] == "section":
             continue
         if data[index] == None or len(data[index]) == 0:
@@ -186,8 +185,6 @@ def validate_form_submission(form_id, data):
 def can_edit(user_id, form_id):
     if form_exists(form_id):
         db, c = open_db()
-        print "user id = " + str(user_id)
-        print "SELECT owner_id FROM forms WHERE form_id = " + str(form_id) + " AND owner_id= " + str(user_id) + ";"
         owner = c.execute("SELECT owner_id FROM forms WHERE form_id = " + str(form_id) + " AND owner_id = " + str(user_id) + ";").fetchone()
         close_db(db)
         return owner != None
@@ -205,9 +202,6 @@ def toggle_form(form_id, what):
 #change theme
 def set_theme(form_id, theme):
     db, c = open_db()
-    print "form_id = " + form_id
-    print "theme = " + theme
-    print '''UPDATE forms SET theme = ''' + theme + " WHERE form_id = " + form_id + ";"
     c.execute("UPDATE forms SET theme = " + "'" + theme + "' WHERE form_id = " + form_id + ";")
     close_db(db)
     return theme

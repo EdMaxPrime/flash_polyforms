@@ -62,14 +62,10 @@ def add_question(formID, question, type, required, min, max):
     db, c = open_db()
     c.execute("SELECT question_id FROM questions where form_id = " + str(formID) + ";")
     tempCounter = c.fetchall()
-    print "tempcounter/...."
-    print tempCounter
     if tempCounter == None or tempCounter == [] or len(tempCounter) == 0:
         question_id = 1
     else:
         question_id = len(tempCounter) + 1
-    print question_id
-    print "INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max)
     c.execute("INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max))
     db.commit()
     db.close()
@@ -96,11 +92,9 @@ def add_account(username, password, security_question, security_question_answer)
 #Returns true if this username+password pair matches, false if it does not
 def validate_login(username, password):
     db, c = open_db()
-    #print  "SELECT username FROM accounts WHERE username" + " = '" + str(username) + "' AND password = '" + str(hashed(password)) + "';"
     c.execute("SELECT username FROM accounts WHERE username" + " = '" + str(username) + "' AND password = '" + str(hashed(password)) + "';")
     results = c.fetchone()
     close_db(db)
-    #print results
     if results == None:
         return False
     else:
@@ -120,7 +114,6 @@ def validate_resetPassword(username, security_question, security_question_answer
 #Checks if something exists in a specific Column within a table. Returns true if it is found
 def checkExist(table, colName, query):
     db, c = open_db()
-    #print "SELECT " + str(colName) + " FROM " + table + " WHERE " + colName + "=" + query +";"
     c.execute("SELECT " + str(colName) + " FROM " + str(table) + " WHERE " + str(colName) + " = '" + str(query) +"';")
     results = c.fetchone()
     close_db(db)
@@ -175,9 +168,7 @@ def getFormData(formID):
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
-    #print ownerID
     tempResult = c.fetchone()
-    #print tempResult
     formData["owner"] = (str(tempResult[0]))
     #========================
     # headers + types
@@ -198,10 +189,6 @@ def getFormData(formID):
     # DATA 
     responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (formID,)).fetchall()    
     if len(responseArray) > 0:
-        print "======== start"
-        print not responseArray
-        print responseArray
-        print "============ end"
         currentResponseID = responseArray[0][3]
         tempArray = []
         dataArray.append([])
@@ -230,8 +217,6 @@ def getFormDataWithResponse(formID):
     db, c = open_db()
     c.execute("SELECT * FROM forms WHERE form_id = " + str(formID))
     tempResult = c.fetchone()
-    #print "===TEMP RESULT ==="
-    #print tempResult
     #Basic form stuff
     formData["title"] = str(tempResult[1])
     formData["id"] = str(tempResult[0])
@@ -240,9 +225,7 @@ def getFormDataWithResponse(formID):
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
-    #print ownerID
     tempResult = c.fetchone()
-    #print tempResult
     formData["owner"] = (str(tempResult[0]))
     #========================
     # questions
@@ -311,9 +294,7 @@ def getFormDataNoResponse(formID):
     #Add creator ID
     ownerID = tempResult[2]
     c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
-    #print ownerID
     tempResult = c.fetchone()
-    #print tempResult
     formData["owner"] = (str(tempResult[0]))
     #========================
     # questions
@@ -359,9 +340,7 @@ def getPublicForms(number):
 
         #ownerID = each[2]
         #c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
-        #print ownerID
         #tempResult = c.fetchone()
-        #print tempResult
         #tempDict["owner"] = (str(tempResult[0]))
         #tempDict["theme"] = each[5]
         #tempDict["open"] = each[7]
@@ -387,9 +366,7 @@ def update_account(username, password):
 
 def update_form(formID, colName, status):
     db, c = open_db()
-    print "UPDATE forms SET " + "'"+ colName + "' = " + "" + str(status) + " WHERE form_id = '" + str(formID) + "';"
     c.execute("UPDATE forms SET " + "'"+ colName + "' = " + "" + str(status) + " WHERE form_id = '" + str(formID) + "';")
-    print "updated formID" + str(formID)
     close_db(db)
 
 
