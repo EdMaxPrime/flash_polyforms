@@ -150,9 +150,9 @@ def validate_form_submission(form_id, data):
         elif q["type"] == "int":
             try:
                 responses.append(int(data[index]))
-                if q["min"] != None and responses[-1] < q["min"]:
+                if q["min"] != None and q["min"] != "" and responses[-1] < q["min"]:
                     errors.append("Your answer must be greater than or equal to %d for \"%s\"" % (q["min"], q["question"]))
-                if q["max"] != None and responses[-1] > q["max"]:
+                if q["max"] != None and q["max"] != "" and responses[-1] > q["max"]:
                     errors.append("Your answer must be less than or equal to %d for \"%s\"" % (q["max"], q["question"]))
             except:
                 errors.append("You didn't enter an integer for, \"" + q["question"] + '"')
@@ -160,9 +160,9 @@ def validate_form_submission(form_id, data):
         elif q["type"] == "number":
             try:
                 responses.append(float(data[index]))
-                if q["min"] != None and responses[-1] < q["min"]:
+                if q["min"] != None and q["min"] != "" and responses[-1] < q["min"]:
                     errors.append("Your answer must be greater than or equal to %d for \"%s\"" % (q["min"], q["question"]))
-                if q["max"] != None and responses[-1] > q["max"]:
+                if q["max"] != None and q["max"] != "" and responses[-1] > q["max"]:
                     errors.append("Your answer must be less than or equal to %d for \"%s\"" % (q["max"], q["question"]))
             except:
                 errors.append("You didn't enter a valid number for, \"" + q["question"] + '"')
