@@ -6,7 +6,7 @@ from utils import db
 from utils import test
 
 app = Flask(__name__)
-app.secret_key = os.urandom(32)
+app.secret_key = 'OPWJipjIE20348JI8JF90mWKL20IJo'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
