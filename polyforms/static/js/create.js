@@ -20,7 +20,7 @@ var dynamicAnswer = function(e){
                     while (answer.firstChild) answer.removeChild(answer.firstChild);
                     answer.innerHTML+='(Optional) Min. characters: ';
                     var minBox = document.createElement('input');
-                    minBox.setAttribute('type', 'text');
+                    minBox.setAttribute('type', 'number');
                     minBox.setAttribute('name', index + '.min');
                     minBox.setAttribute('maxlength', '4');
                     minBox.setAttribute('size', '3');
@@ -28,30 +28,30 @@ var dynamicAnswer = function(e){
                     answer.appendChild(document.createElement('br'));
                     answer.innerHTML+='(Optional) Max. characters: ';
                     var maxBox = document.createElement('input');
-                    maxBox.setAttribute('type', 'text');
+                    maxBox.setAttribute('type', 'number');
                     maxBox.setAttribute('name', index + '.max');
                     maxBox.setAttribute('maxlength', '4');
                     maxBox.setAttribute('size', '3');
                     answer.appendChild(maxBox);
                 } 
-                else if (dropdown.value == "2"){ // numerical
+                else if (dropdown.value == "2" || dropdown.value == "3"){ // numerical
                     while (answer.firstChild) answer.removeChild(answer.firstChild);
                     answer.innerHTML+='Min. number: ';
                     var minBox = document.createElement('input');
-                    minBox.setAttribute('type', 'text');
+                    minBox.setAttribute('type', 'number');
                     minBox.setAttribute('name', index + '.min');
                     minBox.setAttribute('maxlength', '2');
-                    minBox.setAttribute('size', '1');
+                    minBox.setAttribute('size', '3');
                     answer.appendChild(minBox);
                     answer.innerHTML+='Max. number: ';
                     var maxBox = document.createElement('input');
-                    maxBox.setAttribute('type', 'text');
+                    maxBox.setAttribute('type', 'number');
                     maxBox.setAttribute('name', index + '.max');
                     maxBox.setAttribute('maxlength', '5');
                     maxBox.setAttribute('size', '3');
                     answer.appendChild(maxBox);
                 } 
-                else if (dropdown.value == "3"){ // multiple-choice
+                else if (dropdown.value == "4"){ // multiple-choice
                     while (answer.firstChild) answer.removeChild(answer.firstChild);
                     answer.innerHTML+='Enter answer choices in the following box, separated by commas only';
                     answer.appendChild(document.createElement('br'));
@@ -120,7 +120,7 @@ var addQuestion= function(e) {
     var newDropdown = document.createElement('select');
     newDropdown.setAttribute('class', 'select');
     newDropdown.setAttribute('name', questionNumber + '.type');
-    var questionTypes = ['one-line response', 'extended response', 'numerical', 'multiple-choice'];
+    var questionTypes = ['one-line response', 'extended response', 'integer', 'any number', 'multiple-choice'];
     for (var i = 0; i < questionTypes.length; i++){
         var questionTypeOption = document.createElement('option');
         questionTypeOption.setAttribute('value', i);

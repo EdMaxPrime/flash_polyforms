@@ -76,8 +76,7 @@ def add_question(formID, question, type, required, min, max):
 def add_option(formID, questionID, text_user_sees, value):
     db, c = open_db()
     c.execute("INSERT INTO options (form_id, question_id, text_user_sees, value) VALUES (?,?,?,?)", (formID, questionID, text_user_sees, value))
-    db.commit()
-    db.close()
+    close_db(db)
     
 def add_style(formID, row, column, property, value):
     db, c = open_db()

@@ -60,7 +60,7 @@
       {% for row in data %}
       <tr>
         <th scope="row">{{ loop.index }}</th>
-        {% for cell in row %}<td>{{cell|linebreaks|safe}}</td>{% endfor %}
+        {% for cell in row %}<td>{{cell|replace(",", ", ")}}</td>{% endfor %}
       </tr>
       {% endfor %}
     </tbody>

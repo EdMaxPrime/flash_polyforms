@@ -114,7 +114,7 @@ def add_response(form_id, question_id, response, new_row=False):
     if new_row:
         response_id += 1
     if isinstance(response, list):
-        response = "\n".join(response)
+        response = ",".join(response)
     try:
         c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (session["user_id"],form_id, question_id, response_id, response))
     except KeyError:

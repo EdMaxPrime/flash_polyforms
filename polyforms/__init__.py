@@ -122,12 +122,13 @@ def process_form():
         if len(errors) > 0:
             for e in errors:
                 flash(e)
+                return redirect(url_for("display_form", id=form_id))
         else:
             qnumber = 1
             while qnumber <= number_of_questions:
                 test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
-        return redirect(url_for("thankyou", id=form_id))
+            return redirect(url_for("thankyou", id=form_id))
 
 #Thank you message once form is filled out
 @app.route('/form/end')
@@ -229,7 +230,7 @@ def delete_form():
     form_id = request.args.get("id", "-1")
     if test.can_edit(user_id, form_id):
         db.delete_form(form_id)
-        return redirect(url_for("my_forms"), username=username)
+        return redirect(url_for("my_forms"))
     else:
         return render_template("unauthorized.html", username=username)
 
@@ -288,13 +289,18 @@ def addQuestions():
         elif request.args[str(i) + ".type"] == "1":
             type = "long"
         elif request.args[str(i) + ".type"] == "2":
-            type = "number"
+            type = "int"
         elif request.args[str(i) + ".type"] == "3":
+            type = "number"
+        elif request.args[str(i) + ".type"] == "4":
             type = "choice"
         else:
             type = request.args[str(i) + ".type"]
         print formID, request.args[str(i) + ".question"], request.args[str(i) + ".type"], required, min, max
-        db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
+        question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
+        if type == "choice":
+            for o in request.args.get(str(i) + ".answers", "").split(","):
+                db.add_option(formID, question_id, o, o)
         i+=1
         print "next i is" + str(i)
     print "loop ends"
