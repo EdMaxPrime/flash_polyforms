@@ -24,7 +24,6 @@
           <a class="dropdown-item" href="#" data-toggle="modal" data-target="#pieModal">Pie Chart</a>
           <a class="dropdown-item" href="#" data-toggle="modal" data-target="#lineModal">Line Chart</a>
           <a class="dropdown-item" href="#" data-toggle="modal" data-target="#barModal">Bar Chart</a>
-          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#histModal">Histogram</a>
           <a class="dropdown-item" href="#" data-toggle="modal" data-target="#plotModal">Scatter Plot</a>
         </div>
       </div>
@@ -84,7 +83,7 @@
         <hr>
         <form id="pie-form">
           <div class="form-group">
-            <label for="thing2">X-axis:</label>
+            <label for="thing2">Frequency:</label>
             <select class="form-control" id="pieColumn" name="x">
               <option value="0">Response Index</option>
               {% for columnName in headers %}
@@ -114,7 +113,7 @@
       </div>
       <div class="modal-body">
         To make a new scatter plot, please fill out the fields below. The dropdown menus list the questions in your form as options.
-        Select one to use as an x-axis, and then one as a y-axis. Both axes must be numerical.
+        Select one to use as an x-axis, and then one as a y-axis.
         <hr>
         <form id="plot-form">
           <div class="form-group">
@@ -172,7 +171,7 @@
       </div>
       <div class="modal-body">
         To make a new line chart, please fill out the fields below. The dropdown menus list the questions in your form as options.
-        Select one to use as an x-axis, and then one as a y-axis. It is best if the y-axis data is numerical. 
+        Select one to use as an x-axis, and then one as a y-axis. It is best if both axes are numerical. 
         <hr>
         <form>
           <div class="form-group">
@@ -214,22 +213,18 @@
         </button>
       </div>
       <div class="modal-body">
-        To make a new line chart, please fill out the fields below. The dropdown menus list the questions in your form as options.
-        Select one to use as an x-axis, and then one as a y-axis. The y-axis data must be numerical. If a free-response question
-        is chosen, the length of the response will be used as its numerical representation. 
+        To make a new bar chart, please fill out the fields below. The dropdown menu lists the questions in your form as options.
+        Select one to use as the frequency data for the pie chart. This works best with questions that ask the user to pick one
+        from several options.
         <hr>
         <form>
           <div class="form-group">
-            <label for="thing3">X-axis:</label>
+            <label for="thing3">Frequency:</label>
             <select class="form-control" id="thing3" name="x">
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
             </select>
-          </div>
-          <div class="form-group">
-            <input class="form-check-input" type="checkbox" name="order" value="height" id="thing3b">
-            <label class="form-check-label" for="thing3b">Order bars by height from shortest to tallest?</label>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -280,93 +275,158 @@ function makePieChart(){
 function makeBarChart(){
   var x = document.getElementById("thing3").value - 1;
   d3.select("#chartModalLabel").text({{headers|safe}}[x]);
-  var counts = {};
+  var xLabels = ['x'];
+  var counts = ['y'];
+  var xType = 'indexed'
   for (var i = 0; i < mydata.length; i++) {
-    if(mydata[i][x] in counts){
-      counts[mydata[i][x]]++;
+    if(isNaN(mydata[i][x])){
+      xType = 'category';
+    }
+    if(xLabels.indexOf(mydata[i][x]) > -1){
+      counts[xLabels.indexOf(mydata[i][x])]++;
     }
     else{
-      counts[mydata[i][x]] = 1;
+      xLabels.push(mydata[i][x]);
+      counts.push(1);
     }
   }
+  //console.log(xLabels);
+  //console.log(counts);
   //console.log(counts);
   var chart = c3.generate({
     bindto: '#chart',
     data: {
-      json: counts,
+      x: 'x',
       type: 'bar',
+      columns: [xLabels, counts]
+    },
+    legend: {
+      show: false
     },
     size: {
       width: 400,
       height: 400
     },
-    axis:{
-      x:{
-        type:'category'
-      }
-    }   
+    axis: {
+          x: {
+            label: {
+              text: {{headers|tojson}}[x],
+              position: 'outer-center',
+              type: xType
+            }
+          }
+      }   
   });
 };
 
 function makeLineChart(){
   var x = document.getElementById("thing2").value - 1;
   var y = document.getElementById("thing2a").value - 1;
+  d3.select("#chartModalLabel").text({{headers|tojson}}[x] + ' vs. ' + {{headers|tojson}}[y]);
   var xLabels = ['x'];
-  var data = [{{headers|tojson}}[x]];
-  console.log(data);
+  var data = ['y'];
+  //console.log(data);
+  var xType = 'indexed';
+  var yType = 'indexed';
   for(var i = 0; i < mydata.length; i++){
-    xLabels.push(mydata[i][x])
-    data.push(mydata[i][y])
+    xLabels.push(mydata[i][x]);
+    data.push(mydata[i][y]);
+    if(isNaN(mydata[i][x])){
+      xType = 'category';
+    }
+    if(isNaN(mydata[i][y])){
+      yType = 'category';
+    }
   }
-  console.log(xLabels);
-  console.log(data)
+  //console.log(xLabels);
+  //console.log(data);
+  //console.log({{headers|tojson}}[y]);
   var chart = c3.generate({
     bindto: '#chart',
     data: {
       x: 'x',
       columns: [xLabels, data]
     },
+    legend: {
+      show: false
+    },
     size: {
       width: 400,
       height: 400
     },
     axis: {
-        x: {
-            type: 'category' // this needed to load string x value
-        }
+          x: {
+            label: {
+              text: {{headers|tojson}}[x],
+              position: 'outer-center',
+              type: xType
+            }
+          },
+          y: {
+            label: {
+              text: {{headers|tojson}}[y],
+              position: 'outer-middle',
+              type: yType
+          }
+      }
     }
-  });  
-}
+  });
+};  
+
 
 function makeScatterChart(){
   var x = document.getElementById("plotX").value - 1;
   var y = document.getElementById("plotY").value - 1;
+  d3.select("#chartModalLabel").text({{headers|tojson}}[x] + ' vs. ' + {{headers|tojson}}[y]);
   var xLabels = ['x'];
-  var data = ["y"];
+  var data = ['y'];
   console.log(data);
+  var xType = 'indexed';
+  var yType = 'indexed';
   for(var i = 0; i < mydata.length; i++){
-    xLabels.push(mydata[i][x])
-    data.push(mydata[i][y])
+    xLabels.push(mydata[i][x]);
+    data.push(mydata[i][y]);
+    if(isNaN(mydata[i][x])){
+      xType = 'category';
+    }
+    if(isNaN(mydata[i][y])){
+      yType = 'category';
+    }
   }
   console.log(xLabels);
-  console.log(data)
+  console.log(data);
+  console.log({{headers|tojson}}[y]);
   var chart = c3.generate({
     bindto: '#chart',
     data: {
       x: 'x',
       columns: [xLabels, data],
-      type: "scatter"
+      type: 'scatter'
+    },
+    legend: {
+      show: false
     },
     size: {
       width: 400,
       height: 400
     },
     axis: {
-        x: {
-            type: 'category' // this needed to load string x value
-        }
+          x: {
+            label: {
+              text: {{headers|tojson}}[x],
+              position: 'outer-center',
+              type: xType
+            }
+          },
+          y: {
+            label: {
+              text: {{headers|tojson}}[y],
+              position: 'outer-middle',
+              type: yType
+          }
+      }
     }
-  });  
+  });
 };
 
 var activateToolbar = function() {
