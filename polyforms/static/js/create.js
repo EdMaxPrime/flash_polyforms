@@ -21,6 +21,7 @@ var dynamicAnswer = function(e){
                     answer.innerHTML+='(Optional) Min. characters: ';
                     var minBox = document.createElement('input');
                     minBox.setAttribute('type', 'number');
+                    minBox.setAttribute('min', '0');
                     minBox.setAttribute('name', index + '.min');
                     minBox.setAttribute('maxlength', '4');
                     minBox.setAttribute('size', '3');
@@ -29,6 +30,7 @@ var dynamicAnswer = function(e){
                     answer.innerHTML+='(Optional) Max. characters: ';
                     var maxBox = document.createElement('input');
                     maxBox.setAttribute('type', 'number');
+                    maxBox.setAttribute('min', '0');
                     maxBox.setAttribute('name', index + '.max');
                     maxBox.setAttribute('maxlength', '4');
                     maxBox.setAttribute('size', '3');
@@ -148,7 +150,8 @@ var addQuestion= function(e) {
     answerDiv.setAttribute('class', 'answer');
     answerDiv.innerHTML+='(Optional) Min. characters: ';
     var minBox = document.createElement('input');
-    minBox.setAttribute('type', 'text');
+    minBox.setAttribute('type', 'number');
+    minBox.setAttribute('min', '0');
     minBox.setAttribute('name', questionNumber + '.min');
     minBox.setAttribute('maxlength', '4');
     minBox.setAttribute('size', '3');
@@ -156,7 +159,8 @@ var addQuestion= function(e) {
     answerDiv.appendChild(document.createElement('br'));
     answerDiv.innerHTML+='(Optional) Max. characters: ';
     var maxBox = document.createElement('input');
-    maxBox.setAttribute('type', 'text');
+    maxBox.setAttribute('type', 'number');
+    maxBox.setAttribute('min', '0');
     maxBox.setAttribute('name', questionNumber + '.max');
     maxBox.setAttribute('maxlength', '4');
     maxBox.setAttribute('size', '3');
