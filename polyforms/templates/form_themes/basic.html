@@ -19,7 +19,9 @@
             display: inline-block;
             padding-left: 5px;
             padding-right: 5px;
-            border: 1px solid black;
+            border-left: 1px solid black;
+        }
+        span.question {
             font-weight: bold;
         }
         body{
@@ -55,7 +57,7 @@
             <input type="hidden" name="{{q.index}}" value="{{username}}">
             {% else %}
             <label for="q{{q.index}}">
-                {{ q.question }}
+                <span class="question">{{ q.question }}</span>
                 {% if q.required %} <span class="hint">required</span> {% endif %}
                 {% if q.min != None and q.min != "" %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} at least {{q.min}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
                 {% if q.max != None and q.min != "" %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} no more than {{q.max}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
@@ -63,10 +65,10 @@
             {% endif %}
 
             {% if q.type == "short" %}
-            <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}} value="{{q.value|default('')}}">
+            <input type="text" name="{{q.index}}" id="q{{q.index}}" size="25" {{q|attributes|safe}} value="{{q.value|default('')}}">
 
             {% elif q.type == "long" %}<br>
-            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}}>{{q.value|default('')}}</textarea>
+            <textarea name="{{q.index}}" id="q{{q.index}}" rows="5" cols="25" {{q|attributes|safe}}>{{q.value|default('')}}</textarea>
 
             {% elif q.type == "number" %}
             <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" step="any" {{q|attributes|safe}} value="{{q.value|default(''),true}}">

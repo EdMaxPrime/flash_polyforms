@@ -140,7 +140,7 @@ def thankyou():
     id = request.args.get("id", "-1")
     if test.form_exists(id):
         form = test.get_form(id)
-        return render_template("form_themes/end_basic.html", owner=form["owner"], title=form["title"], message=form["message"])
+        return render_template("form_themes/end_"+form["theme"], owner=form["owner"], title=form["title"], message=form["message"])
     else:
         return render_template("unauthorized.html", username=session.get("user", ""))
 

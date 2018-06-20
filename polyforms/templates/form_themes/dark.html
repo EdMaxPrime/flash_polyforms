@@ -21,7 +21,7 @@
     {% endif %}
     <form method="POST" action="/form/submit">
       {% for q in questions %}
-        <div class="form-group my-3">
+        <div class="form-group my-5">
             {% if q.type == "section" %}
             <h2>{{ q.question }}</h2>
             {% elif q.type == "username" %}
@@ -41,7 +41,7 @@
             <input type="text" name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}} value="{{q.value|default('')}}" class="form-control" aria-describedby="help-{{q.index}}">
 
             {% elif q.type == "long" %}<br>
-            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}} class="form-control mb-5" aria-describedby="help-{{q.index}}">{{q.value|default('')}}</textarea>
+            <textarea name="{{q.index}}" id="q{{q.index}}" {{q|attributes|safe}} class="form-control" aria-describedby="help-{{q.index}}" rows="5">{{q.value|default('')}}</textarea>
 
             {% elif q.type == "number" %}
             <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" step="any" {{q|attributes|safe}} value="{{q.value|default('',true)}}" class="form-control" aria-describedby="help-{{q.index}}">
