@@ -1,3 +1,3 @@
 Response Index{% for columnName in headers %},"{{columnName}}"{% endfor %}
-{% for row in data %}{{loop.index}}{% for cell in row %},"{{cell}}"{% endfor %}
+{% for row in data %}{{loop.index}}{% for cell in row %},{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{{cell|replace('"', '""')|safe}}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{% endfor %}
 {% endfor %}
