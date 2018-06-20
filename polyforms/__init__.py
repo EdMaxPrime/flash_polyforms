@@ -4,14 +4,15 @@ import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
 from utils import db
 from utils import test
+from utils import security
 
 app = Flask(__name__)
-app.secret_key = os.urandom(32)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
 db.use_database(DIR)
 db.create_tables()
+app.secret_key = security.get_secret_key(DIR + "data/secret")
 
 @app.route('/test')
 def deploy_test():
@@ -360,7 +361,7 @@ def update_forms():
     return redirect(url_for("home_page"))
 @app.route('/about')
 def about_page():
-    return render_template("about.html")
+    return render_template("about.html", username=session.get("user", ""))
 
 @app.route('/logout')
 def logout():
