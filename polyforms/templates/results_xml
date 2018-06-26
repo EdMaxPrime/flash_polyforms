@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <info>
+        <title>{{ title }}</title>
+        <owner>{{ owner }}</owner>
+        <created>{{ created }}</created>
+    </info>
+    <questions>
+        {% for q in headers %}
+        <question id="{{ loop.index0 }}">{{ q }}</question>
+        {% endfor %}
+    </questions>
+    <responses>
+        {% for response in data %}
+        <response>
+            {% for ans in response %}
+            <answer id="{{ loop.index0 }}">{{ c }}</answer>
+            {% endfor %}
+        </response>
+        {% endfor %}
+    </responses>
+</form>

@@ -171,7 +171,7 @@ def responses_csv():
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
-            return Response(render_template("csv_results.csv", headers=form['headers'], data=form['data']), mimetype="application/json")
+            return Response(render_template("results_csv", headers=form['headers'], data=form['data']), mimetype="text/csv")
 
 #JSON
 @app.route('/form/view/form.json')
@@ -184,7 +184,19 @@ def responses_json():
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
-            return Response(render_template("json_results.json", headers=form['headers'], data=form['data']), mimetype="application/json")
+            return Response(render_template("results_json", headers=form['headers'], data=form['data']), mimetype="application/json")
+#XML
+@app.route('/form/view/form.xml')
+def responses_xml():
+    if not ("id" in request.args):
+        return render_template("404.html", username=session.get("user", "")), 404
+    else:
+        form_id = request.args.get("id", "-1")
+        form = db.getFormData(form_id)
+        if session.get("user", "") != form["owner"]: #dont have permission to download
+            return render_template("unauthorized.html", username=session.get("user", ""))
+        else: #you do have permission to download
+            return Response(render_template("results_xml", headers=form['headers'], data=form['data'], owner=form["owner"], created=form["created"], title=form["title"]), mimetype="application/xml")
 
 #change form settings
 @app.route('/form/toggle')

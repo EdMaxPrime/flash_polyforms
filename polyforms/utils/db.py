@@ -141,6 +141,51 @@ def getID(tableName, idCol, queryCol, query):
     close_db(db)
     return ID[0]
 
+#Useful for retrieving sqlite query results
+def defaultVal(v, d):
+    return d if v == None else v[0]
+
+def get_form_meta(form_id):
+    db, c = open_db()
+    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, message FROM forms WHERE form_id = ?;", (str(form_id),))
+    result = c.fetchone()
+    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "message"])
+    form["login_required"] = (form["login_required"] == 1)
+    form["public_results"] = (form["public_results"] == 1)
+    form["open"] = (form["open"] == 1)
+    form["num_responses"] = defaultVal(c.execute("SELECT max(response_id) FROM responses WHERE form_id = " + str(form_id) + ";").fetchone(), 0)
+    form["owner"] = defaultVal(c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone(), "")
+    close_db(db)
+    return form
+
+#Returns form info with more question data. Top level keys are: id, title, owner, login_required, public_results, theme, created, open
+#The questions array has items with these keys: index, question, type, required, min, max
+#Choices in the choices key of a question have these keys: text and value
+def get_form_questions(form_id):
+    form = get_form_meta(form_id) #get basic info into the dictionary
+    db, c = open_db()
+    form["questions"] = []
+    questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
+    for q in questions:
+        #convert the query result into a dictionary
+        questionAsDict = tuple_to_dictionary(q, ["index", "question", "type", "required", "min", "max"])
+        #If this question lists options, then add them as a list under the key "choices"
+        if questionAsDict["type"] == "choice":
+            c.execute("SELECT text_user_sees, value FROM options WHERE form_id = ? AND question_id = ? ORDER BY option_index ASC;", (form_id, questionAsDict["index"]))
+            result = c.fetchall()
+            questionAsDict["choices"] = [tuple_to_dictionary(choice, ["text", "value"]) for choice in result]
+        #add this to the list of questions
+        form["questions"].append(questionAsDict)
+    close_db(db)
+    return form
+
+def get_form_responses(form_id):
+    form = get_form_meta(form_id)
+    db, c = open_db()
+    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (formID,)).fetchall()    
+    form["data"] = []
+    close_db(db)
+
 # This returns a dictionary that represents a form.
 # Keys are title, id, created, headers, types, data.
 # Header is an array of questions.
