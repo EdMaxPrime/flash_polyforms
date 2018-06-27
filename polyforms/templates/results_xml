@@ -14,7 +14,14 @@
         {% for response in data %}
         <response>
             {% for ans in response %}
-            <answer id="{{ loop.index0 }}">{{ ans }}</answer>
+            {% if ans is iterable and ans is not string %}
+            {% set outer_loop = loop %}
+            {% for item in ans %}
+            <answer to="{{ outer_loop.index0 }}">{{ item }}</answer>
+            {% endfor %}
+            {% else %}
+            <answer to="{{ loop.index0 }}">{{ ans }}</answer>
+            {% endif %}
             {% endfor %}
         </response>
         {% endfor %}

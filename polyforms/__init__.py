@@ -25,7 +25,7 @@ def deploy_test():
 
 @app.route('/')
 def home_page():
-    return render_template("index.html", username=session.get("user", ""), forms=test.get_recent_forms(24))
+    return render_template("index.html", username=session.get("user", ""), forms=db.get_recent_forms(24))
 
 #Shows the form to login
 @app.route('/login')
@@ -89,10 +89,10 @@ def signup_logic():
 def display_form():
     form_id = request.args.get("id")
     username = session.get("user", "")
-    if form_id == None or test.form_exists(form_id) == False: #insert db check for existing form
+    if test.form_exists(form_id) == False: #insert db check for existing form
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
-    form = test.get_form(form_id)
+    form = db.get_form_questions(form_id)
     print form["questions"]
     if (username == None or username == "") and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
@@ -115,9 +115,9 @@ def process_form():
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
-        number_of_questions = test.number_of_questions(form_id)
         data = {}
-        form = test.get_form(form_id)
+        form = db.get_form_questions(form_id)
+        number_of_questions = len(form["questions"])
         for qnumber in range(1, number_of_questions+1):
             if form["questions"][qnumber-1]["type"] == "choice":
                 data[qnumber] = request.form.getlist(str(qnumber), None)
@@ -131,7 +131,7 @@ def process_form():
         else:
             qnumber = 1
             while qnumber <= number_of_questions:
-                test.add_response(form_id, user_id, qnumber, data[qnumber], qnumber == 1)
+                db.add_response(form_id, user_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
             return redirect(url_for("thankyou", id=form_id))
 
@@ -140,7 +140,7 @@ def process_form():
 def thankyou():
     id = request.args.get("id", "-1")
     if test.form_exists(id):
-        form = test.get_form(id)
+        form = db.get_form_meta(id)
         return render_template("form_themes/end_"+form["theme"], owner=form["owner"], title=form["title"], message=form["message"])
     else:
         return render_template("unauthorized.html", username=session.get("user", ""))
@@ -156,9 +156,8 @@ def responses_page():
     else:
         #form = db.getFormData(form_id)
         form = db.get_form_responses(form_id)
-        #print form["public_results"] == "1"
-        if form["owner"] == username or username == "Root" or form["public_results"] == 1 or form["public_results"] == "1": #you have permission to view this
-            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id)
+        if form["owner"] == username or form["public_results"] == True: #you have permission to view this
+            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id, types=form["types"])
         else: #you dont have permission to view this
             return render_template("unauthorized.html", username=username)
 
@@ -171,7 +170,7 @@ def responses_csv():
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
         print form["data"]
-        if session.get("user", "") != form["owner"]: #dont have permission to download
+        if session.get("user", "") != form["owner"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
             return Response(render_template("results_csv", headers=form['headers'], data=form['data']), mimetype="text/csv")
@@ -184,7 +183,7 @@ def responses_json():
     else:
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
-        if session.get("user", "") != form["owner"]: #dont have permission to download
+        if session.get("user", "") != form["owner"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
             return Response(render_template("results_json", headers=form['headers'], data=form['data']), mimetype="application/json")
@@ -196,7 +195,7 @@ def responses_xml():
     else:
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
-        if session.get("user", "") != form["owner"]: #dont have permission to download
+        if session.get("user", "") != form["owner"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
             return Response(render_template("results_xml", headers=form['headers'], data=form['data'], owner=form["owner"], created=form["created"], title=form["title"]), mimetype="application/xml")
@@ -211,26 +210,26 @@ def change_form():
     result = False
     if test.can_edit(user_id, form_id):
         if setting == "open":
-            result = test.toggle_form(form_id, "open")
+            result = db.toggle_form(form_id, "open")
             if result == True:
                 result = "Your form is now accepting responses"
             else:
                 result = "Your form is no longer accepting responses"
         elif setting == "public":
-            result = test.toggle_form(form_id, "public_results")
+            result = db.toggle_form(form_id, "public_results")
             if result == True:
                 result = "Your form's results are now public. Anyone with the link can view them. Press the button below and then copy the link in the address bar."
             else:
                 result = "Your form's results are now private"
         elif setting == "basic":
             result = "Your form has the basic theme"
-            test.set_theme(form_id, "basic.html")
+            db.update_form(form_id, "theme", "basic.html")
         elif setting == "light":
             result = "Your form has the light theme"
-            test.set_theme(form_id, "light.html")
+            db.update_form(form_id, "theme", "light.html")
         elif setting == "dark":
             result = "Your form has the dark theme"
-            test.set_theme(form_id, "dark.html")
+            db.update_form(form_id, "theme", "dark.html")
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
         return render_template("update.html", message=result, form_id=form_id, username=username)
@@ -315,7 +314,7 @@ def my_forms():
         flash("You must be logged in to view this page")
         return redirect(url_for("login_page"))
     user_id = session.get("user_id", "")
-    return render_template("ownforms.html", username=session.get("user",""), forms_user_made=test.get_forms_by(user_id))
+    return render_template("ownforms.html", username=session.get("user",""), forms_user_made=db.get_forms_by(user_id))
 
 #View settings for your account
 @app.route('/my/settings')
@@ -364,7 +363,7 @@ def update_forms():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
     setting = request.form.get("setting", "")
-    listOfForms = test.get_forms_by(user_id)
+    listOfForms = db.get_forms_by(user_id)
     for each in listOfForms:
         formID = each["id"]        
         if "make_all_forms_public" in request.form.keys():
