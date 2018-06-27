@@ -301,8 +301,10 @@ def addQuestions():
             type = request.args[str(i) + ".type"]
         question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
         if type == "choice":
-            for o in request.args.get(str(i) + ".answers", "").split(","):
-                db.add_option(formID, question_id, o, o)
+            for o in request.args.get(str(i) + ".answers", "").splitlines():
+                ovalue = o.split(")")[0]
+                otext = o.split(")")[-1]
+                db.add_option(formID, question_id, otext, ovalue)
         i+=1
     return redirect(url_for("home_page"))
 

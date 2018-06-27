@@ -119,7 +119,7 @@ def add_response(form_id, user_id, question_id, response, new_row=False):
     if new_row:
         response_id += 1
     if isinstance(response, list):
-        response = ",".join(response)
+        response = "\n".join(response)
     c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (user_id,form_id, question_id, response_id, response))
     close_db(db)
     return response_id

@@ -191,18 +191,18 @@ def get_form_questions(form_id):
 def get_form_responses(form_id):
     form = get_form_meta(form_id)
     db, c = open_db()
-    headers = c.execute("SELECT question FROM questions WHERE form_id = ? ORDER BY question_id;", (form_id,)).fetchall()
-    headers = ["Response Index", "When"] + [query[0] for query in headers]
-    form["headers"] = headers
+    questions = c.execute("SELECT question, type FROM questions WHERE form_id = ? ORDER BY question_id;", (form_id,)).fetchall()
+    form["headers"] = ["Response Index", "When"] + [query[0] for query in questions]
+    form["types"] = ["int", "short"] + [query[1] for query in questions]
     responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (form_id,)).fetchall()    
     form["data"] = []
     response_id = 1
-    tempArray = [None for i in range(0, len(headers))]
+    tempArray = [None for i in range(0, len(form["headers"]))]
     for r in responseArray:
         #when the response index goes up, put the previous row in the 2d data array and then fill the tempArray with None values to signify a new row
         if r[3] > response_id:
             form["data"].append(tempArray)
-            tempArray = [None for i in range(0, len(headers))]
+            tempArray = [None for i in range(0, len(form["headers"]))]
             response_id += 1
         #make sure response index and timestamp are recorded
         if tempArray[0] == None:
@@ -210,6 +210,9 @@ def get_form_responses(form_id):
             tempArray[1] = r[5]         #timestamp
         #now put the actual answer for this question into its right spot, accounting for the extra response index and timestamp columns
         tempArray[ r[1] + 1 ] = r[4]
+        #if its a choice question, turn the answer into a list
+        if form["types"][ r[1] + 1 ] == "choice":
+            tempArray[ r[1] + 1 ] = tempArray[ r[1] + 1 ].splitlines()
     #put the last row in
     if len(form["data"]) < len(responseArray):
         form["data"].append(tempArray)

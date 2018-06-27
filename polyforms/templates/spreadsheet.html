@@ -67,9 +67,11 @@
       <tr>
         {% for cell in row %}
         {% if loop.first %}
-        <th scope="row">{{cell|replace(",", ", ")}}</th>
+        <th scope="row">{{cell}}</th>
+        {% elif cell is iterable and cell is not string %}
+        <td>{% for item in cell %}{{item}}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
         {% else %}
-        <td>{{cell|replace(",", ", ")}}</td>
+        <td>{{cell}}</td>
         {% endif %}
         {% endfor %}
       </tr>
@@ -249,18 +251,27 @@
 <script type="text/javascript">
 var mydata = {{ data|tojson }};
 var headers = {{ headers|tojson|safe }};
+var qTypes = {{ types|tojson|safe }};
 
 function makePieChart(){
   var column = document.getElementById("pieColumn").value - 1;
   d3.select("#chartModalLabel").text(headers[column]);
   var counts = {};
   for (var i = 0; i < mydata.length; i++) {
-    if(mydata[i][column] in counts){
-      counts[mydata[i][column]]++;
+    if(Array.isArray(mydata[i][column])) {
+      for(var choice = 0; choice < mydata[i][column].length; choice++) {
+        if(mydata[i][column][choice] in counts) counts[mydata[i][column][choice]]++;
+        else counts[mydata[i][column][choice]] = 1;
+      }
+    } else {
+      if(mydata[i][column] in counts){
+        counts[mydata[i][column]]++;
+      }
+      else{
+        counts[mydata[i][column]] = 1;
+      }
     }
-    else{
-      counts[mydata[i][column]] = 1;
-    }
+    
   }
   //console.log(counts);
   var chart = c3.generate({
@@ -441,12 +452,16 @@ var activateToolbar = function() {
   var filter = document.getElementById("filter");
   //Select all <tr> elements in the table
   var rows = d3.select("#responsesTable").selectAll("tbody tr");
+  //a helper function that returns true if this filter matches
+  var filterMatches = function(innerHTML, filterText) {
+    return innerHTML.replace("<br>", " ").indexOf(filterText) != -1;
+  }
   //This event happens whenever you type in the search bar
   filter.addEventListener("input", function(evt) {
     filterText = filter.value;
-    rows.style("display", function(d, i) {
+    rows.style("display", function(d, rowIndex) {
       for(var i = 0; i < this.children.length; i++) {
-        if(this.children[i].innerHTML.indexOf(filterText) != -1) {
+        if(filterMatches(this.children[i].innerHTML, filterText)) {
           return "table-row";
         }
       }
