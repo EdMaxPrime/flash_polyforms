@@ -1,6 +1,5 @@
 import sqlite3   # enable control of an sqlite database
 import hashlib   # allows for passwords and emails to be encrypted and decrypted
-from flask import session  # interact with cookie
 import os
 
 #this will be the one we use when routes work
@@ -39,6 +38,15 @@ def increment_id(table):
 
 def hashed(foo):
     return hashlib.md5(str(foo)).hexdigest()
+
+#Given a tuple/list and a list of strings, will create a dictionary where the first key in the list corresponds to the first element in the tuple
+def tuple_to_dictionary(tuuple, list_of_keys):
+    d = {} #the dictionary
+    index = 0 #the column index
+    while index < len(tuuple):
+        d[ list_of_keys[index] ] = tuuple[index]
+        index += 1
+    return d
     
 def add_form(user_id, formTitle, loginReq, publicReq, theme, open, message):
     db, c = open_db()
@@ -179,12 +187,34 @@ def get_form_questions(form_id):
     close_db(db)
     return form
 
+#form_id, question_id, user_id, response_id, response, timestamp
 def get_form_responses(form_id):
     form = get_form_meta(form_id)
     db, c = open_db()
-    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (formID,)).fetchall()    
+    headers = c.execute("SELECT question FROM questions WHERE form_id = ? ORDER BY question_id;", (form_id,)).fetchall()
+    headers = ["Response Index", "When"] + [query[0] for query in headers]
+    form["headers"] = headers
+    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (form_id,)).fetchall()    
     form["data"] = []
+    response_id = 1
+    tempArray = [None for i in range(0, len(headers))]
+    for r in responseArray:
+        #when the response index goes up, put the previous row in the 2d data array and then fill the tempArray with None values to signify a new row
+        if r[3] > response_id:
+            form["data"].append(tempArray)
+            tempArray = [None for i in range(0, len(headers))]
+            response_id += 1
+        #make sure response index and timestamp are recorded
+        if tempArray[0] == None:
+            tempArray[0] = response_id  #response index/id
+            tempArray[1] = r[5]         #timestamp
+        #now put the actual answer for this question into its right spot, accounting for the extra response index and timestamp columns
+        tempArray[ r[1] + 1 ] = r[4]
+    #put the last row in
+    if len(form["data"]) < len(responseArray):
+        form["data"].append(tempArray)
     close_db(db)
+    return form
 
 # This returns a dictionary that represents a form.
 # Keys are title, id, created, headers, types, data.

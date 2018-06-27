@@ -111,6 +111,7 @@ def display_form_shortcut(form_id):
 def process_form():
     form_id = request.form.get("id", "")
     username = session.get("user", "")
+    user_id = session.get("user_id", "")
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
@@ -130,7 +131,7 @@ def process_form():
         else:
             qnumber = 1
             while qnumber <= number_of_questions:
-                test.add_response(form_id, qnumber, data[qnumber], qnumber == 1)
+                test.add_response(form_id, user_id, qnumber, data[qnumber], qnumber == 1)
                 qnumber += 1
             return redirect(url_for("thankyou", id=form_id))
 
@@ -153,7 +154,8 @@ def responses_page():
     if test.form_exists(form_id) == False:
         return render_template("404.html", username=username)
     else:
-        form = db.getFormData(form_id)
+        #form = db.getFormData(form_id)
+        form = db.get_form_responses(form_id)
         #print form["public_results"] == "1"
         if form["owner"] == username or username == "Root" or form["public_results"] == 1 or form["public_results"] == "1": #you have permission to view this
             return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id)
@@ -167,7 +169,8 @@ def responses_csv():
         return render_template("404.html", username=session.get("user", "")), 404
     else:
         form_id = request.args.get("id", "-1")
-        form = db.getFormData(form_id)
+        form = db.get_form_responses(form_id)
+        print form["data"]
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
@@ -180,7 +183,7 @@ def responses_json():
         return render_template("404.html", username=session.get("user", "")), 404
     else:
         form_id = request.args.get("id", "-1")
-        form = db.getFormData(form_id)
+        form = db.get_form_responses(form_id)
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
@@ -192,7 +195,7 @@ def responses_xml():
         return render_template("404.html", username=session.get("user", "")), 404
     else:
         form_id = request.args.get("id", "-1")
-        form = db.getFormData(form_id)
+        form = db.get_form_responses(form_id)
         if session.get("user", "") != form["owner"]: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download

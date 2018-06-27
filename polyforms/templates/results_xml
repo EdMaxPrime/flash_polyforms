@@ -14,7 +14,7 @@
         {% for response in data %}
         <response>
             {% for ans in response %}
-            <answer id="{{ loop.index0 }}">{{ c }}</answer>
+            <answer id="{{ loop.index0 }}">{{ ans }}</answer>
             {% endfor %}
         </response>
         {% endfor %}

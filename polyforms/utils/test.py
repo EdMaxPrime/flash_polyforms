@@ -1,7 +1,6 @@
 import sqlite3   # enable control of an sqlite database
 import hashlib   # allows for passwords and emails to be encrypted and decrypted
 import db as main
-from flask import session
 
 #this will be the one we use when routes work
 def open_db():
@@ -114,17 +113,14 @@ def add_question(form_id, question, _type, required=False, _min=None, _max=None)
 
 
 #Add a response to a question, returns its id
-def add_response(form_id, question_id, response, new_row=False):
+def add_response(form_id, user_id, question_id, response, new_row=False):
     db, c = open_db()
     response_id = c.execute("SELECT max(response_id) FROM responses WHERE form_id = ?;", (form_id,)).fetchone()[0] or 0
     if new_row:
         response_id += 1
     if isinstance(response, list):
         response = ",".join(response)
-    try:
-        c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (session["user_id"],form_id, question_id, response_id, response))
-    except KeyError:
-        c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (None,form_id, question_id, response_id, response))
+    c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (user_id,form_id, question_id, response_id, response))
     close_db(db)
     return response_id
 
