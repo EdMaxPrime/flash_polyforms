@@ -2,37 +2,102 @@
 {% block title %} About | Polyforms {% endblock %}
 {% block body %}
 <h1 class="mt-5">About</h1>
-<p>Make forms, questionarres and surveys that you can send out by just sharing a link. It's hosted online at <a href="http://polyforms.me">http://polyforms.me</a> and it's free.</p>
-<p>Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.</p>
+<div class="container mb-3">
+    <div class="row">
+        <div class="col-xs-6 col-lg feature">Make forms, questionarres, and surveys that look good on desktop and mobile.</div>
+        <div class="col-xs-6 col-lg feature">Sharing them is as easy as just giving people a link</div>
+        <div class="col-xs-6 col-lg feature">Your form and its responses are hosted online for free.</div>
+        <div class="col-xs-6 col-lg feature">Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.</div>
+    </div>
+</div>
 <h1>Table of Contents</h1>
 <ol>
-	<li><a href="#1">How to make a form</a></li>
-	<li><a href="#2">How to make an account</a></li>
-	<li><a href="#3">How to share your form</a></li>
-	<li><a href="#4">How to see responses to your form</a></li>
+	<li><a href="#creating">How to make a form</a></li>
+	<li><a href="#account">How to make an account</a></li>
+	<li><a href="#sharing">How to share your form</a></li>
+	<li><a href="#responses">How to see responses to your form</a></li>
+    <li><a href="#api">How to use our API</a></li>
 </ol>
 <hr>
-<a id="1"></a>
+<a id="creating"></a>
 <h2>How to make a form</h2>
-<p>You'll need to make an acount first. Click on the "sign up" link in the topright of the home page. After you make an account, login. The navbar on the home page will then have a "create" link. Follow it to the form creation page. There, you should enter the form's title, choose a theme and enter a thankyou message for respondents.</p>
+<p>You'll need to make an acount first. <a href="account">Instructions here.</a> After you make an account, login. The navigation bar at the top of the page will then have a "create" link. Follow it to the form creation page. There, you should enter the form's title, choose a theme and enter a thankyou message for respondents.</p>
 <p>The next task is to add questions to your form. Add as many as you like. Press the button at the bottom of the page to add questions. A box will appear with a number next to it. Put your question in there. Then, choose what type of response the question should accept. There are five supported types. You can use min and max to constrain the inputs.</p>
 <p>One-line lets respondents write a single line of text. Extended response lets respondents write longer answers with linebreaks and paragraphs. Min and max control how many characters (letters, spaces, punctuation) respondents can enter.</p>
 <p>Number and integer act as you would expect them to. Respondents can only put numbers as answers. Min and max are the inclusive range for numbers.</p>
-<p>Choice questions let respondents choose from among a set of options. Just like a multiple choice question. Min and max control the number of choices that can be selected. Making the question required implies that the minimum value is 1.</p>
+<p>Choice questions let respondents choose from among a set of options. Just like a multiple choice question. Min and max control the number of choices that can be selected. Making the question required implies that the minimum value is 1. If you would like one of the choices to be recorded differently than it is displayed (eg, the form shows "Four times a week" but you want the spreadsheet to show "4"), then separate the two with a right parenthesis. It should look like this: <code>4) Four times a week</code></p>
 <p>If you want a question to be optional, uncheck the required box. Otherwise, make sure it is checked.</p>
 <p>When you finish creating questions, press the submit button.</p>
 
-<a id="2"></a>
+<a id="account"></a>
 <h2>How to make an account</h2>
 <p>Go to <a href="/join">the signup page</a>. There, you will be asked to choose a username, password and security question. The security question is a safeguard to make sure that only you and no one else can change your password if you need to.</p>
 <p>We don't share your information with anyone. Still, please choose a secure password and avoid inputting sensitive information.</p>
 
-<a id="3"></a>
+<a id="sharing"></a>
 <h2>How to share your form</h2>
-<p>When you are logged in, click on the "my forms" link at the top. Click on the form you want to share in the list. You will be brought to the results page. Right below the title, you will see the shareable link. Right click it and then copy it to your clipboard. You can give this link to anyone on the internet.</p>
+<p>When you are logged in, click on the "my forms" link at the top. You will be presented with a list of all the forms you created. Click on the form you want to share in the list. You will be brought to the results page. Right below the title, you will see the shareable link. Right click it and then copy it to your clipboard. You can give this link to anyone on the internet.</p>
+<p>If you want to stop accepting responses for your form, go to the results page (see above). Click on the dropdown menu labaled "configure," then click on "stop/resume accepting responses."</p>
 
-<a id="4"></a>
-<h1>How to see responses to your form</h1>
+<a id="responses"></a>
+<h2>How to see responses to your form</h2>
 <p>Log in to your account. Click on the "my forms" link at the top. Click on the form you want to see in the list. You will be brought to the results page. A table full of responses will appear. They are ordered from first to last submitted.</p>
 <p>The toolbar on that page will let you download the responses. There is also a textfield in which you can type search criteria to find specific responses.</p>
+<p>To let other people view responses to your form, you have to make the results publicly viewable. To do this, click on the configure dropdown menu when viewing your form. Then select the "Make results publicly viewable" menu item. You should see a message telling you that the results are public now. The link to let other people see the responses is the same one you use, in the address bar of your browser window. It should look like http://polyforms.me/form/view?id=some_number</p>
+<p>If you want to make the results to your form private again, click on the same menu item in the "configure" dropdown. You should see a message telling you that the results have been made private. This means that only you can see them, even if other people have the link.</p>
+
+<a id="api"></a>
+<h2>How to use our API</h2>
+<p>Note: this information is only applicable to version 1 of our API.</p>
+<p>We are planning to expand our API capabilities in the future. For now, they're pretty rudimentary.</p>
+<p>If you want to get responses to your form, then you should first make the results public. Then, make a GET request to one of the following URLs. Make sure to substitute "id=some_number" with whatever number appears in the address bar of your browser when viewing the form.</p>
+<ul>
+    <li>For xml, use <code>http://polyforms.me/form/view/form.xml?id=some_number</code>. The response document will look like this:
+        <textarea disabled class="form-control" rows="23" style="font-family: monospace;">
+<?xml version="1.0" encoding="UTF-8"?>
+<form>
+    <info>
+        <title>This is my form</title>
+        <owner>Your username</owner>
+        <created>YYYY-MM-DD HH:MM:SS of when you created this form</created>
+    </info>
+    <questions>
+        <question id="1">What is your name?</question>
+        <question id="2">Select all that apply</question>
+    </questions>
+    <responses>
+        <response>
+            <answer to="1">Nobody</answer>
+        </response>
+        <response>
+            <answer to="1">Jane</answer>
+            <answer to="2">I like ice cream</answer>
+            <answer to="2">I like rainbow sherberts</answer>
+        </response>
+    </responses>
+</form>
+        </textarea>
+    </li>
+    <li>For json, use <code>http://polyforms.me/form/view/form.json?id=some_number</code>. The response document will look like this:
+        <pre><code>
+[
+    {
+        "What is your name?": "Nobody"
+    },
+    {
+        "What is your name?": "Jane",
+        "Select all that apply": ["I like ice cream", "I like rainbow sherberts"]
+    }
+]
+        </code></pre>
+    </li>
+    <li>For csv, use <code>http://polyforms.me/form/view/form.csv?id=some_number</code>. The response document will look like this:
+        <pre><code>
+What is your name?,Select all that apply
+Nobody,
+Jane,"['I like ice cream', 'I like rainbow sherbert']"
+        </code></pre>
+    </li>
+</ul>
+<p>To submit a response to a form that does not require login, send a post request to <code>http://polyforms.me/form/submit</code>. You must include a "form_id" field for it to be processed. The contents of this field should be the number of the form. Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded.</p>
 {% endblock %}

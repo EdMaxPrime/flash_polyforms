@@ -232,7 +232,12 @@ def change_form():
             db.update_form(form_id, "theme", "dark.html")
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
-        return render_template("update.html", message=result, form_id=form_id, username=username)
+        #determine response content-type
+        if "response" in request.args:
+            status = "success" if result != False else "error"
+            return Response('{"status": "%s", "message": "%s"}' % (status, str(result)), mimetype="application/json")
+        else:
+            return render_template("update.html", message=result, form_id=form_id, username=username)
     else:
         return render_template("unauthorized.html", username=username)
 
@@ -301,8 +306,8 @@ def addQuestions():
         question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
         if type == "choice":
             for o in request.args.get(str(i) + ".answers", "").splitlines():
-                ovalue = o.split(")")[0]
-                otext = o.split(")")[-1]
+                ovalue = o.split(")", 1)[0]
+                otext = o.split(")", 1)[-1]
                 db.add_option(formID, question_id, otext, ovalue)
         i+=1
     return redirect(url_for("home_page"))
@@ -375,6 +380,7 @@ def update_forms():
         if "make_all_forms_result_public" in request.form.keys():
             db.update_form(formID, "public_results", 0)
     return redirect(url_for("home_page"))
+
 @app.route('/about')
 def about_page():
     return render_template("about.html", username=session.get("user", ""))
