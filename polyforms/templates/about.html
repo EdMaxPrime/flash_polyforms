@@ -48,12 +48,11 @@
 
 <a id="api"></a>
 <h2>How to use our API</h2>
-<p>Note: this information is only applicable to version 1 of our API.</p>
-<p>We are planning to expand our API capabilities in the future. For now, they're pretty rudimentary.</p>
-<p>If you want to get responses to your form, then you should first make the results public. Then, make a GET request to one of the following URLs. Make sure to substitute "id=some_number" with whatever number appears in the address bar of your browser when viewing the form.</p>
+<p>We are planning to expand our API capabilities in the future. For now, they're pretty rudimentary. You can only get and submit responses to a form.</p>
+<p>If you want to get responses from a form, then you should first make the results public. Then, make a GET request to one of the following URLs. Make sure to substitute "id=some_number" with whatever number appears in the address bar of your browser when viewing the form.</p>
 <ul>
-    <li>For xml, use <code>http://polyforms.me/form/view/form.xml?id=some_number</code>. The response document will look like this:
-        <textarea disabled class="form-control" rows="23" style="font-family: monospace;">
+    <li>For xml, use <code>http://polyforms.me/form/view/form.xml?id=some_number</code>. The response document will have a root tag of <code><form></code> with setions for metadata, questions and answers. The questions are each assigned a number <i>starting from 2</i>. Answers are grouped into <code><response></code> tags and then matched to questions using that number. Here is an example of what this looks like:
+        <textarea disabled class="form-control" rows="30" style="font-family: monospace;">
 <?xml version="1.0" encoding="UTF-8"?>
 <form>
     <info>
@@ -62,42 +61,58 @@
         <created>YYYY-MM-DD HH:MM:SS of when you created this form</created>
     </info>
     <questions>
-        <question id="1">What is your name?</question>
-        <question id="2">Select all that apply</question>
+        <question id="0">Response Index</question>
+        <question id="1">When</question>
+        <question id="2">What is your name?</question>
+        <question id="3">Select all that apply</question>
     </questions>
     <responses>
         <response>
-            <answer to="1">Nobody</answer>
+            <answer to="0">1</answer>
+            <answer to="1">2000-01-01 12:00:00</answer>
+            <answer to="2">Nobody</answer>
         </response>
         <response>
-            <answer to="1">Jane</answer>
-            <answer to="2">I like ice cream</answer>
-            <answer to="2">I like rainbow sherberts</answer>
+            <answer to="0">2</answer>
+            <answer to="1">2000-01-01 12:01:00</answer>
+            <answer to="2">Jane</answer>
+            <answer to="3">I like ice cream</answer>
+            <answer to="3">I like rainbow sherberts</answer>
         </response>
     </responses>
 </form>
         </textarea>
     </li>
-    <li>For json, use <code>http://polyforms.me/form/view/form.json?id=some_number</code>. The response document will look like this:
-        <pre><code>
+    <li>For json, use <code>http://polyforms.me/form/view/form.json?id=some_number</code>. The response document will be properly indented JSON data. At the root is a list. Every item in the list is an object with question-answer pairs. If a question allows you to select more than one answer, then its value will always be a list of answers – even if no answers were selected. Numerical responses will always have quotes around them. Here is an example of what this looks like:
+        <textarea disabled class="form-control" rows="16" style="font-family: monospace;">
 [
     {
+        "Response Index": 1,
+        "When": "2000-01-01 12:00:00",
         "What is your name?": "Nobody"
     },
+
     {
+        "Response Index": 2,
+        "When": "2000-01-01 12:01:00",
         "What is your name?": "Jane",
         "Select all that apply": ["I like ice cream", "I like rainbow sherberts"]
     }
 ]
-        </code></pre>
+        </textarea>
     </li>
-    <li>For csv, use <code>http://polyforms.me/form/view/form.csv?id=some_number</code>. The response document will look like this:
-        <pre><code>
-What is your name?,Select all that apply
-Nobody,
-Jane,"['I like ice cream', 'I like rainbow sherbert']"
-        </code></pre>
+    <li>For csv, use <code>http://polyforms.me/form/view/form.csv?id=some_number</code>. The response document will be a comma-separated list of values. The top row will have the questions, and every subsequent row will have answers. It should look like this:
+        <textarea disabled class="form-control" rows="5" style="font-family: monospace;">
+Response Index,When,What is your name?,Select all that apply
+1,2000-01-01 12:00:00,Nobody,
+2,2000-01-01 12:01:00,Jane,"['I like ice cream', 'I like rainbow sherbert']"
+        </textarea>
     </li>
 </ul>
-<p>To submit a response to a form that does not require login, send a post request to <code>http://polyforms.me/form/submit</code>. You must include a "form_id" field for it to be processed. The contents of this field should be the number of the form. Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded.</p>
+<p>To submit a response to a form that does not require login, send a POST request to <code>http://polyforms.me/form/submit</code>. The body of this POST request should be standard url-encoded parameters. You must include a "form_id" field whose value is the id of the form (check the url for this number). Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded. Here is an example of what this request should look like:</p>
+<textarea disabled class="form-control" rows="5" style="font-family: monospace;">
+Content-Type: application/x-www-form-urlencoded
+
+form_id=1037&1=Nobody
+</textarea>
 {% endblock %}

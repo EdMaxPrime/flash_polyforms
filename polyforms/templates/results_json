@@ -1,8 +1,8 @@
 [
 {% for row in data %}
     {
-    {% for col in row %}
-        "{{headers[loop.index0]}}": {% if col is iterable and col is not string %}[{% for item in col %}{{item|replace('"', '\\"')|tojson}}{% if not loop.last %}, {% endif %}{% endfor %}]{% else %}{{col|replace('"', '\\"')|tojson}}{% endif %}{% if not loop.last %},{% endif %}
+    {% for answer in row %}
+        "{{headers[loop.index0]}}": {{ answer|tojson }}{% if not loop.last %},{% endif %}
     {% endfor %}
     }{% if not loop.last %},{% endif %}
 {% endfor %}
