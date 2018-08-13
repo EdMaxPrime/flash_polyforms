@@ -12,3 +12,10 @@ body {
     font-size: 18px;
     text-align: center;
 }
+
+.polyforms-settings {
+	margin-top: 1em;
+	padding: 10px;
+	border-radius: 5px;
+	border: 1px solid #eee;
+}

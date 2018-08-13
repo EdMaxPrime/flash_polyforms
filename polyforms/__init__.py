@@ -353,7 +353,7 @@ def reset_password_logic():
     elif not db.validate_resetPassword(uname, question, answer):
         flash("Security Question and/or answer is wrong. Please make sure the answer and question match the ones you used when signing up. Capitalization matters.")
     elif request.form.get("password") == request.form.get("password2"):
-        db.update_account(uname, request.form.get("password", ""))
+        db.update_password(uname, request.form.get("password", ""))
         if "user" in session:
             session.pop("user")
         flash("Success! Your password has been changed.")
@@ -362,24 +362,28 @@ def reset_password_logic():
         flash("The new password doesn't match in both boxes")
     return redirect(url_for("reset_password_page"))
 
-#make all forms public (no login required)
-@app.route('/my/settings/update', methods = ["POST", "GET"])
-def update_forms():
+#change username or delete account
+@app.route('/my/settings/update', methods = ["POST"])
+def change_account():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
     setting = request.form.get("setting", "")
-    listOfForms = db.get_forms_by(user_id)
-    for each in listOfForms:
-        formID = each["id"]        
-        if "make_all_forms_public" in request.form.keys():
-            db.update_form(formID, "login_required", 0)
-        if "make_all_forms_result_private" in request.form.keys():
-            db.update_form(formID, "public_results", 1)
-        if "make_all_forms_private" in request.form.keys():
-            db.update_form(formID, "login_required", 1)
-        if "make_all_forms_result_public" in request.form.keys():
-            db.update_form(formID, "public_results", 0)
-    return redirect(url_for("home_page"))
+    if setting == "Change":
+        new_username = request.form.get("new_username", "")
+        if len(new_username) == 0:
+            flash("You can't have an empty username")
+        elif db.user_exists(new_username) and new_username != username:
+            flash("This username is already in use")
+        else:
+            db.update_username(user_id, new_username)
+            session["user"] = new_username
+    elif setting == "Delete":
+        myforms = db.get_forms_by(user_id)
+        for form in myforms:
+            db.delete_form(form["form_id"])
+        db.delete_account(user_id)
+        return redirect(url_for("logout"))
+    return redirect(url_for("settings_page"))
 
 @app.route('/about')
 def about_page():

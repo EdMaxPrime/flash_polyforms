@@ -422,9 +422,14 @@ def getSQ(username):
     close_db(db)
     return str(tempResult)
 
-def update_account(username, password):
+def update_password(username, password):
     db, c = open_db()
     c.execute("UPDATE accounts SET password = " + "'" + str(hashed(password)) + "' WHERE username = '" + str(username) + "';")
+    close_db(db)
+
+def update_username(user_id, new_username):
+    db, c = open_db()
+    c.execute("UPDATE accounts SET username = ? WHERE user_id = ?;", (new_username, user_id))
     close_db(db)
 
 def update_form(formID, colName, status):
@@ -492,6 +497,12 @@ def delete_question(form_id, question_id):
         c.execute("UPDATE questions SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
         c.execute("UPDATE responses SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
         c.execute("UPDATE options SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
+    close_db(db)
+
+#deletes account, but not its associated forms
+def delete_account(user_id):
+    db, c = open_db()
+    c.execute("DELETE FROM accounts WHERE user_id = ?;", (user_id,))
     close_db(db)
 
 def create_tables():
