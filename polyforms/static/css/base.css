@@ -19,3 +19,30 @@ body {
 	border-radius: 5px;
 	border: 1px solid #eee;
 }
+
+fieldset.polyforms-fieldset {
+    border: 2px groove #555;
+    padding: 10px;
+}
+
+legend.polyforms-legend {
+    display: inline-block;
+    width: 200px;
+    background-color: #777;
+    color: white;
+}
+
+div.polyforms-question {
+    border: 2px solid black; 
+    padding: 5px;  
+    margin-bottom: 15px;
+}
+
+div.polyforms-question:hover {
+    border: 2px dashed black;
+}
+
+.polyforms-label {
+    display: inline-block;
+    margin-right: 5px;
+}

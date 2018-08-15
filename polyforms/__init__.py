@@ -12,6 +12,7 @@ DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
 db.use_database(DIR)
 db.create_tables()
+THEMES = ["basic.html", "light.html", "dark.html"]
 app.secret_key = security.get_secret_key(DIR + "data/secret")
 
 @app.route('/test')
@@ -264,8 +265,6 @@ def create():
 
 @app.route('/addQuestions', methods = ["POST", "GET"])
 def addQuestions():
-    print request.form.keys()
-    print request.args.keys()
     if "loginReq" not in request.args.keys():
         loginReq = 0
     else:
@@ -312,7 +311,60 @@ def addQuestions():
                 otext = o.split(")", 1)[-1]
                 db.add_option(formID, question_id, otext, ovalue)
         i+=1
-    return redirect(url_for("home_page"))
+    return redirect(url_for("my_forms"))
+
+@app.route('/form/edit', methods=["GET", "POST"])
+def edit_form():
+    username = session.get("user", "")
+    user_id = session.get("user_id", "")
+    #Get form id
+    if request.method == "GET":
+        form_id = request.args.get("id")
+    else:
+        form_id = request.form.get("form_id")
+    #Make sure this person has permission and the form exists
+    if not test.form_exists(form_id):
+        return render_template("404.html", username=username), 404
+    elif not test.can_edit(user_id, form_id):
+        return render_template("unauthorized.html", username=username)
+    else:
+        #Either display the form or process the results
+        if request.method == "POST":
+            if "title" in request.form:
+                db.update_form(form_id, "title", request.form["title"])
+            if "public_results" in request.form:
+                db.update_form(form_id, "public_results", 1)
+            else:
+                db.update_form(form_id, "public_results", 0)
+            if "login_required" in request.form:
+                db.update_form(form_id, "login_required", 1)
+            else:
+                db.update_form(form_id, "login_required", 0)
+            if "theme" in request.form and request.form["theme"] in THEMES:
+                db.update_form(form_id, "theme", request.form["theme"])
+            if "message" in request.form:
+                db.update_form(form_id, "message", request.form["message"])
+            #Now do the questions
+            question_id = 1
+            while str(question_id) + ".question" in request.form:
+                i = str(question_id)
+                db.update_question(form_id, question_id, "question", request.form[i+".question"])
+                if i+".required" in request.form:
+                    db.update_question(form_id, question_id, "required", 1)
+                else:
+                    db.update_question(form_id, question_id, "required", 0)
+                if i+".min" in request.form and is_positive_number(request.form[i+".min"]):
+                    db.update_question(form_id, question_id, "min", request.form[i+".min"])
+                else:
+                    db.update_question(form_id, question_id, "min", None)
+                if i+".max" in request.form and is_positive_number(request.form[i+".max"]):
+                    db.update_question(form_id, question_id, "max", request.form[i+".max"])
+                else:
+                    db.update_question(form_id, question_id, "max", None)
+                if i+".answers" in request.form:
+                    print "choices here"
+                question_id += 1
+        return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @app.route('/my/forms')

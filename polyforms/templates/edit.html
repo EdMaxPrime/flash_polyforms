@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %} Edit Form | Polyforms {% endblock %}
+{% block body %}
+    <h1 class="my-3">Edit Form</h1>
+    <form method="POST">
+        <fieldset class="my-5 polyforms-fieldset">
+            <legend class="px-3 polyforms-legend">Basic Info</legend>
+            <div class="form-group">
+                Form Title: <input type="text" name="title" size="50" value="{{ form.title }}"><br>
+            </div>
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" name="login_required" id="login_required" class="form-check-input" {{"checked" if form.login_required}}>
+                    <label for="login_required" class="form-check-label">Check this box to only let respondents fill out this form once. Note that this will require them to make accounts on this website and be logged in to fill out the form.</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="public_results" id="public_results" class="form-check-input" {{"checked" if form.public_results}}>
+                    <label for="public_results" class="form-check-label">Check this box to let the results to this form be viewable by anyone with the link to the form. Otherwise, only you will be able to see the responses to this form.</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="theme">Choose a theme. This affects how your form will look like. You can change the theme later too.</label> 
+                <select id="theme" name="theme">
+                    <option value="basic.html" {{"selected" if form.theme == "basic.html"}}>Basic</option>
+                    <option value="light.html" {{"selected" if form.theme == "light.html"}}>Light</option>
+                    <option value="dark.html" {{"selected" if form.theme == "dark.html"}}>Dark</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="message">Write a message for users to see after they submit the form. To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</label>
+                <textarea id="message" rows="4" name="message" class="form-control" required>{{ form.message }}</textarea>
+            </div>
+            <input name="form_id" value="{{form.id}}" type="hidden">
+            <input name="num_questions" value="{{form.questions|length}}" type="hidden">
+        </fieldset>
+        
+        <h2>Questions</h2>
+        <ol id="questionList">
+            {% for q in form.questions %}
+            {% if q.type == "short" %} {% set typeLabel = "one-line response" %} {% set minmax = "answer length" %}
+            {% elif q.type == "long" %} {% set typeLabel = "extended response" %} {% set minmax = "answer length" %}
+            {% elif q.type == "int" %} {% set typeLabel = "integer" %} {% set minmax = "value" %}
+            {% elif q.type == "number" %} {% set typeLabel = "any number" %} {% set minmax = "value" %}
+            {% elif q.type == "choice" %} {% set typeLabel = "multiple-choice" %} {% set minmax = "selected choices" %}
+            {% endif %}
+            <li>
+                <div class="polyforms-question">
+                    <label for="{{q.index}}.question" class="polyforms-label">Question: </label>
+                    <input id="{{q.index}}.question" name="{{q.index}}.question" type="text" value="{{q.question}}" style="width:90%;" required>
+                    <br>
+                    <label for="{{q.index}}.type" class="polyforms-label">Question Type: </label>
+                    <select id="{{q.index}}.type" disabled><option>{{typeLabel}}</option></select>
+                    <i>This can't be changed</i>
+                    <br>
+                    <label for="{{q.index}}.required" class="polyforms-label">Required:</label>
+                    <input id="{{q.index}}.required" name="{{q.index}}.required" type="checkbox" {{"checked" if q.required}}>
+                    <br>
+                    <label for="{{q.index}}.min" class="polyforms-label">Minimum {{minmax}}: </label>
+                    <input id="{{q.index}}.min" name="{{q.index}}.min" type="number" min="0" value="{{q.min}}">
+                    <br>
+                    <label for="{{q.index}}.max" class="polyforms-label">Maximum {{minmax}}: </label>
+                    <input id="{{q.index}}.max" name="{{q.index}}.max" type="number" min="0" value="{{q.max}}">
+                    {% if q.type == "choice" %}
+                    <p>Enter answer choices in the following box, where each answer choice is on a new line. If you want an answer choice to be recorded differently than it is presented on this form, then put the text you want to see in the spreadsheet for that answer choice at the start of the line and end it with a closing parenthesis. Ex: "A) Bananas" will show "Bananas" on the form but "A" on the spreadsheet</p>
+                    <textarea name="{{q.index}}.answers" cols="50" rows="4" required>{% for c in q.choices %}{{c.value}}){{c.text}}
+{% endfor %}</textarea>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+        <input class="btn btn-success" type="submit" value="Save Changes">
+        <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
+    </form>
+    <br><br><br><br>
+{% endblock %}
