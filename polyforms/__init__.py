@@ -264,6 +264,8 @@ def create():
 
 @app.route('/addQuestions', methods = ["POST", "GET"])
 def addQuestions():
+    print request.form.keys()
+    print request.args.keys()
     if "loginReq" not in request.args.keys():
         loginReq = 0
     else:

@@ -69,7 +69,7 @@ def add_response(form_id, user_id, question_id, response, new_row=False):
     
 def add_question(formID, question, type, required, min, max):
     db, c = open_db()
-    question_id = c.execute("SELECT max(question_id) FROM questions WHERE form_id = ?;", (form_id,)).fetchone()
+    question_id = c.execute("SELECT max(question_id) FROM questions WHERE form_id = ?;", (formID,)).fetchone()
     question_id = (question_id[0] + 1) if question_id[0] != None else 1
     c.execute("INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max))
     close_db(db)
@@ -147,7 +147,7 @@ def getID(tableName, idCol, queryCol, query):
 
 #Useful for retrieving sqlite query results
 def defaultVal(v, d):
-    return d if v == None else v[0]
+    return d if (v == None or v[0] == None) else v[0]
 
 def get_form_meta(form_id):
     db, c = open_db()
