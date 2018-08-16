@@ -10,6 +10,8 @@
         <div id="info" class="card-body">
           <p>Shareable link: <a href="/f/{{form_id}}">http://polyforms.me{{url_for("display_form_shortcut", form_id=form_id)}}</a> (right click the blue link and then click "copy link address" in the popup menu)</p>
           <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
+          <p>To delete a response, click on "Delete a response" in the configure menu then click on a row.</p>
+          <p>To import these responses into Excel or a similar spreadsheet editor, download this as a CSV file</p>
           <button class="btn btn-dark" id="closeHelp">Dismiss help menu</button>
         </div>
       </div>
@@ -43,10 +45,8 @@
           <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=dark">Change theme to dark</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="cew">Make columns equal width</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=public">Make results publicly viewable</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=open">Stop/resume accepting responses</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=delete" id="">Delete form</a>
-          <a class="dropdown-item" href="/form/edit?id={{form_id}}">Edit Form</a>
+          <a class="dropdown-item" href="#" id="del">Delete a response</a>
+          <a class="dropdown-item" href="/form/edit?id={{form_id}}">Edit or delete form</a>
         </div>
       </div>
     </div>
@@ -479,6 +479,25 @@ var activateToolbar = function() {
   /* Make columns equal width */
   document.getElementById("cew").addEventListener("click", function() {
     d3.select("#columns").selectAll("th").style("width", "400px");
+  });
+
+  /* Delete response */
+  document.getElementById("del").addEventListener("click", function() {
+    rows.on("click", function(data, rowIndex) {
+      rows.on("click", null); //stop this event listener from affecting more rows
+      thisRow = this;
+      reqwest({
+        url: "/form/toggle?id=" + formID + "&setting=delete_response&rid=" + (rowIndex + 1) + "&response=simple",
+        method: "GET",
+        type: "json",
+        error: function() { flashMessage("danger", "Operation failed. You should try again later."); },
+        success: function(resp) {
+          thisRow.parentNode.removeChild(thisRow);
+          if(resp.status == "error") resp.status = "danger"; //for css
+          flashMessage(resp.status, resp.message);
+        }
+      });
+    })
   });
 
   /* Change timestamp format event listener */

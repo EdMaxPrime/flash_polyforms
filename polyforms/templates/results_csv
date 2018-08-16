@@ -1,3 +1,3 @@
-{% for columnName in headers %}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{{columnName}}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{% if not loop.last %},{% endif %}{% endfor %}
-{% for row in data %}{% for cell in row %}{% set cell = cell|string %}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{{cell|replace('"', '""')|safe}}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{% if not loop.last %},{% endif %}{% endfor %}
+{% for columnName in headers %}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{{columnName|replace('"', '""')|safe}}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{% if not loop.last %},{% endif %}{% endfor %}
+{% for row in data %}{% for cell in row %}{% set cell = cell|string|replace("u'", "'") %}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{{cell|replace('"', '""')|safe}}{% if "\n" in cell or "\r" in cell or "," in cell %}"{% endif %}{% if not loop.last %},{% endif %}{% endfor %}
 {% endfor %}

@@ -151,10 +151,7 @@ def thankyou():
     id = request.args.get("id", "-1")
     if test.form_exists(id):
         form = db.get_form_meta(id)
-        if form["public_results"] == True:
-            return render_template("form_themes/end_"+form["theme"], form=form)
-        else:
-            return render_template("unauthorized.html", username=session.get("user", ""))
+        return render_template("form_themes/end_"+form["theme"], form=form)
     else:
         return render_template("404.html", username=session.get("user", "")), 404
 
