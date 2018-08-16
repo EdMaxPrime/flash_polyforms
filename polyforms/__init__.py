@@ -93,8 +93,11 @@ def display_form():
     if test.form_exists(form_id) == False: #insert db check for existing form
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
-    form = db.get_form_questions(form_id)
-    print form["questions"]
+    if "bad" in request.args:
+        form = db.get_form_questions_1response(form_id, request.args["bad"])
+        db.delete_response(form_id, response_id=request.args["bad"])
+    else:
+        form = db.get_form_questions(form_id)
     if (username == None or username == "") and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
@@ -121,18 +124,24 @@ def process_form():
         number_of_questions = len(form["questions"])
         for qnumber in range(1, number_of_questions+1):
             if form["questions"][qnumber-1]["type"] == "choice":
-                data[qnumber] = request.form.getlist(str(qnumber), None)
+                data[qnumber] = request.form.getlist(str(qnumber), None) or []
             else:
                 data[qnumber] = request.form.get(str(qnumber), None)
         errors = test.validate_form_submission(form_id, data)
-        if len(errors) > 0:
+        if len(errors) > 0: #invalid submission
             for e in errors:
                 flash(e)
-                return redirect(url_for("display_form", id=form_id))
-        else:
             qnumber = 1
+            response_id = None
             while qnumber <= number_of_questions:
-                db.add_response(form_id, user_id, qnumber, data[qnumber], qnumber == 1)
+                response_id = db.add_response_negative(form_id, user_id, qnumber, data[qnumber], response_id)
+                qnumber += 1
+            return redirect(url_for("display_form", id=form_id, bad=response_id))
+        else: #valid submission
+            qnumber = 1
+            response_id = None
+            while qnumber <= number_of_questions:
+                response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
                 qnumber += 1
             return redirect(url_for("thankyou", id=form_id))
 
@@ -234,6 +243,9 @@ def change_form():
         elif setting == "dark":
             result = "Your form has the dark theme"
             db.update_form(form_id, "theme", "dark.html")
+        elif setting == "delete_response":
+            result = "You deleted response #" + request.args.get("rid", "") + "."
+            db.delete_response(form_id, response_id=request.args.get("rid"))
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
         #determine response content-type
@@ -345,6 +357,10 @@ def edit_form():
                 db.update_form(form_id, "login_required", 1)
             else:
                 db.update_form(form_id, "login_required", 0)
+            if "open" in request.form:
+                db.update_form(form_id, "open", 1)
+            else:
+                db.update_form(form_id, "open", 0)
             if "theme" in request.form and request.form["theme"] in THEMES:
                 db.update_form(form_id, "theme", request.form["theme"])
             if "message" in request.form:
