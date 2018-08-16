@@ -17,6 +17,7 @@
 	<li><a href="#sharing">How to share your form</a></li>
 	<li><a href="#responses">How to see responses to your form</a></li>
     <li><a href="#api">How to use our API</a></li>
+    <li><a href="#changes">What's changed about Polyforms?</a></li>
 </ol>
 <hr>
 <a id="creating"></a>
@@ -52,7 +53,7 @@
 <p>If you want to get responses from a form, then you should first make the results public. Then, make a GET request to one of the following URLs. Make sure to substitute "id=some_number" with whatever number appears in the address bar of your browser when viewing the form.</p>
 <ul>
     <li>For xml, use <code>http://polyforms.me/form/view/form.xml?id=some_number</code>. The response document will have a root tag of <code><form></code> with setions for metadata, questions and answers. The questions are each assigned a number <i>starting from 2</i>. Answers are grouped into <code><response></code> tags and then matched to questions using that number. Here is an example of what this looks like:
-        <textarea disabled class="form-control" rows="30" style="font-family: monospace;">
+        <textarea disabled class="form-control" rows="28" style="font-family: monospace;">
 <?xml version="1.0" encoding="UTF-8"?>
 <form>
     <info>
@@ -84,7 +85,7 @@
         </textarea>
     </li>
     <li>For json, use <code>http://polyforms.me/form/view/form.json?id=some_number</code>. The response document will be properly indented JSON data. At the root is a list. Every item in the list is an object with question-answer pairs. If a question allows you to select more than one answer, then its value will always be a list of answers – even if no answers were selected. Numerical responses will always have quotes around them. Here is an example of what this looks like:
-        <textarea disabled class="form-control" rows="16" style="font-family: monospace;">
+        <textarea disabled class="form-control" rows="14" style="font-family: monospace;">
 [
     {
         "Response Index": 1,
@@ -102,7 +103,7 @@
         </textarea>
     </li>
     <li>For csv, use <code>http://polyforms.me/form/view/form.csv?id=some_number</code>. The response document will be a comma-separated list of values. The top row will have the questions, and every subsequent row will have answers. It should look like this:
-        <textarea disabled class="form-control" rows="5" style="font-family: monospace;">
+        <textarea disabled class="form-control" rows="3" style="font-family: monospace;">
 Response Index,When,What is your name?,Select all that apply
 1,2000-01-01 12:00:00,Nobody,
 2,2000-01-01 12:01:00,Jane,"['I like ice cream', 'I like rainbow sherbert']"
@@ -110,9 +111,23 @@ Response Index,When,What is your name?,Select all that apply
     </li>
 </ul>
 <p>To submit a response to a form that does not require login, send a POST request to <code>http://polyforms.me/form/submit</code>. The body of this POST request should be standard url-encoded parameters. You must include a "form_id" field whose value is the id of the form (check the url for this number). Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded. Here is an example of what this request should look like:</p>
-<textarea disabled class="form-control" rows="5" style="font-family: monospace;">
+<textarea disabled class="form-control" rows="3" style="font-family: monospace;">
 Content-Type: application/x-www-form-urlencoded
 
 form_id=1037&1=Nobody
 </textarea>
+<br>
+
+<a id="changes"></a>
+<h2>What's new with Polyforms?</h2>
+<p>In August 2018, we rolled out some changes to this website. Here they are:</p>
+<ul>
+    <li>Completely revamped the settings page. It now contains all account-relevant options, including some new ones like changing your username and deleting your account.</li>
+    <li>It's now possible to edit your form with a form-editor that resembles the form-creator. Notable additions include the ability to change questions and see the configuration of your form before you change it.</li>
+    <li>Added some markup support to the thankyou message on forms. You can include a link to submit responses again, see results, put your signature wherever, and show the total number of responses.</li>
+    <li>Small aesthetic changes throughout the site</li>
+    <li>Fixed bugs</li>
+</ul>
+
+<br><br><br><br>
 {% endblock %}

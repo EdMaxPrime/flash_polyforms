@@ -24,8 +24,10 @@
 <div class="polyforms-settings">
     <h6>Delete Account</h6>
     <form action="/my/settings/update" method="POST" class="form-inline">
-        This will delete your account and all forms made with this account. Make sure you've made up your mind, as this can't be undone. We're sad to see you go!
-        <input type="submit" name="setting" value="Delete" class="form-control btn-danger">
+        <div class="row">
+            <div class="col col-md-10">This will delete your account and all forms made with this account. Make sure you've made up your mind, as this can't be undone. We're sad to see you go!</div>
+            <div class="col col-md"><input type="submit" name="setting" value="Delete" class="form-control btn-danger"></div>
+        </div>
     </form>
 </div>
 {% endblock %}
