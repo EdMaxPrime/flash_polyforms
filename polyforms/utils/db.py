@@ -432,9 +432,16 @@ def update_username(user_id, new_username):
     c.execute("UPDATE accounts SET username = ? WHERE user_id = ?;", (new_username, user_id))
     close_db(db)
 
+#Changes a form. ColName should be one of: title, owner_id, login_required, public_results, theme, created, message, open
 def update_form(formID, colName, status):
     db, c = open_db()
     c.execute("UPDATE forms SET " + colName + " = ? WHERE form_id = ?;", (status, formID))
+    close_db(db)
+
+#Changes a question. ColName should be one of: type, question, min, max, required. Its better not to change the type though.
+def update_question(form_id, question_id, colName, status):
+    db, c = open_db()
+    c.execute("UPDATE questions SET " + colName + " = ? WHERE form_id = ? AND question_id = ?;", (status, form_id, question_id))
     close_db(db)
 
 
@@ -497,6 +504,16 @@ def delete_question(form_id, question_id):
         c.execute("UPDATE questions SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
         c.execute("UPDATE responses SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
         c.execute("UPDATE options SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
+    close_db(db)
+
+#Deletes the options from a multiple-choice question. The which parameter should be a list of values of the options to delete. Leave empty to delete all of them
+def delete_options(form_id, question_id, which=[]):
+    db, c = open_db()
+    if len(which) == 0:
+        c.execute("DELETE FROM options WHERE form_id = ? AND question_id = ?;", (form_id, question_id))
+    else:
+        for index in which:
+            c.execute("DELETE FROM options WHERE form_id = ? AND question_id = ? AND value = ?;", (form_id, question_id, index))
     close_db(db)
 
 #deletes account, but not its associated forms

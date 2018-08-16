@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block title %} Edit Form | Polyforms {% endblock %}
 {% block body %}
-    <h1 class="my-3">Edit Form</h1>
+    <h1 class="my-5" style="display:inline-block;">Edit Form</h1>
+    <a class="btn btn-link" href="/form/respond?id={{form.id}}">Go to Form</a>
+    <a class="btn btn-link" href="/form/view?id={{form.id}}">Go to Results</a>
     <form method="POST">
-        <fieldset class="my-5 polyforms-fieldset">
+        <fieldset class="mb-5 polyforms-fieldset">
             <legend class="px-3 polyforms-legend">Basic Info</legend>
             <div class="form-group">
                 Form Title: <input type="text" name="title" size="50" value="{{ form.title }}"><br>
@@ -70,6 +72,7 @@
             </li>
             {% endfor %}
         </ol>
+        <p>Make sure you save your changes before doing anything else</p>
         <input class="btn btn-success" type="submit" value="Save Changes">
         <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
     </form>

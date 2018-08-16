@@ -142,9 +142,12 @@ def thankyou():
     id = request.args.get("id", "-1")
     if test.form_exists(id):
         form = db.get_form_meta(id)
-        return render_template("form_themes/end_"+form["theme"], owner=form["owner"], title=form["title"], message=form["message"])
+        if form["public_results"] == True:
+            return render_template("form_themes/end_"+form["theme"], form=form)
+        else:
+            return render_template("unauthorized.html", username=session.get("user", ""))
     else:
-        return render_template("unauthorized.html", username=session.get("user", ""))
+        return render_template("404.html", username=session.get("user", "")), 404
 
 #View the responses to your form and make charts
 @app.route('/form/view')
@@ -307,6 +310,8 @@ def addQuestions():
         question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
         if type == "choice":
             for o in request.args.get(str(i) + ".answers", "").splitlines():
+                if len(o) == 0:
+                    continue
                 ovalue = o.split(")", 1)[0]
                 otext = o.split(")", 1)[-1]
                 db.add_option(formID, question_id, otext, ovalue)
@@ -362,7 +367,13 @@ def edit_form():
                 else:
                     db.update_question(form_id, question_id, "max", None)
                 if i+".answers" in request.form:
-                    print "choices here"
+                    db.delete_options(form_id, question_id)
+                    for o in request.form[i+".answers"].splitlines():
+                        if len(o) == 0:
+                            continue
+                        ovalue = o.split(")", 1)[0]
+                        otext = o.split(")", 1)[-1]
+                        db.add_option(form_id, question_id, otext, ovalue)
                 question_id += 1
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
 
@@ -489,6 +500,10 @@ def newline_br(value):
     else:
         lines = ""
     return "<br>".join([escape(s) for s in lines])
+
+@app.template_filter('msgCodes')
+def codes_to_html(value, form):
+    return value.replace("[SIGNATURE]", "<em>%s</em>"%form["owner"]).replace("[HOWMANY]", str(form["num_responses"])).replace("[AGAIN]", '<a href="/f/%s">Submit another response</a>'%str(form["id"])).replace("[RESULTS]", '<a href="/form/view?id=%s">See the responses</a>'%str(form["id"]))
 
 def is_positive_number(thing):
     try:
