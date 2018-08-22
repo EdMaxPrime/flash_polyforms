@@ -4,6 +4,10 @@
     <h1 class="my-5" style="display:inline-block;">Edit Form</h1>
     <a class="btn btn-link" href="/form/respond?id={{form.id}}">Go to Form</a>
     <a class="btn btn-link" href="/form/view?id={{form.id}}">Go to Results</a>
+    {% set messages = get_flashed_messages() %}
+    {% for m in messages %}
+    <div class="alert alert-info">{{ m }}</div>
+    {% endfor %}
     <form method="POST">
         <fieldset class="mb-5 polyforms-fieldset">
             <legend class="px-3 polyforms-legend">Basic Info</legend>
@@ -31,6 +35,11 @@
                     <option value="basic.html" {{"selected" if form.theme == "basic.html"}}>Basic</option>
                     <option value="light.html" {{"selected" if form.theme == "light.html"}}>Light</option>
                     <option value="dark.html" {{"selected" if form.theme == "dark.html"}}>Dark</option>
+                    <option value="purple" {{"selected" if form.theme == "purple"}}>Purple</option>
+                    <option value="green" {{"selected" if form.theme == "green"}}>Green</option>
+                    <option value="gold" {{"selected" if form.theme == "gold"}}>Gold</option>
+                    <option value="blue" {{"selected" if form.theme == "blue"}}>Blue</option>
+                    <option value="red" {{"selected" if form.theme == "red"}}>Red</option>
                 </select>
             </div>
             <div class="form-group">
@@ -69,7 +78,7 @@
                     <input id="{{q.index}}.max" name="{{q.index}}.max" type="number" min="0" value="{{q.max}}">
                     {% if q.type == "choice" %}
                     <p>Enter answer choices in the following box, where each answer choice is on a new line. If you want an answer choice to be recorded differently than it is presented on this form, then put the text you want to see in the spreadsheet for that answer choice at the start of the line and end it with a closing parenthesis. Ex: "A) Bananas" will show "Bananas" on the form but "A" on the spreadsheet</p>
-                    <textarea name="{{q.index}}.answers" cols="50" rows="4" required>{% for c in q.choices %}{{c.value}}){{c.text}}
+                    <textarea name="{{q.index}}.answers" cols="50" rows="4" required>{% for c in q.choices %}{% if c.value != c.text %}{{c.value}}) {% endif %}{{c.text}}
 {% endfor %}</textarea>
                     {% endif %}
                 </div>
@@ -81,4 +90,45 @@
         <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
     </form>
     <br><br><br><br>
+    <script type="text/javascript">
+        var time = new Date();
+        var alerts = document.getElementsByClassName("alert-info");
+        var id;
+        //Where t is milliseconds
+        var elapsed = function(t) {
+            if(t < 60000) {
+                return "just now";
+            }
+            else if(t < 2 * 60 * 1000) {
+                return "a minute ago";
+            }
+            else if(t < 60 * 60 * 1000) {
+                return Math.round(t / (60 * 1000)) + " minutes ago";
+            }
+            else if(t < 2 * 60 * 60 * 1000) {
+                return "an hour ago";
+            }
+            else if(t < 24 * 60 * 60 * 1000) {
+                return Math.round(t / (60 * 60 * 1000)) + " hours ago";
+            }
+            else if(t < 48 * 60 * 60 * 1000) {
+                return "a day and " + elapsed(t - 24 * 60 * 60 * 1000);
+            }
+            return Math.round(t / (24 * 60 * 60 * 1000)) + " days and " + elapsed(t % (24 * 60 * 60 * 1000));
+        }
+        
+        for(var i = 0; i < alerts.length; i++) {
+            if(alerts[i].innerHTML == "Your changes have been saved") {
+                var a = alerts[i];
+                a.innerHTML = "Your changes have been saved " + elapsed(Date.now() - time.getTime()) + " <u>Dismiss</u>"
+                id = setInterval(function () {
+                    a.innerHTML = "Your changes have been saved " + elapsed(Date.now() - time.getTime()) + " <u>Dismiss</u>";
+                }, 60000);
+                a.addEventListener("click", function (event) {
+                    clearInterval(id);
+                    a.parentNode.removeChild(a);
+                });
+            }
+        }
+    </script>
 {% endblock %}

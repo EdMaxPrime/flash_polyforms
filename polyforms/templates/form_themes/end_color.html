@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{form.title}} | Polyforms </title>
+    <link rel="shortcut icon" href="/static/img/logo_square.png">
+    {% if form.theme == "purple" %}
+        {% set text = "#1B1B3A" %}
+        {% set bg = "#7D5BA6" %}
+        {% set active = "#643173" %}
+        {% set normal = "#565264" %}
+        {% set hint = "#706677" %}
+    {% elif form.theme == "green" %}
+        {% set text = "#507255" %}
+        {% set bg = "#6EB257" %}
+        {% set active = "#4AAD52" %}
+        {% set normal = "#488B49" %}
+        {% set hint = "#C5E063" %}
+    {% elif form.theme == "gold" %}
+        {% set text = "#141414" %}
+        {% set bg = "#BFAB25" %}
+        {% set active = "#FBFF12" %}
+        {% set normal = "#EDFF7A" %}
+        {% set hint = "#D17B0F" %}
+    {% elif form.theme == "blue" %}
+        {% set text = "#044389" %}
+        {% set bg = "#28C2FF" %}
+        {% set active = "#2AF5FF" %}
+        {% set normal = "#60AFFF" %}
+        {% set hint = "#3066BE" %}
+    {% elif form.theme == "red" %}
+        {% set text = "#66101F" %}
+        {% set bg = "#CC4158" %}
+        {% set active = "#C42021" %}
+        {% set normal = "#858C65" %}
+        {% set hint = "#804E49" %}
+    {% endif %}
+    <style type="text/css">
+        body {
+            font-family: Optima,Segoe,Segoe UI,Candara,Calibri,Arial,sans-serif;
+            font-size: 18px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            background-color: {{bg}};
+            color: {{text}};
+        }
+        div.logo {
+            text-align: center;
+            margin-top: 5em;
+        }
+        #contents {
+            background-color: white;
+            margin: 2em 1in 2em 1in;
+            padding: 2em;
+        }
+        a {
+            color: {{normal}};
+        }
+        a:hover, a:active {
+            color: {{active}};
+        }
+    </style>
+</head>
+<body>
+    <div id="contents">
+        <h1>{{form.title}}</h1>
+        <hr>
+        <p>{{form.message | linebreaks| msgCodes(form) | safe}}</p>
+        <div class="logo heading">
+            <p>This form was made with</p>
+            <a href="/">
+                <img src="/static/img/logo_full.png" alt="Logo" width="375" height="65">
+            </a>
+        </div>
+    </div>
+</body>
+</html>
