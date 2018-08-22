@@ -12,7 +12,7 @@ DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
 db.use_database(DIR)
 db.create_tables()
-THEMES = ["basic.html", "light.html", "dark.html"]
+THEMES = ["basic.html", "light.html", "dark.html", "purple", "green", "gold", "blue", "red"]
 app.secret_key = security.get_secret_key(DIR + "data/secret")
 
 @app.route('/test')
@@ -103,7 +103,9 @@ def display_form():
         return redirect(url_for("login_page", redirect=form_id))
     else:
         template_name = form["theme"]
-        return render_template("form_themes/"+template_name, title=form["title"], questions=form["questions"], form_id=form_id)
+        if template_name in THEMES[3:]:
+            template_name = "color.html"
+        return render_template("form_themes/"+template_name, title=form["title"], questions=form["questions"], form_id=form_id, theme=form["theme"])
 
 #Shortcut URLS
 @app.route('/f/<form_id>')
@@ -151,7 +153,10 @@ def thankyou():
     id = request.args.get("id", "-1")
     if test.form_exists(id):
         form = db.get_form_meta(id)
-        return render_template("form_themes/end_"+form["theme"], form=form)
+        template_name = form["theme"]
+        if template_name in THEMES[3:]:
+            template_name = "color.html"
+        return render_template("form_themes/end_"+template_name, form=form)
     else:
         return render_template("404.html", username=session.get("user", "")), 404
 
@@ -282,9 +287,9 @@ def addQuestions():
     else:
         loginReq = 1
     if "publicReq" not in request.args.keys():
-        publicReq = 1
-    else:
         publicReq = 0
+    else:
+        publicReq = 1
     if "message" not in request.args.keys() or len(request.args["message"]) == 0:
         message = "Your response has been recorded"
     else:
@@ -292,18 +297,6 @@ def addQuestions():
     formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, message)
     i=0
     while (str(i) + ".question" in request.args.keys()):
-        if (str(i) + ".required" not in request.args.keys()):
-            required = 0
-        else:
-            required = 1
-        if (is_positive_number(request.args.get(str(i) + ".min"))):
-            min = request.args[str(i) + ".min"]
-        else:
-            min = None
-        if (is_positive_number(request.args.get(str(i) + ".max"))):
-            max = request.args[str(i) + ".max"]
-        else:
-            max = None
         if request.args[str(i) + ".type"] == "0":
             type = "short"
         elif request.args[str(i) + ".type"] == "1":
@@ -316,6 +309,22 @@ def addQuestions():
             type = "choice"
         else:
             type = request.args[str(i) + ".type"]
+        if (str(i) + ".required" not in request.args.keys()):
+            required = 0
+        else:
+            required = 1
+        if (is_positive_number(request.args.get(str(i) + ".min")) and type != "number" and type != "int"):
+            min = request.args[str(i) + ".min"]
+        elif (is_integer(request.args.get(str(i) + ".min")) and (type == "number" or type == "int")):
+            min = request.args[str(i) + ".min"]
+        else:
+            min = None
+        if (is_positive_number(request.args.get(str(i) + ".max")) and type != "number" and type != "int"):
+            max = request.args[str(i) + ".max"]
+        elif (is_integer(request.args.get(str(i) + ".max")) and (type == "number" or type == "int")):
+            max = request.args[str(i) + ".max"]
+        else:
+            max = None
         question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
         if type == "choice":
             for o in request.args.get(str(i) + ".answers", "").splitlines():
@@ -371,11 +380,11 @@ def edit_form():
                     db.update_question(form_id, question_id, "required", 1)
                 else:
                     db.update_question(form_id, question_id, "required", 0)
-                if i+".min" in request.form and is_positive_number(request.form[i+".min"]):
+                if i+".min" in request.form and is_integer(request.form[i+".min"]):
                     db.update_question(form_id, question_id, "min", request.form[i+".min"])
                 else:
                     db.update_question(form_id, question_id, "min", None)
-                if i+".max" in request.form and is_positive_number(request.form[i+".max"]):
+                if i+".max" in request.form and is_integer(request.form[i+".max"]):
                     db.update_question(form_id, question_id, "max", request.form[i+".max"])
                 else:
                     db.update_question(form_id, question_id, "max", None)
@@ -388,6 +397,7 @@ def edit_form():
                         otext = o.split(")", 1)[-1]
                         db.add_option(form_id, question_id, otext, ovalue)
                 question_id += 1
+        flash("Your changes have been saved")
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
@@ -522,6 +532,13 @@ def is_positive_number(thing):
     try:
         thing = int(thing)
         return thing > 0
+    except:
+        return False
+
+def is_integer(thing):
+    try:
+        int(thing)
+        return True
     except:
         return False
 
