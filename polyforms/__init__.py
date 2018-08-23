@@ -397,7 +397,7 @@ def edit_form():
                         otext = o.split(")", 1)[-1]
                         db.add_option(form_id, question_id, otext, ovalue)
                 question_id += 1
-        flash("Your changes have been saved")
+            flash("Your changes have been saved")
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
