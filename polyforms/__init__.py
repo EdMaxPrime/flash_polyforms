@@ -398,6 +398,8 @@ def edit_form():
                         ovalue = o.split(")", 1)[0].strip()
                         otext = o.split(")", 1)[-1].strip()
                         db.add_option(form_id, question_id, otext, ovalue)
+                if i+".type" in request.form:
+                    db.update_question(form_id, question_id, "type", request.form[i+".type"])
                 question_id += 1
             db.update_order(form_id, new_order)
             flash("Your changes have been saved")

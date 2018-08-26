@@ -11,8 +11,11 @@
     <form method="POST">
         <fieldset class="mb-5 polyforms-fieldset">
             <legend class="px-3 polyforms-legend">Basic Info</legend>
-            <div class="form-group">
-                Form Title: <input type="text" name="title" size="50" value="{{ form.title }}"><br>
+            <div class="form-group row">
+                <label for="title" class="col-sm-2 col-md-1 col-form-label">Form Title: </label>
+                <div class="col">
+                    <input type="text" name="title" class="form-control" value="{{ form.title }}">
+                </div>
             </div>
             <div class="form-group">
                 <div class="form-check">
@@ -65,35 +68,43 @@
                         <a class="card-link" href="">Move Up</a>
                         <a class="card-link" href="">Move Down</a>
                         <a class="card-link" href="">Delete</a>
+                        <p class="card-text text-danger polyforms-hidden">This question and its responses will be deleted.</p>
                     </div>
                     <div class="card-body">
-                        <label for="{{q.index}}.question" class="polyforms-label">Question: </label>
-                        <input id="{{q.index}}.question" name="{{q.index}}.question" type="text" value="{{q.question}}" style="width:90%;" required>
-                        <br>
-                        <label for="{{q.index}}.type" class="polyforms-label">Question Type: </label>
-                        <select id="{{q.index}}.type" disabled><option>{{typeLabel}}</option></select>
-                        <i>This can't be changed</i>
-                        <br>
-                        <label for="{{q.index}}.required" class="polyforms-label">Required:</label>
-                        <input id="{{q.index}}.required" name="{{q.index}}.required" type="checkbox" {{"checked" if q.required}}>
-                        <br>
-                        <label for="{{q.index}}.min" class="polyforms-label">Minimum {{minmax}}: </label>
-                        <input id="{{q.index}}.min" name="{{q.index}}.min" type="number" min="0" value="{{q.min}}">
-                        <br>
-                        <label for="{{q.index}}.max" class="polyforms-label">Maximum {{minmax}}: </label>
-                        <input id="{{q.index}}.max" name="{{q.index}}.max" type="number" min="0" value="{{q.max}}">
-                        {% if q.type == "choice" %}
-                        <p>Enter answer choices in the following box, where each answer choice is on a new line. If you want an answer choice to be recorded differently than it is presented on this form, then put the text you want to see in the spreadsheet for that answer choice at the start of the line and end it with a closing parenthesis. Ex: "A) Bananas" will show "Bananas" on the form but "A" on the spreadsheet</p>
-                        <textarea name="{{q.index}}.answers" cols="50" rows="4" required>{% for c in q.choices %}{{c.value+")" if c.value != c.text}}{{c.text}}
-{% endfor %}</textarea>
-                        {% endif %}
-                        <input type="text" name="{{q.index}}.newIndex" value="{{q.index}}">
+                        <div class="form-group row">
+                            <label for="{{q.index}}.question" class="polyforms-label col col-sm-1 col-form-label">Question: </label>
+                            <div class="col"><input id="{{q.index}}.question" name="{{q.index}}.question" type="text" value="{{q.question}}" class="form-control" required></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="{{q.index}}.type" class="polyforms-label col col-sm-1 col-form-label">Question Type: </label>
+                            <div class="col"><select id="{{q.index}}.type" name="{{q.index}}.type" class="form-control" onchange="changeType({{q.index}}, this.value);">
+                                <option value="short" {{"selected" if q.type == "short"}}>one-line response</option>
+                                <option value="long" {{"selected" if q.type == "long"}}>extended response</option>
+                                <option value="int" {{"selected" if q.type == "int"}}>integer</option>
+                                <option value="number" {{"selected" if q.type == "number"}}>number</option>
+                                <option value="choice" {{"selected" if q.type == "choice"}}>multiple-choice</option>
+                            </select></div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="{{q.index}}.required" class="col col-sm-1 col-form-label">Required:</label>
+                            <div class="col"><input id="{{q.index}}.required" name="{{q.index}}.required" type="checkbox" {{"checked" if q.required}}></div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col"><label for="{{q.index}}.min">Minimum {{minmax}}</label><input id="{{q.index}}.min" name="{{q.index}}.min" type="number" min="0" value="{{q.min}}" class="form-control" placeholder="number"></div>
+                            <div class="col"><label for="{{q.index}}.max">Maximum {{minmax}}</label><input id="{{q.index}}.max" name="{{q.index}}.max" type="number" min="0" value="{{q.max}}" class="form-control" placeholder="number"></div>
+                        </div>
+                        <div class="form-group {{'polyforms-hidden' if q.type != 'choice'}}" id="{{q.index}}.answersDiv">
+                            <label for="{{q.index}}.answers">Enter answer choices in the following box, where each answer choice is on a new line. If you want an answer choice to be recorded differently than it is presented on this form, then put the text you want to see in the spreadsheet for that answer choice at the start of the line and end it with a closing parenthesis. Ex: "A) Bananas" will show "Bananas" on the form but "A" on the spreadsheet</label>
+                            <textarea name="{{q.index}}.answers" id="{{q.index}}.answers" class="form-control" rows="4" required>{% if "choices" in q %}{% for c in q.choices %}{{c.value+")" if c.value != c.text}}{{c.text}}
+{% endfor %}{% else %}.{% endif %}</textarea>
+                        </div>
+                        <input type="hidden" name="{{q.index}}.newIndex" value="{{q.index}}">
                     </div>
                 </div>
             </li>
             {% endfor %}
         </ol>
-        <input type="hidden" name="swaps" id="swaps" value="{{ form.questions | map(attribute='index') | join(' ') }}">
+        <div class="text-center mb-5"><a class="btn btn-lg btn-primary" href="#" id="add">Add Question</a></div>
         <p>Make sure you save your changes before doing anything else</p>
         <input class="btn btn-success" type="submit" value="Save Changes">
         <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
@@ -134,31 +145,59 @@
             afterIndex.setAttribute("value", temp);
             after.parentNode.insertBefore(after, before);
         };
-        for(var i = 0; i < listElements.length; i++) {
-            listElements[i].addEventListener("click", function(event) {
-                var originalQuestionIndex = i + 1;
-                var target = event.target || event.srcElement || event.originalTarget;
-                if(target.textContent == "Move Up") {
-                    event.preventDefault();
-                    if(this.previousElementSibling != null) {
-                        swapElements(this.previousElementSibling, this);
-                    }
+        var liListener = function(event) {
+            var target = event.target || event.srcElement || event.originalTarget;
+            if(target.textContent == "Move Up") {
+                event.preventDefault();
+                if(this.previousElementSibling != null) {
+                    swapElements(this.previousElementSibling, this);
                 }
-                else if(target.textContent == "Move Down") {
-                    event.preventDefault();
-                    if(this.nextElementSibling != null) {
-                        swapElements(this, this.nextElementSibling);
-                    }
+            }
+            else if(target.textContent == "Move Down") {
+                event.preventDefault();
+                if(this.nextElementSibling != null) {
+                    swapElements(this, this.nextElementSibling);
                 }
-                else if(target.textContent == "Delete") {
-                    event.preventDefault();
-                    target.textContent = "Undo Delete";
-                }
-                else if(target.textContent == "Undo Delete") {
-                    event.preventDefault();
-                    target.textContent = "Delete";
-                }
-            });
+            }
+            else if(target.textContent == "Delete") {
+                event.preventDefault();
+                target.textContent = "Undo Delete";
+                getChild(this, function(element) {
+                    return element.classList.contains("text-danger");
+                }).classList.toggle("polyforms-hidden");
+            }
+            else if(target.textContent == "Undo Delete") {
+                event.preventDefault();
+                target.textContent = "Delete";
+                getChild(this, function(element) {
+                    return element.className.indexOf("text-danger") != -1;
+                }).classList.toggle("polyforms-hidden");
+            }
         }
+        for(var i = 0; i < listElements.length; i++) {
+            listElements[i].addEventListener("click", liListener);
+        }
+
+        var changeType = function(question_index, type) {
+            var minmax = "";
+            document.getElementById(question_index+".answersDiv").classList.add("polyforms-hidden");
+            if(type == "choice") {
+                minmax = "selectable choices";
+                document.getElementById(question_index+".answersDiv").classList.remove("polyforms-hidden");
+            } else if(type == "int" || type == "number") {
+                minmax = "value";
+            } else {
+                minmax = "answer length";
+            }
+            document.getElementById(question_index+".min").previousElementSibling.textContent = "Minimum " + minmax;
+            document.getElementById(question_index+".max").previousElementSibling.textContent = "Maximum " + minmax;
+        };
+
+        document.getElementById("add").addEventListener("click", function(event) {
+            event.preventDefault();
+            var li = document.createElement("li");
+            li.innerHTML = "";
+            document.getElementsByTagName("ol")[0].appendChild(li);
+        });
     </script>
 {% endblock %}

@@ -46,3 +46,7 @@ div.polyforms-question:hover {
     display: inline-block;
     margin-right: 5px;
 }
+
+.polyforms-hidden {
+    display: none;
+}
