@@ -372,10 +372,12 @@ def edit_form():
             if "message" in request.form:
                 db.update_form(form_id, "message", request.form["message"])
             #Now do the questions
+            new_order = []
             question_id = 1
             while str(question_id) + ".question" in request.form:
                 i = str(question_id)
                 db.update_question(form_id, question_id, "question", request.form[i+".question"])
+                new_order.append(request.form.get(i+".newIndex", i))
                 if i+".required" in request.form:
                     db.update_question(form_id, question_id, "required", 1)
                 else:
@@ -393,10 +395,11 @@ def edit_form():
                     for o in request.form[i+".answers"].splitlines():
                         if len(o) == 0:
                             continue
-                        ovalue = o.split(")", 1)[0]
-                        otext = o.split(")", 1)[-1]
+                        ovalue = o.split(")", 1)[0].strip()
+                        otext = o.split(")", 1)[-1].strip()
                         db.add_option(form_id, question_id, otext, ovalue)
                 question_id += 1
+            db.update_order(form_id, new_order)
             flash("Your changes have been saved")
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
 

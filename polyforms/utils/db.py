@@ -475,6 +475,22 @@ def update_question(form_id, question_id, colName, status):
     c.execute("UPDATE questions SET " + colName + " = ? WHERE form_id = ? AND question_id = ?;", (status, form_id, question_id))
     close_db(db)
 
+#Given a form's ID and a list of indexes, this function will rearrange the questions of that form.
+#If the first number in the list is 3, then the first question will be moved to index 3.
+#Note that question indices start at 1, so the list shouldn't contain the number 0.
+def update_order(form_id, new_indexes):
+    print new_indexes
+    db, c = open_db()
+    c.execute("UPDATE questions SET question_id = question_id * -1 WHERE form_id = ?;", (form_id,))
+    c.execute("UPDATE responses SET question_id = question_id * -1 WHERE form_id = ?;", (form_id,))
+    c.execute("UPDATE options   SET question_id = question_id * -1 WHERE form_id = ?;", (form_id,))
+    i = 0
+    while i < len(new_indexes):
+        c.execute("UPDATE questions SET question_id = ? WHERE question_id = ? * -1 AND form_id = ?;", (new_indexes[i], i + 1, form_id))
+        c.execute("UPDATE responses SET question_id = ? WHERE question_id = ? * -1 AND form_id = ?;", (new_indexes[i], i + 1, form_id))
+        c.execute("UPDATE options   SET question_id = ? WHERE question_id = ? * -1 AND form_id = ?;", (new_indexes[i], i + 1, form_id))
+        i += 1
+    close_db(db)
 
 def get_form_questionResponses(form_id, question_id):
     formDict = getFormDataWithResponse(form_id)
