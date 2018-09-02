@@ -107,7 +107,7 @@ def validate_form_submission(form_id, data):
 def can_edit(user_id, form_id):
     if form_exists(form_id):
         db, c = open_db()
-        owner = c.execute("SELECT owner_id FROM forms WHERE form_id = " + str(form_id) + " AND owner_id = " + str(user_id) + ";").fetchone()
+        owner = c.execute("SELECT owner_id FROM forms WHERE form_id = ? AND owner_id = ?;", (form_id, user_id)).fetchone()
         close_db(db)
         return owner != None
     else:
