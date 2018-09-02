@@ -262,7 +262,7 @@ def change_form():
 #Delete a form
 @app.route('/form/delete')
 def delete_form():
-    username = session.get("username", "")
+    username = session.get("user", "")
     user_id = session.get("user_id", "")
     form_id = request.args.get("id", "-1")
     if test.can_edit(user_id, form_id):
@@ -270,6 +270,17 @@ def delete_form():
         return redirect(url_for("my_forms"))
     else:
         return render_template("unauthorized.html", username=username)
+
+#Shows information about a form
+@app.route('/form/info')
+def info_form():
+    username = session.get("user", "")
+    form_id = request.args.get("id", "-1")
+    if test.form_exists(form_id) == False:
+        return render_template("404.html", username=username), 404
+    else:
+        form = db.get_form_meta(form_id)
+        return render_template("info.html", username=username, form=form, isowner=(form["owner"] == username))
 
 #Make a new form
 @app.route('/form/new')
