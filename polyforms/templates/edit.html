@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block title %} Edit Form | Polyforms {% endblock %}
 {% block body %}
-    <h1 class="my-5" style="display:inline-block;">Edit Form</h1>
-    <a class="btn btn-link" href="/form/respond?id={{form.id}}">Go to Form</a>
-    <a class="btn btn-link" href="/form/view?id={{form.id}}">Go to Results</a>
+    <h1 class="mt-5 mb-2">{{ form.title }}</h1>
+    <nav class="nav nav-tabs mb-5">
+        <a class="nav-item nav-link" href="/form/view?id={{form.id}}">Results</a>
+        <a class="nav-item nav-link active" href="/form/edit?id={{form.id}}">Edit Form</a>
+        <a class="nav-item nav-link" href="/form/info?id={{form.id}}">Share</a>
+    </nav>
     {% set messages = get_flashed_messages() %}
     {% for m in messages %}
     <div class="alert alert-info">{{ m }}</div>
@@ -12,7 +15,7 @@
         <fieldset class="mb-5 polyforms-fieldset">
             <legend class="px-3 polyforms-legend">Basic Info</legend>
             <div class="form-group row">
-                <label for="title" class="col-sm-2 col-md-1 col-form-label">Form Title: </label>
+                <label for="title" class="col-sm-2 col-form-label">Form Title: </label>
                 <div class="col">
                     <input type="text" name="title" class="form-control" value="{{ form.title }}">
                 </div>
@@ -33,7 +36,7 @@
             </div>
             
             <div class="form-group">
-                <label for="theme">Choose a theme. This affects how your form will look like. You can change the theme later too.</label> 
+                <label for="theme">Choose a theme. This affects how your form will look like.</label> 
                 <select id="theme" name="theme">
                     <option value="basic.html" {{"selected" if form.theme == "basic.html"}}>Basic</option>
                     <option value="light.html" {{"selected" if form.theme == "light.html"}}>Light</option>
@@ -72,29 +75,31 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
-                            <label for="{{q.index}}.question" class="polyforms-label col col-sm-1 col-form-label">Question: </label>
+                            <label for="{{q.index}}.question" class="polyforms-label col-12 col-sm-2 col-form-label">Question: </label>
                             <div class="col"><input id="{{q.index}}.question" name="{{q.index}}.question" type="text" value="{{q.question}}" class="form-control" required></div>
                         </div>
-                        <div class="form-group row">
-                            <label for="{{q.index}}.type" class="polyforms-label col col-sm-1 col-form-label">Question Type: </label>
-                            <div class="col"><select id="{{q.index}}.type" name="{{q.index}}.type" class="form-control" onchange="changeType({{q.index}}, this.value);">
-                                <option value="short" {{"selected" if q.type == "short"}}>one-line response</option>
-                                <option value="long" {{"selected" if q.type == "long"}}>extended response</option>
-                                <option value="int" {{"selected" if q.type == "int"}}>integer</option>
-                                <option value="number" {{"selected" if q.type == "number"}}>number</option>
-                                <option value="choice" {{"selected" if q.type == "choice"}}>multiple-choice</option>
-                            </select></div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="{{q.index}}.required" class="col col-sm-1 col-form-label">Required:</label>
-                            <div class="col"><input id="{{q.index}}.required" name="{{q.index}}.required" type="checkbox" {{"checked" if q.required}}></div>
+                        <div class="row">
+                            <div class="form-group col-12 col-sm-6">
+                                <label for="{{q.index}}.type" class="polyforms-label">Question Type: </label>
+                                <select id="{{q.index}}.type" name="{{q.index}}.type" class="form-control" onchange="changeType({{q.index}}, this.value);">
+                                    <option value="short" {{"selected" if q.type == "short"}}>one-line response</option>
+                                    <option value="long" {{"selected" if q.type == "long"}}>extended response</option>
+                                    <option value="int" {{"selected" if q.type == "int"}}>integer</option>
+                                    <option value="number" {{"selected" if q.type == "number"}}>number</option>
+                                    <option value="choice" {{"selected" if q.type == "choice"}}>multiple-choice</option>
+                                </select>
+                            </div>
+                            <div class="form-group col">
+                                <label for="{{q.index}}.required">Required:</label>
+                                <input id="{{q.index}}.required" name="{{q.index}}.required" type="checkbox" {{"checked" if q.required}}>
+                            </div>
                         </div>
                         <div class="form-group row">
                             <div class="col"><label for="{{q.index}}.min">Minimum {{minmax}}</label><input id="{{q.index}}.min" name="{{q.index}}.min" type="number" min="0" value="{{q.min}}" class="form-control" placeholder="number"></div>
                             <div class="col"><label for="{{q.index}}.max">Maximum {{minmax}}</label><input id="{{q.index}}.max" name="{{q.index}}.max" type="number" min="0" value="{{q.max}}" class="form-control" placeholder="number"></div>
                         </div>
                         <div class="form-group {{'polyforms-hidden' if q.type != 'choice'}}" id="{{q.index}}.answersDiv">
-                            <label for="{{q.index}}.answers">Enter answer choices in the following box, where each answer choice is on a new line. If you want an answer choice to be recorded differently than it is presented on this form, then put the text you want to see in the spreadsheet for that answer choice at the start of the line and end it with a closing parenthesis. Ex: "A) Bananas" will show "Bananas" on the form but "A" on the spreadsheet</label>
+                            <label for="{{q.index}}.answers">Enter answer choices in the following box, where each answer choice is on a new line.</label>
                             <textarea name="{{q.index}}.answers" id="{{q.index}}.answers" class="form-control" rows="4" required>{% if "choices" in q %}{% for c in q.choices %}{{c.value+")" if c.value != c.text}}{{c.text}}
 {% endfor %}{% else %}.{% endif %}</textarea>
                         </div>
@@ -104,7 +109,7 @@
             </li>
             {% endfor %}
         </ol>
-        <div class="text-center mb-5"><a class="btn btn-lg btn-primary" href="#" id="add">Add Question</a></div>
+        <div class="text-center mb-5"><a class="btn btn-primary" href="#" id="add">Add Question</a></div>
         <p>Make sure you save your changes before doing anything else</p>
         <input class="btn btn-success" type="submit" value="Save Changes">
         <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
@@ -196,7 +201,7 @@
         document.getElementById("add").addEventListener("click", function(event) {
             event.preventDefault();
             var li = document.createElement("li");
-            li.innerHTML = "";
+            li.innerHTML = "This feature doesn't work yet";
             document.getElementsByTagName("ol")[0].appendChild(li);
         });
     </script>

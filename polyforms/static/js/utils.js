@@ -38,3 +38,15 @@ var getChild = function(parent, filter) {
     };
     return recursive(parent, filter);
 };
+
+/* Given an element's ID, this function will either show or hide it. Optionally provide the button element that performs this action as a 2nd parameter and its text content will change too. */
+var toggleVisibility = function(elementID, toggleButton, showText, hideText) {
+    var element = document.getElementById(elementID);
+    if(element != null && element.classList != undefined) {
+        var result = element.classList.toggle("d-none");
+        if(toggleButton != undefined) {
+            toggleButton.textContent = result? showText : hideText;
+        }
+        return result;
+    }
+}

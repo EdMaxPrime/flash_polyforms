@@ -5,14 +5,18 @@
 <div class="row my-5">
   <div class="col mb-1">
     <h1>{{title}}</h1>
+    <nav class="nav nav-tabs mb-5">
+        <a class="nav-item nav-link active" href="/form/view?id={{form_id}}">Results</a>
+        <a class="nav-item nav-link" href="/form/edit?id={{form_id}}">Edit Form</a>
+        <a class="nav-item nav-link" href="/form/info?id={{form_id}}">Share</a>
+    </nav>
     <div id="cards">
       <div class="card my-3" id="helpBox">
+        <div class="card-footer"><h5 class="d-inline card-title">Help</h5><a id="infoToggle" href="#" class="card-link float-right">Hide</a></div>
         <div id="info" class="card-body">
-          <p>Shareable link: <a href="/f/{{form_id}}">http://polyforms.me{{url_for("display_form_shortcut", form_id=form_id)}}</a> (right click the blue link and then click "copy link address" in the popup menu)</p>
           <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
           <p>To delete a response, click on "Delete a response" in the configure menu then click on a row.</p>
           <p>To import these responses into Excel or a similar spreadsheet editor, download this as a CSV file</p>
-          <button class="btn btn-dark" id="closeHelp">Dismiss help menu</button>
         </div>
       </div>
     </div>
@@ -40,13 +44,8 @@
       <div class="btn-group" role="group">
         <button class="btn btn-secondary dropdown-toggle" id="configureMenuToggler" data-toggle="dropdown" type="button">Configure</button>
         <div class="dropdown-menu" aria-labelledby="configureMenuToggler">
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=basic">Change theme to basic</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=light">Change theme to light</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=dark">Change theme to dark</a>
-          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="cew">Make columns equal width</a>
           <a class="dropdown-item" href="#" id="del">Delete a response</a>
-          <a class="dropdown-item" href="/form/edit?id={{form_id}}">Edit or delete form</a>
         </div>
       </div>
     </div>
@@ -250,6 +249,7 @@
 </div>
 
 <script type="text/javascript" src="/static/js/reqwest.min.js"></script>
+<script type="text/javascript" src="/static/js/utils.js"></script>
 <script type="text/javascript">
 var mydata = {{ data|tojson }};
 var headers = {{ headers|tojson|safe }};
@@ -559,8 +559,9 @@ var activateToolbar = function() {
   });
 
   /* Close help card */
-  document.getElementById("closeHelp").addEventListener("click", function() {
-    document.getElementById("helpBox").style.display = "none";
+  document.getElementById("infoToggle").addEventListener("click", function(event) {
+    event.preventDefault();
+    toggleVisibility("info", this, "Show", "Hide");
   });
 
   /* AJAX things */
