@@ -446,6 +446,13 @@ def get_recent_forms(amount):
     close_db(db)
     return [get_form_questions(x[0]) for x in list_of_ids]
 
+#Returns the number of questions in a form, or 0 if it doesn't exist
+def get_num_questions(form_id):
+    db, c = open_db()
+    number = defaultVal(c.execute("SELECT count(question_id) FROM questions WHERE form_id = ?;", (form_id,)).fetchone(), 0)
+    close_db(db)
+    return number
+
 def getSQ(username):
     db, c = open_db()
     c.execute("SELECT security_question FROM accounts WHERE username = " + "'" + str(username) + "';")
@@ -538,20 +545,14 @@ def delete_form(form_id):
 def delete_question(form_id, question_id):
     db, c = open_db()
     # Delete the question from th DB
-    c.execute("DELETE FROM questions WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
-    c.execute("DELETE FROM responses WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
-    c.execute("DELETE FROM options WHERE form_id = " + str(form_id) + " AND question_id = " + str(question_id) + ";")
+    c.execute("DELETE FROM questions WHERE form_id = ? AND question_id = ?;", (form_id, question_id))
+    c.execute("DELETE FROM responses WHERE form_id = ? AND question_id = ?;", (form_id, question_id))
+    c.execute("DELETE FROM options WHERE form_id = ? AND question_id = ?;", (form_id, question_id))
     c.fetchall() # do this to clear / reset the cache 
     # Re-number all the existing ones
-    c.execute("SELECT question_id FROM questions where form_id = " + str(form_id) + ";")
-    tempCounter = c.fetchall()
-    if tempCounter == 0 or tempCounter == None:
-        pass
-    else:
-        #tempCounter = question_id + 1
-        c.execute("UPDATE questions SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
-        c.execute("UPDATE responses SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
-        c.execute("UPDATE options SET question_id = question_id - 1 WHERE question_id > " + str(tempCounter) + ";")
+    c.execute("UPDATE questions SET question_id = question_id - 1 WHERE question_id > ?;", (question_id,))
+    c.execute("UPDATE responses SET question_id = question_id - 1 WHERE question_id > ?;", (question_id,))
+    c.execute("UPDATE options SET question_id = question_id - 1 WHERE question_id > ?;", (question_id,))
     close_db(db)
 
 #Deletes the options from a multiple-choice question. The which parameter should be a list of values of the options to delete. Leave empty to delete all of them

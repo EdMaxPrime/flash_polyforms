@@ -4,10 +4,10 @@ body {
     padding-right: 30px;
 }
 */
-.feature {
+.polyforms-feature {
     background-color: rgba(199, 221, 255, 0.5);
-    border: 5px solid white;
-    border-radius: 5px;
+    border-left: 1px solid rgb(199, 221, 255);
+    border-right: 1px solid rgb(199, 221, 255);
     padding: 2em;
     font-size: 18px;
     text-align: center;
@@ -49,4 +49,15 @@ div.polyforms-question:hover {
 
 .polyforms-hidden {
     display: none;
+}
+
+.polyforms-codeblock {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    padding: 2em;
+}
+
+ul.polyforms-compact {
+    margin-bottom: 0rem;
+    padding-left: 20px;
 }

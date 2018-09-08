@@ -70,8 +70,8 @@
                     <div class="card-header">
                         <a class="card-link" href="">Move Up</a>
                         <a class="card-link" href="">Move Down</a>
-                        <a class="card-link" href="">Delete</a>
-                        <p class="card-text text-danger polyforms-hidden">This question and its responses will be deleted.</p>
+                        <a class="card-link" href="" id="{{q.index}}.deleteButton">Delete</a>
+                        <p class="card-text text-danger d-none" id="{{q.index}}.deleteWarning">This question and its responses will be permanently deleted when you save.</p>
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
@@ -100,10 +100,10 @@
                         </div>
                         <div class="form-group {{'polyforms-hidden' if q.type != 'choice'}}" id="{{q.index}}.answersDiv">
                             <label for="{{q.index}}.answers">Enter answer choices in the following box, where each answer choice is on a new line.</label>
-                            <textarea name="{{q.index}}.answers" id="{{q.index}}.answers" class="form-control" rows="4" required>{% if "choices" in q %}{% for c in q.choices %}{{c.value+")" if c.value != c.text}}{{c.text}}
-{% endfor %}{% else %}.{% endif %}</textarea>
+                            <textarea name="{{q.index}}.answers" id="{{q.index}}.answers" class="form-control" rows="4" required>{% if "choices" in q %}{% for c in q.choices %}{{c.value+")" if c.value != c.text}}{{c.text}}{{"\n" if not loop.last}}{% endfor %}{% else %}.{% endif %}</textarea>
                         </div>
                         <input type="hidden" name="{{q.index}}.newIndex" value="{{q.index}}">
+                        <input type="hidden" name="{{q.index}}.delete" id="{{q.index}}.delete" value="">
                     </div>
                 </div>
             </li>
@@ -150,6 +150,7 @@
             afterIndex.setAttribute("value", temp);
             after.parentNode.insertBefore(after, before);
         };
+        /* This gets run whenever something in the <li> element gets clicked. This function is for <a> element buttons. */
         var liListener = function(event) {
             var target = event.target || event.srcElement || event.originalTarget;
             if(target.textContent == "Move Up") {
@@ -164,19 +165,13 @@
                     swapElements(this, this.nextElementSibling);
                 }
             }
-            else if(target.textContent == "Delete") {
+            else if(target.textContent == "Delete" || target.textContent == "Undo Delete") {
                 event.preventDefault();
-                target.textContent = "Undo Delete";
-                getChild(this, function(element) {
-                    return element.classList.contains("text-danger");
-                }).classList.toggle("polyforms-hidden");
-            }
-            else if(target.textContent == "Undo Delete") {
-                event.preventDefault();
-                target.textContent = "Delete";
-                getChild(this, function(element) {
-                    return element.className.indexOf("text-danger") != -1;
-                }).classList.toggle("polyforms-hidden");
+                var question_index = target.getAttribute("id").split(".")[0];
+                toggleVisibility(question_index + ".deleteWarning", target, "Delete", "Undo Delete");
+                var hiddenInput = document.getElementById(question_index + ".delete");
+                if(hiddenInput.value == "delete") hiddenInput.value = "";
+                else                              hiddenInput.value = "delete";
             }
         }
         for(var i = 0; i < listElements.length; i++) {
@@ -201,8 +196,10 @@
         document.getElementById("add").addEventListener("click", function(event) {
             event.preventDefault();
             var li = document.createElement("li");
-            li.innerHTML = "This feature doesn't work yet";
-            document.getElementsByTagName("ol")[0].appendChild(li);
+            var ol = document.getElementsByTagName("ol")[0];
+            li.innerHTML = '<div class="card mb-5">\n    <div class="card-header">\n        <a class="card-link" href="">Move Up</a>\n        <a class="card-link" href="">Move Down</a>\n        <a class="card-link" href="" id="INDEX.deleteButton">Delete</a>\n        <p class="card-text text-danger d-none" id="INDEX.deleteWarning">This question and its responses will be permanently deleted when you save.</p>\n    </div>\n    <div class="card-body">\n        <div class="form-group row">\n            <label for="INDEX.question" class="polyforms-label col-12 col-sm-2 col-form-label">Question: </label>\n            <div class="col"><input id="INDEX.question" name="INDEX.question" type="text" value="" class="form-control" required></div>\n        </div>\n        <div class="row">\n            <div class="form-group col-12 col-sm-6">\n                <label for="INDEX.type" class="polyforms-label">Question Type: </label>\n                <select id="INDEX.type" name="INDEX.type" class="form-control" onchange="changeType(INDEX, this.value);">\n                    <option value="short" selected>one-line response</option>\n                    <option value="long">extended response</option>\n                    <option value="int">integer</option>\n                    <option value="number">number</option>\n                    <option value="choice">multiple-choice</option>\n                </select>\n            </div>\n            <div class="form-group col">\n                <label for="INDEX.required">Required:</label>\n                <input id="INDEX.required" name="INDEX.required" type="checkbox">\n            </div>\n        </div>\n        <div class="form-group row">\n            <div class="col"><label for="INDEX.min">Minimum characters</label><input id="INDEX.min" name="INDEX.min" type="number" min="0" value="" class="form-control" placeholder="number"></div>\n            <div class="col"><label for="INDEX.max">Maximum characters</label><input id="INDEX.max" name="INDEX.max" type="number" min="0" value="" class="form-control" placeholder="number"></div>\n        </div>\n        <div class="form-group polyforms-hidden" id="INDEX.answersDiv">\n            <label for="INDEX.answers">Enter answer choices in the following box, where each answer choice is on a new line.</label>\n            <textarea name="INDEX.answers" id="INDEX.answers" class="form-control" rows="4" required>.</textarea>\n        </div>\n        <input type="hidden" name="INDEX.newIndex" value="INDEX">\n        <input type="hidden" name="INDEX.delete" id="INDEX.delete" value="">\n    </div>\n</div>'.replace(/INDEX/g, ol.children.length + 1);
+            li.addEventListener("click", liListener);
+            ol.appendChild(li);
         });
     </script>
 {% endblock %}

@@ -5,6 +5,7 @@ import random   #for the generate_questions random word generator
 from utils import db
 from utils import test
 from utils import security
+from utils import forms
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -286,7 +287,8 @@ def info_form():
 @app.route('/form/new')
 def create():
     if "user" in session:
-        return render_template("create.html", username=session.get("user", ""))
+        form = forms.EMPTY_FORM
+        return render_template("create.html", username=session.get("user", ""), form=form)
     else:
         flash("You need an account to make a form")
         return redirect(url_for("login_page"))
@@ -384,11 +386,18 @@ def edit_form():
                 db.update_form(form_id, "message", request.form["message"])
             #Now do the questions
             new_order = []
+            to_be_deleted = []
             question_id = 1
+            number_of_questions = db.get_num_questions(form_id)
             while str(question_id) + ".question" in request.form:
                 i = str(question_id)
-                db.update_question(form_id, question_id, "question", request.form[i+".question"])
+                if question_id > number_of_questions: #if this is a new question, add it
+                    db.add_question(form_id, request.form[i+".question"], "short", 0, None, None) #default values: one-line question that's optional with no min/max
+                else: #if this is an exisiting question, update it
+                    db.update_question(form_id, question_id, "question", request.form[i+".question"])
                 new_order.append(request.form.get(i+".newIndex", i))
+                if request.form.get(i+".delete") == "delete":
+                    to_be_deleted.append(int(new_order[-1]))
                 if i+".required" in request.form:
                     db.update_question(form_id, question_id, "required", 1)
                 else:
@@ -413,6 +422,11 @@ def edit_form():
                     db.update_question(form_id, question_id, "type", request.form[i+".type"])
                 question_id += 1
             db.update_order(form_id, new_order)
+            to_be_deleted.sort()
+            #delete loop here
+            for i in range(0, len(to_be_deleted)):
+                #print "deleting %d which is now index %d, %d left" % (to_be_deleted[i], to_be_deleted[i]-i, len(to_be_deleted) - i - 1)
+                db.delete_question(form_id, to_be_deleted[i] - i)
             flash("Your changes have been saved")
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
 
