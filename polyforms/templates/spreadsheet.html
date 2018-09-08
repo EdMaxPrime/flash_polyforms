@@ -12,8 +12,8 @@
     </nav>
     <div id="cards">
       <div class="card my-3" id="helpBox">
-        <div class="card-footer"><h5 class="d-inline card-title">Help</h5><a id="infoToggle" href="#" class="card-link float-right">Hide</a></div>
-        <div id="info" class="card-body">
+        <div class="card-footer"><h5 class="d-inline card-title">Help</h5><a id="infoToggle" href="#" class="card-link float-right">Show</a></div>
+        <div id="info" class="card-body d-none">
           <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
           <p>To delete a response, click on "Delete a response" in the configure menu then click on a row.</p>
           <p>To import these responses into Excel or a similar spreadsheet editor, download this as a CSV file</p>
@@ -70,9 +70,9 @@
         {% if loop.first %}
         <th scope="row">{{cell}}</th>
         {% elif cell is iterable and cell is not string %}
-        <td>{% for item in cell %}{{item}}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
+        <td><ul class="polyforms-compact">{% for item in cell %}<li>{{item}}</li>{% endfor %}</ul></td>
         {% else %}
-        <td>{{cell}}</td>
+        <td>{{cell if cell != None else ""}}</td>
         {% endif %}
         {% endfor %}
       </tr>
@@ -247,6 +247,7 @@
     </div>
   </div>
 </div>
+<br><br><br><br>
 
 <script type="text/javascript" src="/static/js/reqwest.min.js"></script>
 <script type="text/javascript" src="/static/js/utils.js"></script>
@@ -461,14 +462,14 @@ var activateToolbar = function() {
   var rows = d3.select("#responsesTable").selectAll("tbody tr");
   //a helper function that returns true if this filter matches
   var filterMatches = function(innerHTML, filterText) {
-    return innerHTML.replace("<br>", " ").indexOf(filterText) != -1;
+    return innerHTML.replace(" ", "").toLowerCase().indexOf(filterText.replace(" ", "").toLowerCase()) != -1;
   }
   //This event happens whenever you type in the search bar
   filter.addEventListener("input", function(evt) {
     filterText = filter.value;
     rows.style("display", function(d, rowIndex) {
       for(var i = 0; i < this.children.length; i++) {
-        if(filterMatches(this.children[i].innerHTML, filterText)) {
+        if(filterMatches(this.children[i].textContent, filterText)) {
           return "table-row";
         }
       }
