@@ -4,25 +4,28 @@
 <h1 class="mt-5">About</h1>
 <div class="container mb-3">
     <div class="row">
-        <div class="col-xs-6 col-lg feature">Make forms, questionarres, and surveys that look good on desktop and mobile.</div>
-        <div class="col-xs-6 col-lg feature">Sharing them is as easy as just giving people a link</div>
-        <div class="col-xs-6 col-lg feature">Your form and its responses are hosted online for free.</div>
-        <div class="col-xs-6 col-lg feature">Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.</div>
+        <div class="col-md-6 col-lg polyforms-feature">Make forms, questionarres, and surveys that look good on desktop and mobile.</div>
+        <div class="col-md-6 col-lg polyforms-feature">Sharing them is as easy as just giving people a link</div>
+        <div class="col-md-6 col-lg polyforms-feature">Your form and its responses are hosted online for free.</div>
+        <div class="col-md-6 col-lg polyforms-feature">Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.</div>
     </div>
 </div>
 <h1>Table of Contents</h1>
 <ol>
 	<li><a href="#creating">How to make a form</a></li>
 	<li><a href="#account">How to make an account</a></li>
-	<li><a href="#sharing">How to share your form</a></li>
-	<li><a href="#responses">How to see responses to your form</a></li>
+    <li><a href="#sharing">How to share your form</a></li>
+    <li><a href="#responses">How to see responses to your form</a></li>
+    <li><a href="#editing">How to edit your form after your create it</a></li>
+    <li><a href="#settings">How to change your username or delete your account</a></li>
+    <li><a href="#password">How to change your password</a></li>
     <li><a href="#api">How to use our API</a></li>
     <li><a href="#changes">What's changed about Polyforms?</a></li>
 </ol>
 <hr>
 <a id="creating"></a>
 <h2>How to make a form</h2>
-<p>You'll need to make an acount first. <a href="account">Instructions here.</a> After you make an account, login. The navigation bar at the top of the page will then have a "create" link. Follow it to the form creation page. There, you should enter the form's title, choose a theme and enter a thankyou message for respondents.</p>
+<p>You'll need to make an acount first. <a href="#account">Instructions here.</a> After you make an account, login. The navigation bar at the top of the page will then have a "create" link. Follow it to the form creation page. There, you should enter the form's title, choose a theme and enter a thankyou message for respondents.</p>
 <p>The next task is to add questions to your form. Add as many as you like. Press the button at the bottom of the page to add questions. A box will appear with a number next to it. Put your question in there. Then, choose what type of response the question should accept. There are five supported types. You can use min and max to constrain the inputs.</p>
 <p>One-line lets respondents write a single line of text. Extended response lets respondents write longer answers with linebreaks and paragraphs. Min and max control how many characters (letters, spaces, punctuation) respondents can enter.</p>
 <p>Number and integer act as you would expect them to. Respondents can only put numbers as answers. Min and max are the inclusive range for numbers.</p>
@@ -30,63 +33,102 @@
 <p>If you want a question to be optional, uncheck the required box. Otherwise, make sure it is checked.</p>
 <p>When you finish creating questions, press the submit button.</p>
 
+<hr>
 <a id="account"></a>
 <h2>How to make an account</h2>
-<p>Go to <a href="/join">the signup page</a>. There, you will be asked to choose a username, password and security question. The security question is a safeguard to make sure that only you and no one else can change your password if you need to.</p>
+<p>Go to <a href="/join">the signup page</a>. Fill out the boxes (you <em>do not</em> need to give your email).
+    <ol>
+        <li><b>Pick a username.</b> Write it again in the "confirm username" box to make sure you didn't make a typo.<ul><li>Usernames are unique. If someone else already has an account with the one you picked, you'll be asked to choose a new one.</li></ul></li>
+        <li><b>Choose a password.</b> Write it in the "confirm password" box exactly like you did in the first one to make sure there are no typos.<ul><li>Although not required, you're encouraged to choose a password at least 8 characters long.</li><li>Good passwords use uppercase, lowercase, numbers, symbols and spaces.</li></ul></li>
+        <li><b>Select a security question.</b> <ul><li>You'll need to remember it in case you ever have to change your password.</li></ul></li>
+        <li><b>Answer the security question.</b> <ul><li>Make sure it's something specific to you that is easy to remember but hard for others to guess.</li></ul></li>
+    </ol>
+<p>Now you have an account :) If you ever want to change your username, password, or delete your account, you should go to your <a href="/my/settings">settings</a> page (link is in the nav bar at the top of each page).</p>
 <p>We don't share your information with anyone. Still, please choose a secure password and avoid inputting sensitive information.</p>
 
+<hr>
 <a id="sharing"></a>
 <h2>How to share your form</h2>
-<p>When you are logged in, click on the "my forms" link at the top. You will be presented with a list of all the forms you created. Click on the form you want to share in the list. You will be brought to the results page. Right below the title, you will see the shareable link. Right click it and then copy it to your clipboard. You can give this link to anyone on the internet.</p>
-<p>If you want to stop accepting responses for your form, go to the results page (see above). Click on the dropdown menu labaled "configure," then click on "stop/resume accepting responses."</p>
+<p>When you are logged in, click on the "my forms" link at the top of any page. You will be presented with a list of all the forms you created. Click on the form you want to share in the list. You will be brought to the results page. Right below the title, you will see a tab called "Share." Click on the tab. You'll see the shareable link on the page. Copy it to your clipboard. You can give this link to anyone on the internet.</p>
+<ul>
+    <li>On desktop web broswers, right click on the shareable link and select "copy link address" from the popup menu.</li>
+    <li>On smartphone / mobile web browsers, tap and hold your finger on the shareable link. Select "copy link" from the popup menu.</li>
+</ul>
+<p>If you want to stop accepting responses for your form, go to the "my forms" page (see above). Click on your form, then go to the "Edit" tab.</p>
+<img src="/static/img/tutorial_open.png" class="img-fluid"></img>
+<p> In the Basic Info box, uncheck the option that says "continue letting people respond to this form" and press the save button at the bottom of the page.</p>
 
+<hr>
 <a id="responses"></a>
 <h2>How to see responses to your form</h2>
 <p>Log in to your account. Click on the "my forms" link at the top. Click on the form you want to see in the list. You will be brought to the results page. A table full of responses will appear. They are ordered from first to last submitted.</p>
 <p>The toolbar on that page will let you download the responses. There is also a textfield in which you can type search criteria to find specific responses.</p>
-<p>To let other people view responses to your form, you have to make the results publicly viewable. To do this, click on the configure dropdown menu when viewing your form. Then select the "Make results publicly viewable" menu item. You should see a message telling you that the results are public now. The link to let other people see the responses is the same one you use, in the address bar of your browser window. It should look like http://polyforms.me/form/view?id=some_number</p>
-<p>If you want to make the results to your form private again, click on the same menu item in the "configure" dropdown. You should see a message telling you that the results have been made private. This means that only you can see them, even if other people have the link.</p>
+<p>To let other people view responses to your form, you have to make the results publicly viewable. To do this, click on the "Edit Form" tab below the form's title. In the Basic Info box, you will see a checkbox item labeled "Check this box to let the results to this form be viewable by anyone with the link to the form. Otherwise, only you will be able to see the responses to this form," which you should check and then press the save button at the bottom of the page. The link to let other people see the responses is the same one you use, in the address bar of your browser window. It should look like <code>http://polyforms.me/form/view?id=some_number</code>, and you can also find this link in the "share" tab.</p>
+<p>If you want to make the results to your form private again, go to the "edit form" tab and uncheck the item that says "Check this box to let the results to this form be viewable by anyone with the link to the form. Otherwise, only you will be able to see the responses to this form." Then press the save button at the bottom of the page. Now only you can see the results, even if other people have the link.</p>
 
+<hr>
+<a id="editing"></a>
+<h2>How to edit your form after you create it</h2>
+<p>First, open your form. Do this by going to the <a href="/my/forms">my forms</a> page (link is in the navigation bar at the top) and clicking on your form's title in the list. This will bring you to the results page. Right below your form's title on the results page, you will see a tab called "Edit Form." Click on this tab.</p>
+<p>You will be presented with the form editor, which looks a lot like the form creation page. You can change the form's title, theme, access, and thank you message.</p>
+<p>If you scroll further down the page, you'll see a list of questions from your form. Each of them will be in their own box. You can change the order of the questions by clicking "Move Up" and "Move Down." You can delete a question by clicking the "Delete" button at the top of the box (note that the question will only be deleted after you press save). You can change the question's text, answer format, and other settings too.</p>
+<p>To add a question, click on the "Add Question" button at the bottom of the question list. An empty box will appear for you to fill out.</p>
+<p><b>You must save your changes before you leave the editing page.</b> Even clicking on the "results" or "share" tabs constitutes leaving the page. To save, scroll all the way to the bottom, and click on the green "Save Changes" button. A notification will appear at the top telling you that they were saved.</p>
+
+<hr>
+<a id="settings"></a>
+<h2>How to change your username or delete your account</h2>
+<p>First, go to your <a href="/my/settings">settings</a> page.</p>
+<img src="/static/img/tutorial_settings.png" class="img-fluid"></img>
+<p>To change your username, write a new one in the box. Then press the change button next to it. If it works, then you will see your new username appear in the navbar at the top of the page. Otherwise, if someone already has that username, then you will be told so.</p>
+<p>To delete your account, just press the "Delete" button. This action is final, and can't be undone. All of your forms and data will be deleted. Any responses you submitted to other forms will be kept, though. Finally, you will be redirected to the home page.</p>
+
+<hr>
+<a id="password"></a>
+<h2>How to change your password</h2>
+<p>Go to your <a href="/my/settings">settings</a> page, then click on "change password." You will be brought to this page:</p>
+<img src="/static/img/tutorial_password.png" class="img-fluid"></img>
+<p>Follow the instructions on the page. A dropdown menu with all the possible security questions will be there; make sure to choose the one you did when signing up for an account. If you don't remember which one you chose, then try going through all the questions.</p>
+<p>Make sure to put your new password in both boxes. The reason for this is to make sure you don't make any typos. You're encouraged to make a long password so that it doesn't get hacked.</p>
+
+<hr>
 <a id="api"></a>
 <h2>How to use our API</h2>
 <p>We are planning to expand our API capabilities in the future. For now, they're pretty rudimentary. You can only get and submit responses to a form.</p>
 <p>If you want to get responses from a form, then you should first make the results public. Then, make a GET request to one of the following URLs. Make sure to substitute "id=some_number" with whatever number appears in the address bar of your browser when viewing the form.</p>
 <ul>
     <li>For xml, use <code>http://polyforms.me/form/view/form.xml?id=some_number</code>. The response document will have a root tag of <code><form></code> with setions for metadata, questions and answers. The questions are each assigned a number <i>starting from 2</i>. Answers are grouped into <code><response></code> tags and then matched to questions using that number. Here is an example of what this looks like:
-        <textarea disabled class="form-control" rows="28" style="font-family: monospace;">
-<?xml version="1.0" encoding="UTF-8"?>
-<form>
-    <info>
-        <title>This is my form</title>
-        <owner>Your username</owner>
-        <created>YYYY-MM-DD HH:MM:SS of when you created this form</created>
-    </info>
-    <questions>
-        <question id="0">Response Index</question>
-        <question id="1">When</question>
-        <question id="2">What is your name?</question>
-        <question id="3">Select all that apply</question>
-    </questions>
-    <responses>
-        <response>
-            <answer to="0">1</answer>
-            <answer to="1">2000-01-01 12:00:00</answer>
-            <answer to="2">Nobody</answer>
-        </response>
-        <response>
-            <answer to="0">2</answer>
-            <answer to="1">2000-01-01 12:01:00</answer>
-            <answer to="2">Jane</answer>
-            <answer to="3">I like ice cream</answer>
-            <answer to="3">I like rainbow sherberts</answer>
-        </response>
-    </responses>
-</form>
-        </textarea>
+        <pre class="polyforms-codeblock"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;form&gt;
+    &lt;info&gt;
+        &lt;title&gt;This is my form&lt;/title&gt;
+        &lt;owner&gt;Your username&lt;/owner&gt;
+        &lt;created&gt;YYYY-MM-DD HH:MM:SS of when you created this form&lt;/created&gt;
+    &lt;/info&gt;
+    &lt;questions&gt;
+        &lt;question id="0"&gt;Response Index&lt;/question&gt;
+        &lt;question id="1"&gt;When&lt;/question&gt;
+        &lt;question id="2"&gt;What is your name?&lt;/question&gt;
+        &lt;question id="3"&gt;Select all that apply&lt;/question&gt;
+    &lt;/questions&gt;
+    &lt;responses&gt;
+        &lt;response&gt;
+            &lt;answer to="0"&gt;1&lt;/answer&gt;
+            &lt;answer to="1"&gt;2000-01-01 12:00:00&lt;/answer&gt;
+            &lt;answer to="2"&gt;Nobody&lt;/answer&gt;
+        &lt;/response&gt;
+        &lt;response&gt;
+            &lt;answer to="0"&gt;2&lt;/answer&gt;
+            &lt;answer to="1"&gt;2000-01-01 12:01:00&lt;/answer&gt;
+            &lt;answer to="2"&gt;Jane&lt;/answer&gt;
+            &lt;answer to="3"&gt;I like ice cream&lt;/answer&gt;
+            &lt;answer to="3"&gt;I like rainbow sherberts&lt;/answer&gt;
+        &lt;/response&gt;
+    &lt;/responses&gt;
+&lt;/form&gt;</code></pre>
     </li>
     <li>For json, use <code>http://polyforms.me/form/view/form.json?id=some_number</code>. The response document will be properly indented JSON data. At the root is a list. Every item in the list is an object with question-answer pairs. If a question allows you to select more than one answer, then its value will always be a list of answers – even if no answers were selected. Numerical responses will always have quotes around them. Here is an example of what this looks like:
-        <textarea disabled class="form-control" rows="14" style="font-family: monospace;">
-[
+        <pre class="polyforms-codeblock"><code>[
     {
         "Response Index": 1,
         "When": "2000-01-01 12:00:00",
@@ -99,33 +141,36 @@
         "What is your name?": "Jane",
         "Select all that apply": ["I like ice cream", "I like rainbow sherberts"]
     }
-]
-        </textarea>
+]</code></pre>
     </li>
     <li>For csv, use <code>http://polyforms.me/form/view/form.csv?id=some_number</code>. The response document will be a comma-separated list of values. The top row will have the questions, and every subsequent row will have answers. It should look like this:
-        <textarea disabled class="form-control" rows="3" style="font-family: monospace;">
-Response Index,When,What is your name?,Select all that apply
+        <pre class="polyforms-codeblock"><code>Response Index,When,What is your name?,Select all that apply
 1,2000-01-01 12:00:00,Nobody,
-2,2000-01-01 12:01:00,Jane,"['I like ice cream', 'I like rainbow sherbert']"
-        </textarea>
+2,2000-01-01 12:01:00,Jane,"['I like ice cream', 'I like rainbow sherbert']"</code></pre>
     </li>
 </ul>
 <p>To submit a response to a form that does not require login, send a POST request to <code>http://polyforms.me/form/submit</code>. The body of this POST request should be standard url-encoded parameters. You must include a "form_id" field whose value is the id of the form (check the url for this number). Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded. Here is an example of what this request should look like:</p>
-<textarea disabled class="form-control" rows="3" style="font-family: monospace;">
+<pre class="polyforms-codeblock"><code>POST /form/submit HTTP/1.1
+Host: polyforms.me
 Content-Type: application/x-www-form-urlencoded
+Content-Length: 22
 
-form_id=1037&1=Nobody
-</textarea>
-<br>
+form_id=1037&amp;1=Nobody</code></pre>
 
+
+<hr>
 <a id="changes"></a>
 <h2>What's new with Polyforms?</h2>
 <p>After our initial release, we rolled out some changes to this website. Here they are:</p>
 <ul>
-    <li>Version 2.0<ul>
+    <li>Version 2.0 September 2018<ul>
         <li>Made the website more mobile-friendly. Pages are now scaled to fit small screens</li>
         <li>The editing page looks nicer and works better with different screen sizes</li>
         <li>You can change the order of questions from the form editing page</li>
+        <li>You can add and delete questions from your forms via the editing page</li>
+        <li>Answers to multiple choice questions will appear as a bulleted list on the results table.</li>
+        <li>Reorganized the form menu into 3 tabs: results, editing, and sharing. This replaces the old results and editing pages and makes everything easier to find.</li>
+        <li>Updated this help page with clearer instructions and pictures</li>
     </ul></li>
     <li>Version 1.X August 2018<ul>
         <li>Completely revamped the settings page. It now contains all account-relevant options, including some new ones like changing your username and deleting your account.</li>
