@@ -149,13 +149,29 @@
 2,2000-01-01 12:01:00,Jane,"['I like ice cream', 'I like rainbow sherbert']"</code></pre>
     </li>
 </ul>
-<p>To submit a response to a form that does not require login, send a POST request to <code>http://polyforms.me/form/submit</code>. The body of this POST request should be standard url-encoded parameters. You must include a "form_id" field whose value is the id of the form (check the url for this number). Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded. Here is an example of what this request should look like:</p>
+<p>To submit a response to a form that does not require login, send a POST request to <code>http://polyforms.me/form/submit</code>. The body of this POST request should be standard url-encoded parameters. You must include a "id" field whose value is the id of the form (check the url for this number). Every answer should have a field name of the question number, starting at 1, and then the value should be the answer. If an error occurs, the response will not be recorded. Here is an example of what this request should look like:</p>
 <pre class="polyforms-codeblock"><code>POST /form/submit HTTP/1.1
 Host: polyforms.me
 Content-Type: application/x-www-form-urlencoded
-Content-Length: 22
+Content-Length: 36
 
-form_id=1037&amp;1=Nobody</code></pre>
+id=1037&amp;1=Nobody&amp;response=json</code></pre>
+<p>If the submission was succesful, then you will get a response with a mimetype of <code>application/json</code> that looks like this:</p>
+<pre class="polyforms-codeblock"><code>{
+    "status": "ok",
+    "id": &lt;the form's id&gt;,
+    "message": "Your responses have been recorded (or whatever the form's creator chose as their end message)"
+}
+</code></pre>
+<p>Otherwise, you'll get:</p>
+<pre class="polyforms-codeblock"><code>{
+    "status": "bad",
+    "id": &lt;the form's id&gt;,
+    "errors": ["You must answer \"What is your name?\""],
+    "answers": {"2": ["I like ice cream"]}
+}
+</code></pre>
+
 
 
 <hr>
@@ -171,6 +187,7 @@ form_id=1037&amp;1=Nobody</code></pre>
         <li>Answers to multiple choice questions will appear as a bulleted list on the results table.</li>
         <li>Reorganized the form menu into 3 tabs: results, editing, and sharing. This replaces the old results and editing pages and makes everything easier to find.</li>
         <li>Updated this help page with clearer instructions and pictures</li>
+        <li>Expanded API support for submitting form responses</li>
     </ul></li>
     <li>Version 1.X August 2018<ul>
         <li>Completely revamped the settings page. It now contains all account-relevant options, including some new ones like changing your username and deleting your account.</li>

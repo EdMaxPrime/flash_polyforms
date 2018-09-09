@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 from jinja2 import escape
 import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
+import json
 from utils import db
 from utils import test
 from utils import security
@@ -119,6 +120,7 @@ def process_form():
     form_id = request.form.get("id", "")
     username = session.get("user", "")
     user_id = session.get("user_id", "")
+    print request.form
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
@@ -131,22 +133,30 @@ def process_form():
             else:
                 data[qnumber] = request.form.get(str(qnumber), None)
         errors = test.validate_form_submission(form_id, data)
+        if not test.can_respond(user_id, form_id, form["login_required"]):
+            errors.append("You can't respond to this form more than once")
         if len(errors) > 0: #invalid submission
-            for e in errors:
-                flash(e)
-            qnumber = 1
-            response_id = None
-            while qnumber <= number_of_questions:
-                response_id = db.add_response_negative(form_id, user_id, qnumber, data[qnumber], response_id)
-                qnumber += 1
-            return redirect(url_for("display_form", id=form_id, bad=response_id))
+            if request.form.get("response") == "json":
+                return Response(json.dumps({"status": "bad", "errors": errors, "answers": data, "form_id": form_id}), mimetype="application/json")
+            else: 
+                qnumber = 1
+                response_id = None
+                while qnumber <= number_of_questions:
+                    response_id = db.add_response_negative(form_id, user_id, qnumber, data[qnumber], response_id)
+                    qnumber += 1
+                for e in errors:
+                    flash(e)
+                return redirect(url_for("display_form", id=form_id, bad=response_id))
         else: #valid submission
             qnumber = 1
             response_id = None
             while qnumber <= number_of_questions:
                 response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
                 qnumber += 1
-            return redirect(url_for("thankyou", id=form_id))
+            if request.form.get("response") == "json":
+                return Response(json.dumps({"status": "ok", "message": codes_to_html(form["message"], form), "form_id": form_id}), mimetype="application/json")
+            else:
+                return redirect(url_for("thankyou", id=form_id))
 
 #Thank you message once form is filled out
 @app.route('/form/end')
@@ -295,11 +305,11 @@ def create():
 
 @app.route('/addQuestions', methods = ["POST", "GET"])
 def addQuestions():
-    if "loginReq" not in request.args.keys():
+    if "login_required" not in request.args.keys():
         loginReq = 0
     else:
         loginReq = 1
-    if "publicReq" not in request.args.keys():
+    if "public_results" not in request.args.keys():
         publicReq = 0
     else:
         publicReq = 1
