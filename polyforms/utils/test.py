@@ -115,6 +115,8 @@ def can_edit(user_id, form_id):
 
 #returns true if this person can submit a response (if logged in)
 def can_respond(user_id, form_id, login_required):
+    if (user_id == None or user_id == "") and login_required == True:
+        return False
     db, c = open_db()
     result = c.execute("SELECT * FROM responses WHERE form_id = ? AND user_id = ?;", (form_id, user_id)).fetchone()
     close_db(db)
