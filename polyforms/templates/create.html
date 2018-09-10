@@ -25,14 +25,9 @@
             <div class="form-group">
                 <label for="theme">Choose a theme. This affects how your form will look like.</label> 
                 <select id="theme" name="theme">
-                    <option value="basic.html" {{"selected" if form.theme == "basic.html"}}>Basic</option>
-                    <option value="light.html" {{"selected" if form.theme == "light.html"}}>Light</option>
-                    <option value="dark.html" {{"selected" if form.theme == "dark.html"}}>Dark</option>
-                    <option value="purple" {{"selected" if form.theme == "purple"}}>Purple</option>
-                    <option value="green" {{"selected" if form.theme == "green"}}>Green</option>
-                    <option value="gold" {{"selected" if form.theme == "gold"}}>Gold</option>
-                    <option value="blue" {{"selected" if form.theme == "blue"}}>Blue</option>
-                    <option value="red" {{"selected" if form.theme == "red"}}>Red</option>
+                    {% for t in themes %}
+                    <option value="{{t.name}}" {{"selected" if form.theme == t.name}}>{{t.display_name}}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="form-group">

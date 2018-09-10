@@ -1,3 +1,0 @@
-# Form question presets
-EMPTY_FORM = {"title": "", "public_results": False, "login_required": False, "theme": "basic.html", "message": "", "questions": []}
-YESNO_FORM = {"title": "", "public_results": False, "login_required": False, "theme": "basic.html", "message": "", "questions": [{"index": 1, "required": True, "min": 1, "max": 1, "type": "choice", "choices": [{"text": "yes", "value": "yes"}, {"text": "no", "value": "no"}]}]}

@@ -1,0 +1,88 @@
+[
+    {
+        "name": "basic",
+        "display_name": "Basic",
+        "template_form": "basic.html",
+        "template_end": "end_basic.html",
+        "data": {}
+    },
+    {
+        "name": "light",
+        "display_name": "Light (fancy)",
+        "template_form": "light.html",
+        "template_end": "end_light.html",
+        "data": {}
+    },
+    {
+        "name": "dark",
+        "display_name": "Dark (fancy)",
+        "template_form": "dark.html",
+        "template_end": "end_dark.html",
+        "data": {}
+    },
+    {
+        "name": "purple",
+        "display_name": "Purple",
+        "template_form": "color.html",
+        "template_end": "end_color.html",
+        "data": {
+            "text":   "#1B1B3A",
+            "bg":     "#7D5BA6",
+            "active": "#643173",
+            "normal": "#565264",
+            "hint":   "#706677"
+        }
+    },
+    {
+        "name": "green",
+        "display_name": "Green",
+        "template_form": "color.html",
+        "template_end": "end_color.html",
+        "data": {
+            "text":   "#507255",
+            "bg":     "#6EB257",
+            "active": "#C5E063",
+            "normal": "#488B49",
+            "hint":   "#4AAd52"
+        }
+    },
+    {
+        "name": "gold",
+        "display_name": "Gold",
+        "template_form": "color.html",
+        "template_end": "end_color.html",
+        "data": {
+            "text":   "#141414",
+            "bg":     "#BFAB25",
+            "active": "#FBFF12",
+            "normal": "#94A04D",
+            "hint":   "#D17B0F"
+        }
+    },
+    {
+        "name": "blue",
+        "display_name": "Blue",
+        "template_form": "color.html",
+        "template_end": "end_color.html",
+        "data": {
+            "text":   "#044389",
+            "bg":     "#28C2FF",
+            "active": "#2AF5FF",
+            "normal": "#60AFFF",
+            "hint":   "#3066BE"
+        }
+    },
+    {
+        "name": "red",
+        "display_name": "Red",
+        "template_form": "color.html",
+        "template_end": "end_color.html",
+        "data": {
+            "text":   "#66101F",
+            "bg":     "#CC4158",
+            "active": "#C42021",
+            "normal": "#858C65",
+            "hint":   "#804E49"
+        }
+    }
+]

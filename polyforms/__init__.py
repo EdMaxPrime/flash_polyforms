@@ -5,8 +5,7 @@ import random   #for the generate_questions random word generator
 import json
 from utils import db
 from utils import test
-from utils import security
-from utils import forms
+from utils import config
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -14,8 +13,8 @@ DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
 db.use_database(DIR)
 db.create_tables()
-THEMES = ["basic.html", "light.html", "dark.html", "purple", "green", "gold", "blue", "red"]
-app.secret_key = security.get_secret_key(DIR + "data/secret")
+config.load_themes(DIR + "data/themes.json")
+app.secret_key = config.get_secret_key(DIR + "data/secret")
 
 @app.route('/test')
 def deploy_test():
@@ -42,12 +41,6 @@ def login_logic():
     pword = request.form.get("password", "")
     form_id = request.form.get("redirect")
     submitType = request.form.get("submit", "")
-    '''
-    #Dummy account to test stuff
-    if pword == "123":
-        session["user"] = "Root" # NSA Backend
-        session["user_id"] = "1"
-    '''
     if db.validate_login(uname, pword) == True:
         session["user"] = uname
         session["user_id"] = db.getID("accounts", "user_id", "username", str(uname))
@@ -104,10 +97,8 @@ def display_form():
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
     else:
-        template_name = form["theme"]
-        if template_name in THEMES[3:]:
-            template_name = "color.html"
-        return render_template("form_themes/"+template_name, title=form["title"], questions=form["questions"], form_id=form_id, theme=form["theme"])
+        theme = config.get_theme(form["theme"])
+        return render_template("form_themes/"+theme["template_form"], title=form["title"], questions=form["questions"], form_id=form_id, theme=theme)
 
 #Shortcut URLS
 @app.route('/f/<form_id>')
@@ -119,8 +110,7 @@ def display_form_shortcut(form_id):
 def process_form():
     form_id = request.form.get("id", "")
     username = session.get("user", "")
-    user_id = session.get("user_id", "")
-    print request.form
+    user_id = session.get("user_id")
     if not test.form_exists(form_id):
         return render_template("404.html", username=username), 404
     else:
@@ -164,10 +154,8 @@ def thankyou():
     id = request.args.get("id", "-1")
     if test.form_exists(id):
         form = db.get_form_meta(id)
-        template_name = form["theme"]
-        if template_name in THEMES[3:]:
-            template_name = "color.html"
-        return render_template("form_themes/end_"+template_name, form=form)
+        theme = config.get_theme(form["theme"])
+        return render_template("form_themes/end_"+theme["template_end"], form=form, theme=theme)
     else:
         return render_template("404.html", username=session.get("user", "")), 404
 
@@ -297,14 +285,17 @@ def info_form():
 @app.route('/form/new')
 def create():
     if "user" in session:
-        form = forms.EMPTY_FORM
-        return render_template("create.html", username=session.get("user", ""), form=form)
+        form = config.EMPTY_FORM
+        return render_template("create.html", username=session.get("user", ""), form=form, themes=config.THEMES)
     else:
         flash("You need an account to make a form")
         return redirect(url_for("login_page"))
 
 @app.route('/addQuestions', methods = ["POST", "GET"])
 def addQuestions():
+    if "user_id" not in session:
+        flash("You must be logged in to make a form")
+        return redirect(url_for("login_page"))
     if "login_required" not in request.args.keys():
         loginReq = 0
     else:
@@ -317,7 +308,11 @@ def addQuestions():
         message = "Your response has been recorded"
     else:
         message = request.args["message"]
-    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, request.args.get("theme", "basic.html"), 1, message)
+    if config.theme_exists(request.args.get("theme")):
+        theme = request.args.get("theme")
+    else:
+        theme = "basic"
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, theme, 1, message)
     i=0
     while (str(i) + ".question" in request.args.keys()):
         if request.args[str(i) + ".type"] == "0":
@@ -390,7 +385,7 @@ def edit_form():
                 db.update_form(form_id, "open", 1)
             else:
                 db.update_form(form_id, "open", 0)
-            if "theme" in request.form and request.form["theme"] in THEMES:
+            if "theme" in request.form and config.theme_exists(request.form["theme"]):
                 db.update_form(form_id, "theme", request.form["theme"])
             if "message" in request.form:
                 db.update_form(form_id, "message", request.form["message"])
@@ -438,7 +433,7 @@ def edit_form():
                 #print "deleting %d which is now index %d, %d left" % (to_be_deleted[i], to_be_deleted[i]-i, len(to_be_deleted) - i - 1)
                 db.delete_question(form_id, to_be_deleted[i] - i)
             flash("Your changes have been saved")
-        return render_template("edit.html", username=username, form=db.get_form_questions(form_id))
+        return render_template("edit.html", username=username, form=db.get_form_questions(form_id), themes=config.THEMES)
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @app.route('/my/forms')

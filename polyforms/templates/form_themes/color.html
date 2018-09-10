@@ -4,37 +4,6 @@
     <title> {{title}} | Polyforms </title>
     <link rel="shortcut icon" href="/static/img/logo_square.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% if theme == "purple" %}
-        {% set text = "#1B1B3A" %}
-        {% set bg = "#7D5BA6" %}
-        {% set active = "#643173" %}
-        {% set normal = "#565264" %}
-        {% set hint = "#706677" %}
-    {% elif theme == "green" %}
-        {% set text = "#507255" %}
-        {% set bg = "#6EB257" %}
-        {% set active = "#C5E063" %}
-        {% set normal = "#488B49" %}
-        {% set hint = "#4AAD52" %}
-    {% elif theme == "gold" %}
-        {% set text = "#141414" %}
-        {% set bg = "#BFAB25" %}
-        {% set active = "#FBFF12" %}
-        {% set normal = "#94A04D" %}
-        {% set hint = "#D17B0F" %}
-    {% elif theme == "blue" %}
-        {% set text = "#044389" %}
-        {% set bg = "#28C2FF" %}
-        {% set active = "#2AF5FF" %}
-        {% set normal = "#60AFFF" %}
-        {% set hint = "#3066BE" %}
-    {% elif theme == "red" %}
-        {% set text = "#66101F" %}
-        {% set bg = "#CC4158" %}
-        {% set active = "#C42021" %}
-        {% set normal = "#858C65" %}
-        {% set hint = "#804E49" %}
-    {% endif %}
     <style type="text/css">
         div.container {
             margin-bottom: 4em;
@@ -43,6 +12,7 @@
             border: 4px solid red;
             background-color: rgba(255, 102, 102, 0.25);
             padding: 20px;
+            margin-bottom: 2em;
         }
         #contents {
             background-color: white;
@@ -56,8 +26,8 @@
             display: inline-block;
             padding-left: 5px;
             padding-right: 5px;
-            border-left: 1px solid {{hint}};
-            color: {{hint}};
+            border-left: 1px solid {{theme.data.hint}};
+            color: {{theme.data.hint}};
             font-size: 12px;
         }
         span.question {
@@ -70,27 +40,27 @@
             font-variant: normal;
             font-weight: 400;
             line-height: 20px;
-            background-color: {{bg}};
-            color: {{text}};
+            background-color: {{theme.data.bg}};
+            color: {{theme.data.text}};
         }
         input, textarea {
-            color: {{text}};
-            border: 1px solid {{normal}};
+            color: {{theme.data.text}};
+            border: 1px solid {{theme.data.normal}};
             padding: 2px;
         }
         input:focus, textarea:focus {
-            outline-color: {{active}};
+            outline-color: {{theme.data.active}};
         }
         input[type="submit"] {
             display: block;
             padding: 10px;
-            background-color: {{text}};
+            background-color: {{theme.data.text}};
             color: white;
             width: 80%;
             margin: 0 auto;
         }
         input[type="submit"]:hover {
-            background-color: {{active}};
+            background-color: {{theme.data.active}};
         }
         textarea {
             width: 80%;
@@ -140,14 +110,14 @@
                 {% elif q.type == "int" %}
                 <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes|safe}} value="{{q.value|default(''),true}}">
 
-                <!-- If the maximum selectable choices is more than 1, then checkboxes -->
                 {% elif q.type == "choice" and q.max != 1 %}
+                <!-- If the maximum selectable choices is more than 1, then checkboxes -->
                 {% for c in q.choices %}
                 <br><input type="checkbox" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ 'checked' if c.selected|default(false, true)}}> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
                 {% endfor %}
 
-                <!-- If the maximum selectable choices is 1, then radio buttons -->
                 {% else %}
+                <!-- If the maximum selectable choices is 1, then radio buttons -->
                 {% for c in q.choices %}
                 <br><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ 'checked' if c.selected|default(false, true)}}> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
                 {% endfor %}
