@@ -53,62 +53,55 @@
         
         <h2>Questions</h2>
         <ol id="questionList">
-            {% for q in form.questions %}
-            {% if q.type == "short" %} {% set typeLabel = "one-line response" %} {% set minmax = "answer length" %}
-            {% elif q.type == "long" %} {% set typeLabel = "extended response" %} {% set minmax = "answer length" %}
-            {% elif q.type == "int" %} {% set typeLabel = "integer" %} {% set minmax = "value" %}
-            {% elif q.type == "number" %} {% set typeLabel = "any number" %} {% set minmax = "value" %}
-            {% elif q.type == "choice" %} {% set typeLabel = "multiple-choice" %} {% set minmax = "selected choices" %}
-            {% endif %}
-            <li>
-                <div class="card mb-5">
-                    <div class="card-header">
-                        <a class="card-link" href="">Move Up</a>
-                        <a class="card-link" href="">Move Down</a>
-                        <a class="card-link" href="" id="{{q.index}}.deleteButton">Delete</a>
-                        <p class="card-text text-danger d-none" id="{{q.index}}.deleteWarning">This question and its responses will be permanently deleted when you save.</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group row">
-                            <label for="{{q.index}}.question" class="polyforms-label col-12 col-sm-2 col-form-label">Question: </label>
-                            <div class="col"><input id="{{q.index}}.question" name="{{q.index}}.question" type="text" value="{{q.question}}" class="form-control" required></div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-12 col-sm-6">
-                                <label for="{{q.index}}.type" class="polyforms-label">Question Type: </label>
-                                <select id="{{q.index}}.type" name="{{q.index}}.type" class="form-control" onchange="changeType({{q.index}}, this.value);">
-                                    <option value="short" {{"selected" if q.type == "short"}}>one-line response</option>
-                                    <option value="long" {{"selected" if q.type == "long"}}>extended response</option>
-                                    <option value="int" {{"selected" if q.type == "int"}}>integer</option>
-                                    <option value="number" {{"selected" if q.type == "number"}}>number</option>
-                                    <option value="choice" {{"selected" if q.type == "choice"}}>multiple-choice</option>
-                                </select>
-                            </div>
-                            <div class="form-group col">
-                                <label for="{{q.index}}.required">Required:</label>
-                                <input id="{{q.index}}.required" name="{{q.index}}.required" type="checkbox" {{"checked" if q.required}}>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col"><label for="{{q.index}}.min">Minimum {{minmax}}</label><input id="{{q.index}}.min" name="{{q.index}}.min" type="number" min="0" value="{{q.min}}" class="form-control" placeholder="number"></div>
-                            <div class="col"><label for="{{q.index}}.max">Maximum {{minmax}}</label><input id="{{q.index}}.max" name="{{q.index}}.max" type="number" min="0" value="{{q.max}}" class="form-control" placeholder="number"></div>
-                        </div>
-                        <div class="form-group {{'polyforms-hidden' if q.type != 'choice'}}" id="{{q.index}}.answersDiv">
-                            <label for="{{q.index}}.answers">Enter answer choices in the following box, where each answer choice is on a new line.</label>
-                            <textarea name="{{q.index}}.answers" id="{{q.index}}.answers" class="form-control" rows="4" required>{% if "choices" in q %}{% for c in q.choices %}{{c.value+")" if c.value != c.text}}{{c.text}}{{"\n" if not loop.last}}{% endfor %}{% else %}.{% endif %}</textarea>
-                        </div>
-                        <input type="hidden" name="{{q.index}}.newIndex" value="{{q.index}}">
-                        <input type="hidden" name="{{q.index}}.delete" id="{{q.index}}.delete" value="">
-                    </div>
-                </div>
-            </li>
-            {% endfor %}
         </ol>
         <div class="text-center mb-5"><a class="btn btn-primary" href="#" id="add">Add Question</a></div>
         <p>Make sure you save your changes before doing anything else</p>
         <input class="btn btn-success" type="submit" value="Save Changes">
         <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
     </form>
+    <!-- hidden prototype -->
+    <div class="d-none">
+        <div id="copyMe" class="card mb-5">
+            <div class="card-header">
+                <a class="card-link" href="">Move Up</a>
+                <a class="card-link" href="">Move Down</a>
+                <a class="card-link" href="" id="INDEX.deleteButton">Delete</a>
+                <p class="card-text text-danger d-none" id="INDEX.deleteWarning">This question and its responses will be permanently deleted when you save.</p>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="INDEX.question" class="polyforms-label col-12 col-sm-2 col-form-label">Question: </label>
+                    <div class="col"><input id="INDEX.question" name="INDEX.question" type="text" value="" class="form-control" required></div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-12 col-sm-6">
+                        <label for="INDEX.type" class="polyforms-label">Question Type: </label>
+                        <select id="INDEX.type" name="INDEX.type" class="form-control" onchange="changeType(INDEX, this.value);">
+                            <option value="short" selected>one-line response</option>
+                            <option value="long">extended response</option>
+                            <option value="int">integer</option>
+                            <option value="number">number</option>
+                            <option value="choice">multiple-choice</option>
+                        </select>
+                    </div>
+                    <div class="form-group col">
+                        <label for="INDEX.required">Required:</label>
+                        <input id="INDEX.required" name="INDEX.required" type="checkbox">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col"><label for="INDEX.min">Minimum answer length</label><input id="INDEX.min" name="INDEX.min" type="number" min="0" class="form-control" placeholder="number"></div>
+                    <div class="col"><label for="INDEX.max">Maximum answer length</label><input id="INDEX.max" name="INDEX.max" type="number" min="0" class="form-control" placeholder="number"></div>
+                </div>
+                <div class="form-group polyforms-hidden" id="INDEX.answersDiv">
+                    <label for="INDEX.answers">Enter answer choices in the following box, where each answer choice is on a new line. <button class="btn btn-link" id="INDEX.toggleHelp">More</button><span class="d-none" id="INDEX.advancedHelp"><br>If you want a choice to appear differently on the spreadsheet (like an abbreviation) than it does on the form for respondents, then place the spreadsheet value to the left of the form value and separate them with a parenthesis. For example, the line <code class="polyforms-code">4) Four times a week</code> will show "Four times a week" on the form, but just "4" on the spreadsheet if that option is selected.</span></label>
+                    <textarea name="INDEX.answers" id="INDEX.answers" class="form-control" rows="4" required>.</textarea>
+                </div>
+                <input type="hidden" name="INDEX.newIndex" value="INDEX">
+                <input type="hidden" name="INDEX.delete" id="INDEX.delete" value="">
+            </div>
+        </div>
+    </div>
     <br><br><br><br>
     <script type="text/javascript" src="/static/js/utils.js"></script>
     <script type="text/javascript">
@@ -130,7 +123,6 @@
             }
         }
 
-        var listElements = document.getElementsByTagName("li");
         var swapElements = function(before, after) {
             var beforeIndex = getChild(before, function(element) {
                 var n = element.getAttribute("name");
@@ -168,33 +160,75 @@
                 if(hiddenInput.value == "delete") hiddenInput.value = "";
                 else                              hiddenInput.value = "delete";
             }
-        }
-        for(var i = 0; i < listElements.length; i++) {
-            listElements[i].addEventListener("click", liListener);
-        }
+            else if(target.textContent == "More" || target.textContent == "Less") {
+                event.preventDefault();
+                var question_index = target.getAttribute("id").split(".")[0];
+                toggleVisibility(question_index + ".advancedHelp", target, "More", "Less");
+            }
+        };
 
+        //Given a question's index (starting from 1) and the desired question type, this will reformat the div element to let the user access hidden options
         var changeType = function(question_index, type) {
             var minmax = "";
-            document.getElementById(question_index+".answersDiv").classList.add("polyforms-hidden");
+            var answersDiv = document.getElementById(question_index+".answersDiv");
+            var minimum = document.getElementById(question_index+".min");
+            var maximum = document.getElementById(question_index+".max");
             if(type == "choice") {
                 minmax = "selectable choices";
-                document.getElementById(question_index+".answersDiv").classList.remove("polyforms-hidden");
+                answersDiv.classList.remove("polyforms-hidden");
+                minimum.setAttribute("min", 0);
+                maximum.setAttribute("min", 0);
             } else if(type == "int" || type == "number") {
                 minmax = "value";
+                answersDiv.classList.add("polyforms-hidden");
+                minimum.removeAttribute("min");
+                maximum.removeAttribute("min");
             } else {
                 minmax = "answer length";
+                answersDiv.classList.add("polyforms-hidden");
+                minimum.setAttribute("min", 0);
+                maximum.setAttribute("min", 0);
             }
             document.getElementById(question_index+".min").previousElementSibling.textContent = "Minimum " + minmax;
             document.getElementById(question_index+".max").previousElementSibling.textContent = "Maximum " + minmax;
         };
 
-        document.getElementById("add").addEventListener("click", function(event) {
-            event.preventDefault();
+        //Adds a question to the list, and returns it's index. All parameters are optional
+        var addQuestion = function(questionText, questionType, minimum, maximum, required, choices) {
             var li = document.createElement("li");
             var ol = document.getElementsByTagName("ol")[0];
-            li.innerHTML = '<div class="card mb-5">\n    <div class="card-header">\n        <a class="card-link" href="">Move Up</a>\n        <a class="card-link" href="">Move Down</a>\n        <a class="card-link" href="" id="INDEX.deleteButton">Delete</a>\n        <p class="card-text text-danger d-none" id="INDEX.deleteWarning">This question and its responses will be permanently deleted when you save.</p>\n    </div>\n    <div class="card-body">\n        <div class="form-group row">\n            <label for="INDEX.question" class="polyforms-label col-12 col-sm-2 col-form-label">Question: </label>\n            <div class="col"><input id="INDEX.question" name="INDEX.question" type="text" value="" class="form-control" required></div>\n        </div>\n        <div class="row">\n            <div class="form-group col-12 col-sm-6">\n                <label for="INDEX.type" class="polyforms-label">Question Type: </label>\n                <select id="INDEX.type" name="INDEX.type" class="form-control" onchange="changeType(INDEX, this.value);">\n                    <option value="short" selected>one-line response</option>\n                    <option value="long">extended response</option>\n                    <option value="int">integer</option>\n                    <option value="number">number</option>\n                    <option value="choice">multiple-choice</option>\n                </select>\n            </div>\n            <div class="form-group col">\n                <label for="INDEX.required">Required:</label>\n                <input id="INDEX.required" name="INDEX.required" type="checkbox">\n            </div>\n        </div>\n        <div class="form-group row">\n            <div class="col"><label for="INDEX.min">Minimum characters</label><input id="INDEX.min" name="INDEX.min" type="number" min="0" value="" class="form-control" placeholder="number"></div>\n            <div class="col"><label for="INDEX.max">Maximum characters</label><input id="INDEX.max" name="INDEX.max" type="number" min="0" value="" class="form-control" placeholder="number"></div>\n        </div>\n        <div class="form-group polyforms-hidden" id="INDEX.answersDiv">\n            <label for="INDEX.answers">Enter answer choices in the following box, where each answer choice is on a new line.</label>\n            <textarea name="INDEX.answers" id="INDEX.answers" class="form-control" rows="4" required>.</textarea>\n        </div>\n        <input type="hidden" name="INDEX.newIndex" value="INDEX">\n        <input type="hidden" name="INDEX.delete" id="INDEX.delete" value="">\n    </div>\n</div>'.replace(/INDEX/g, ol.children.length + 1);
+            var card = document.getElementById("copyMe").cloneNode(true);
+            var question_index = ol.children.length + 1;
+            card.innerHTML = card.innerHTML.replace(/INDEX/g, question_index);
+            card.removeAttribute("id");
+            li.appendChild(card);
             li.addEventListener("click", liListener);
             ol.appendChild(li);
+            if(questionText != undefined) document.getElementById(question_index + ".question").setAttribute("value", questionText);
+            if(minimum != undefined) document.getElementById(question_index + ".min").setAttribute("value", minimum);
+            if(maximum != undefined) document.getElementById(question_index + ".max").setAttribute("value", maximum);
+            if(required == true) document.getElementById(question_index + ".required").setAttribute("checked", "checked");
+            if(choices != undefined) document.getElementById(question_index + ".answers").textContent = choices;
+            if(questionType != undefined) {
+                var select = document.getElementById(question_index + ".type");
+                for(var i = 0; i < select.options.length; i++) {
+                    if(select.options[i].getAttribute("value") == questionType) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+                changeType(question_index, questionType);
+            }
+            return question_index;
+        };
+
+        document.getElementById("add").addEventListener("click", function(event) {
+            event.preventDefault();
+            addQuestion();
         });
+
+        {% for q in form.questions %}
+        addQuestion("{{q.question}}", "{{q.type}}", {{q.min|default("undefined", true)}}, {{q.max|default("undefined", true)}}, {{"true" if q.required else "false"}}{% if "choices" in q and q.choices|length > 0 %}, "{{q.choices|map('formatChoice')|join('\\n')}}" {% endif %});
+        {% endfor %}
     </script>
 {% endblock %}

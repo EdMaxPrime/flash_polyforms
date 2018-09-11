@@ -563,6 +563,13 @@ def newline_br(value):
 def codes_to_html(value, form):
     return value.replace("[SIGNATURE]", "<em>%s</em>"%form["owner"]).replace("[HOWMANY]", str(form["num_responses"])).replace("[AGAIN]", '<a href="/f/%s">Submit another response</a>'%str(form["id"])).replace("[RESULTS]", '<a href="/form/view?id=%s">See the responses</a>'%str(form["id"]))
 
+@app.template_filter('formatChoice')
+def formatChoice(value):
+    if value["text"] == value["value"]:
+        return value["text"]
+    else:
+        return value["value"] + ")" + value["text"]
+
 def is_positive_number(thing):
     try:
         thing = int(thing)

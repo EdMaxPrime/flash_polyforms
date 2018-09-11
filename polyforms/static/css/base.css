@@ -57,6 +57,16 @@ div.polyforms-question:hover {
     padding: 2em;
 }
 
+.polyforms-code {
+    display: inline-block;
+    background-color: #eee;
+    color: black;
+    font-family: monospace;
+    font-size: 1em;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
 ul.polyforms-compact {
     margin-bottom: 0rem;
     padding-left: 20px;
