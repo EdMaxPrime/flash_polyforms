@@ -170,8 +170,9 @@ def responses_page():
     else:
         #form = db.getFormData(form_id)
         form = db.get_form_responses(form_id)
-        if form["owner"] == username or form["public_results"] == True: #you have permission to view this
-            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id, types=form["types"])
+        isowner = form["owner"] == username
+        if isowner or form["public_results"] == True: #you have permission to view this
+            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id, types=form["types"], isowner=isowner, form=form)
         else: #you dont have permission to view this
             return render_template("unauthorized.html", username=username)
 
@@ -433,7 +434,7 @@ def edit_form():
                 #print "deleting %d which is now index %d, %d left" % (to_be_deleted[i], to_be_deleted[i]-i, len(to_be_deleted) - i - 1)
                 db.delete_question(form_id, to_be_deleted[i] - i)
             flash("Your changes have been saved")
-        return render_template("edit.html", username=username, form=db.get_form_questions(form_id), themes=config.THEMES)
+        return render_template("edit.html", username=username, form=db.get_form_questions(form_id), themes=config.THEMES, isowner=True)
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @app.route('/my/forms')

@@ -1,27 +1,20 @@
 {% extends "base.html" %}
+{% import "macros.html" as macro %}
 {% block title %} {{title}} | Polyforms {% endblock %}
 {% block body %}
-<!-- This is the toolbar for the spreadsheet. Includes form title, make chart button, and filter input box -->
-<div class="row my-5">
-  <div class="col mb-1">
-    <h1>{{title}}</h1>
-    <nav class="nav nav-tabs mb-5">
-        <a class="nav-item nav-link active" href="/form/view?id={{form_id}}">Results</a>
-        <a class="nav-item nav-link" href="/form/edit?id={{form_id}}">Edit Form</a>
-        <a class="nav-item nav-link" href="/form/info?id={{form_id}}">Share</a>
-    </nav>
-    <div id="cards">
-      <div class="card my-3" id="helpBox">
-        <div class="card-footer"><h5 class="d-inline card-title">Help</h5><a id="infoToggle" href="#" class="card-link float-right">Show</a></div>
-        <div id="info" class="card-body d-none">
-          <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
-          <p>To delete a response, click on "Delete a response" in the configure menu then click on a row.</p>
-          <p>To import these responses into Excel or a similar spreadsheet editor, download this as a CSV file</p>
-        </div>
-      </div>
+{{ macro.form_nav_tabs("view", form, isowner) }}
+<div id="cards">
+  <div class="card my-3" id="helpBox">
+    <div class="card-footer"><h5 class="d-inline card-title">Help</h5><a id="infoToggle" href="#" class="card-link float-right">Show</a></div>
+    <div id="info" class="card-body d-none">
+      <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
+      <p>To delete a response, click on "Delete a response" in the configure menu then click on a row.</p>
+      <p>To import these responses into Excel or a similar spreadsheet editor, download this as a CSV file</p>
     </div>
   </div>
-  <div class="w-100"></div>
+</div>
+<!-- This is the toolbar for the spreadsheet. Includes dropdown menus and filter input box -->
+<div class="row my-5">
   <div class="col-12 col-md-7 col-lg-6 order-last order-md-2">
     <div class="btn-group" role="group">
       <div class="btn-group" role="group">

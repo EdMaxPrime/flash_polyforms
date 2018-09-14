@@ -1,12 +1,8 @@
 {% extends "base.html" %}
+{% import "macros.html" as macro %}
 {% block title %} {{ form.title }} | Polyforms {% endblock %}
 {% block body %}
-<h1 class="mt-5 mb-2">{{ form.title }}</h1>
-<nav class="nav nav-tabs mb-5">
-    <a class="nav-item nav-link" href="/form/view?id={{form.id}}">Results</a>
-    <a class="nav-item nav-link" href="/form/edit?id={{form.id}}">Edit Form</a>
-    <a class="nav-item nav-link active" href="/form/info?id={{form.id}}">Share</a>
-</nav>
+{{ macro.form_nav_tabs("info", form, isowner) }}
 <div class="table-responsive">
     <table class="table">
         <tr><th scope="row">Owner</th><td>{{form.owner}}</td></tr>

@@ -1,0 +1,14 @@
+{# This file contains jinja macros #}
+
+{# This is a piece of jinja template that will get pasted whenever you write {{form_nav_tabs()}}.  #}
+{# The parameters are a string ("view", "edit", "info"), the form metadata object, and a boolean thats true if this is the owner #}
+{% macro form_nav_tabs(active_tab, form, isowner) -%}
+<h1 class="mt-5 mb-2">{{ form.title }}</h1>
+<nav class="nav nav-tabs mb-5">
+  {% if form.public_results or isowner %}<a class="nav-item nav-link {{ 'active' if active_tab == 'view' }}" href="/form/view?id={{form.id}}">Results</a>
+  {% else %}<span class="nav-item nav-link disabled" title="You don't have permission to see the results">Results</span>{% endif %}
+  {% if isowner %}<a class="nav-item nav-link {{ 'active' if active_tab == 'edit' }}" href="/form/edit?id={{form.id}}">Edit Form</a>
+  {% else %}<span class="nav-item nav-link disabled" title="You don't have permission to edit this form">Edit Form</span>{% endif %}
+  <a class="nav-item nav-link {{ 'active' if active_tab == 'info' }}" href="/form/info?id={{form.id}}">Share</a>
+</nav>
+{%- endmacro %}
