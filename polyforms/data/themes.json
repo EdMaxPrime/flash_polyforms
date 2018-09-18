@@ -9,16 +9,16 @@
     {
         "name": "light",
         "display_name": "Light (fancy)",
-        "template_form": "light.html",
-        "template_end": "end_light.html",
-        "data": {}
+        "template_form": "bootstrap_v.html",
+        "template_end": "end_bootstrap_v.html",
+        "data": {"dark": false}
     },
     {
         "name": "dark",
         "display_name": "Dark (fancy)",
-        "template_form": "dark.html",
-        "template_end": "end_dark.html",
-        "data": {}
+        "template_form": "bootstrap_v.html",
+        "template_end": "end_bootstrap_v.html",
+        "data": {"dark": true}
     },
     {
         "name": "purple",
