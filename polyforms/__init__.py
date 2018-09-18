@@ -170,7 +170,7 @@ def responses_page():
     else:
         #form = db.getFormData(form_id)
         form = db.get_form_responses(form_id)
-        isowner = form["owner"] == username
+        isowner = form["owner_id"] == user_id
         if isowner or form["public_results"] == True: #you have permission to view this
             return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id, types=form["types"], isowner=isowner, form=form)
         else: #you dont have permission to view this
@@ -185,7 +185,7 @@ def responses_csv():
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
         print form["data"]
-        if session.get("user", "") != form["owner"] and form["public_results"] == False: #dont have permission to download
+        if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
             return Response(render_template("results_csv", headers=form['headers'], data=form['data']), mimetype="text/csv")
@@ -198,7 +198,7 @@ def responses_json():
     else:
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
-        if session.get("user", "") != form["owner"] and form["public_results"] == False: #dont have permission to download
+        if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
             return Response(render_template("results_json", headers=form['headers'], data=form['data']), mimetype="application/json")
@@ -210,7 +210,7 @@ def responses_xml():
     else:
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
-        if session.get("user", "") != form["owner"] and form["public_results"] == False: #dont have permission to download
+        if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download
             return Response(render_template("results_xml", headers=form['headers'], data=form['data'], owner=form["owner"], created=form["created"], title=form["title"]), mimetype="application/xml")
@@ -236,24 +236,21 @@ def change_form():
                 result = "Your form's results are now public. Anyone with the link can view them. Press the button below and then copy the link in the address bar."
             else:
                 result = "Your form's results are now private"
-        elif setting == "basic":
-            result = "Your form has the basic theme"
-            db.update_form(form_id, "theme", "basic.html")
-        elif setting == "light":
-            result = "Your form has the light theme"
-            db.update_form(form_id, "theme", "light.html")
-        elif setting == "dark":
-            result = "Your form has the dark theme"
-            db.update_form(form_id, "theme", "dark.html")
         elif setting == "delete_response":
+            result = True
             result = "You deleted response #" + request.args.get("rid", "") + "."
             db.delete_response(form_id, response_id=request.args.get("rid"))
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
+        elif "theme" in request.args and config.theme_exists(request.args["theme"]):
+            result = 'Your form has the "%s" theme' % config.get_theme(request.args["theme"])["display_name"]
+            db.update_form(form_id, "theme", request.args["theme"])
         #determine response content-type
         if "response" in request.args:
             status = "ok" if result != False else "bad"
             return Response('{"status": "%s", "message": "%s"}' % (status, str(result)), mimetype="application/json")
+        elif "redirect" in request.args:
+            return redirect(request.args["redirect"] + "?id=" + form_id)
         else:
             return render_template("update.html", message=result, form_id=form_id, username=username)
     else:

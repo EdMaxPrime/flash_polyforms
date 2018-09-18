@@ -4,6 +4,7 @@
         "display_name": "Basic",
         "template_form": "basic.html",
         "template_end": "end_basic.html",
+        "group": "Loads Quickly",
         "data": {}
     },
     {
@@ -11,6 +12,7 @@
         "display_name": "Light (fancy)",
         "template_form": "bootstrap_v.html",
         "template_end": "end_bootstrap_v.html",
+        "group": "Bootstrap",
         "data": {"dark": false}
     },
     {
@@ -18,6 +20,7 @@
         "display_name": "Dark (fancy)",
         "template_form": "bootstrap_v.html",
         "template_end": "end_bootstrap_v.html",
+        "group": "Bootstrap",
         "data": {"dark": true}
     },
     {
@@ -25,6 +28,7 @@
         "display_name": "Purple",
         "template_form": "color.html",
         "template_end": "end_color.html",
+        "group": "Loads Quickly",
         "data": {
             "text":   "#1B1B3A",
             "bg":     "#7D5BA6",
@@ -38,6 +42,7 @@
         "display_name": "Green",
         "template_form": "color.html",
         "template_end": "end_color.html",
+        "group": "Loads Quickly",
         "data": {
             "text":   "#507255",
             "bg":     "#6EB257",
@@ -51,6 +56,7 @@
         "display_name": "Gold",
         "template_form": "color.html",
         "template_end": "end_color.html",
+        "group": "Loads Quickly",
         "data": {
             "text":   "#141414",
             "bg":     "#BFAB25",
@@ -64,6 +70,7 @@
         "display_name": "Blue",
         "template_form": "color.html",
         "template_end": "end_color.html",
+        "group": "Loads Quickly",
         "data": {
             "text":   "#044389",
             "bg":     "#28C2FF",
@@ -77,6 +84,7 @@
         "display_name": "Red",
         "template_form": "color.html",
         "template_end": "end_color.html",
+        "group": "Loads Quickly",
         "data": {
             "text":   "#66101F",
             "bg":     "#CC4158",

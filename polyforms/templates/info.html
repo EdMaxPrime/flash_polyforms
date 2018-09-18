@@ -9,10 +9,11 @@
         <tr><th scope="row">Link to respond</th><td><a href="/f/{{form.id}}">http://polyforms.me{{url_for("display_form_shortcut", form_id=form.id)}}</a> (right click the blue link and then click "copy link address" in the popup menu)</td></tr>
         <tr><th scope="row">Link to view results</th><td>{% if form.public_results == True %}<a href="/form/view?id={{form.id}}">http://polyforms.me{{url_for("responses_page", id=form.id)}}</a>{% else %}<i>Results are not public</i>{% endif %}</td></tr>
         <tr><th scope="row">Responses</th><td>{{form.num_responses}}</td></tr>
-        <tr><th scope="row">Who can respond</th><td>{% if form.login_required == False %}Anyone, as many times as they want{% else %}Users who signed in, and only once{% endif %}</td></tr>
+        <tr><th scope="row">Who can respond</th><td>{% if not form.open %}Nobody{% elif form.login_required == False %}Anyone, as many times as they want{% else %}Users who signed in, and only once{% endif %}</td></tr>
     </table>
 </div>
 {% if isowner == True %}
+<a class="btn btn-light" href="/form/toggle?id={{form.id}}&amp;setting=open&amp;redirect={{ url_for('info_form') }}" style="background-color: #ddd;">{{ "Stop accepting responses" if form.open else "Start accepting responses" }}</a>
 <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
 {% endif %}
 <br><br><br><br>
