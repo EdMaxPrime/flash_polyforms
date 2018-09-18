@@ -155,7 +155,7 @@ def thankyou():
     if test.form_exists(id):
         form = db.get_form_meta(id)
         theme = config.get_theme(form["theme"])
-        return render_template("form_themes/end_"+theme["template_end"], form=form, theme=theme)
+        return render_template("form_themes/"+theme["template_end"], form=form, theme=theme)
     else:
         return render_template("404.html", username=session.get("user", "")), 404
 
