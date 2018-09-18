@@ -42,7 +42,7 @@ def form_exists(form_id):
     close_db(db)
     return result != None
 
-#Returns a list of errors in processing this form. If everything goes right, the error list is empty. DOES NOT store responses
+#Returns a list of errors in processing this form. If everything goes right, the error list is empty. DOES NOT store responses. Errors are a tuple: (message, category) where category is "general" or a question number
 #data should be an array of size equal to the number of questions in the form. Elements can be None or "". Choice questions must be inner lists.
 def validate_form_submission(form_id, data):
     errors = []
@@ -50,16 +50,16 @@ def validate_form_submission(form_id, data):
     responses = []
     index = 1
     if form["open"] == False:
-        errors.append("This form is no longer accepting responses")
+        errors.append(("This form is no longer accepting responses", "general"))
     for q in form["questions"]:
         if q["type"] == "section":
             continue
         if data[index] == None or len(data[index]) == 0:
             if (q["required"] == 1 or q["required"] == True):
                 if q["type"] == "username":
-                    errors.append("You must be logged in")
+                    errors.append(("You must be logged in", "general"))
                 else:
-                    errors.append("You must answer, \"" + q["question"] + '"')
+                    errors.append(("You must answer, \"" + q["question"] + '"', str(index)))
             index += 1
             responses.append(None)
             continue
@@ -67,35 +67,35 @@ def validate_form_submission(form_id, data):
             try:
                 responses.append(int(data[index]))
                 if q["min"] != None and q["min"] != "" and responses[-1] < q["min"]:
-                    errors.append("Your answer must be greater than or equal to %d for \"%s\"" % (q["min"], q["question"]))
+                    errors.append(("Your answer must be greater than or equal to " + str(q["min"]), str(index)))
                 if q["max"] != None and q["max"] != "" and responses[-1] > q["max"]:
-                    errors.append("Your answer must be less than or equal to %d for \"%s\"" % (q["max"], q["question"]))
+                    errors.append(("Your answer must be less than or equal to " + str(q["max"]), str(index)))
             except:
-                errors.append("You didn't enter an integer for, \"" + q["question"] + '"')
+                errors.append(("You didn't enter an integer", str(index)))
                 responses.append(data[index])
         elif q["type"] == "number":
             try:
                 responses.append(float(data[index]))
                 if q["min"] != None and q["min"] != "" and responses[-1] < q["min"]:
-                    errors.append("Your answer must be greater than or equal to %d for \"%s\"" % (q["min"], q["question"]))
+                    errors.append(("Your answer must be greater than or equal to " + str(q["min"]), str(index)))
                 if q["max"] != None and q["max"] != "" and responses[-1] > q["max"]:
-                    errors.append("Your answer must be less than or equal to %d for \"%s\"" % (q["max"], q["question"]))
+                    errors.append(("Your answer must be less than or equal to " + str(q["max"]), str(index)))
             except:
-                errors.append("You didn't enter a valid number for, \"" + q["question"] + '"')
+                errors.append(("You didn't enter a valid number", str(index)))
                 responses.append(data[index])
         elif q["type"] == "choice":
             responses.append(data[index])
             if q["min"] != None and len(responses[-1]) < q["min"]:
-                errors.append("Select at least %d choices for \"%s\"" % (q["min"], q["question"]))
+                errors.append(("Select at least %d choices" % q["min"], str(index)))
             if q["max"] != None and len(responses[-1]) > q["max"]:
-                errors.append("Select no more than %d choices for \"%s\"" % (q["max"], q["question"]))
+                errors.append(("Select no more than %d choices" % q["max"], str(index)))
         elif q["type"] == "short" or q["type"] == "long":
             responses.append(data[index])
             try:
                 if q["min"] != None and len(responses[-1]) < q["min"]:
-                    errors.append("Your response must be at least %d characters long for \"%s\"" % (q["min"], q["question"]))
+                    errors.append(("Your response must be at least %d characters long" % q["min"], str(index)))
                 if q["max"] != None and len(responses[-1]) > q["max"]:
-                    errors.append("Your response must be no longer than %d characters for \"%s\"" % (q["max"], q["question"]))
+                    errors.append(("Your response must be no longer than %d characters" % q["max"], str(index)))
             except:
                 pass
         elif q["type"] == "username":

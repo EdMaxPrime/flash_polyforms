@@ -88,9 +88,9 @@ def display_form():
     if test.form_exists(form_id) == False: #insert db check for existing form
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
-    if "bad" in request.args:
+    if "bad" in request.args and is_integer(request.args["bad"]):
         form = db.get_form_questions_1response(form_id, request.args["bad"])
-        db.delete_response(form_id, response_id=request.args["bad"])
+        db.delete_response(form_id, response_id=int(request.args["bad"]))
     else:
         form = db.get_form_questions(form_id)
     if (username == None or username == "") and form["login_required"]: #insert db check for login required
@@ -124,7 +124,7 @@ def process_form():
                 data[qnumber] = request.form.get(str(qnumber), None)
         errors = test.validate_form_submission(form_id, data)
         if not test.can_respond(user_id, form_id, form["login_required"]):
-            errors.append("You can't respond to this form more than once")
+            errors.append(("You can't respond to this form more than once", "general"))
         if len(errors) > 0: #invalid submission
             if request.form.get("response") == "json":
                 return Response(json.dumps({"status": "bad", "errors": errors, "answers": data, "form_id": form_id}), mimetype="application/json")
@@ -135,7 +135,7 @@ def process_form():
                     response_id = db.add_response_negative(form_id, user_id, qnumber, data[qnumber], response_id)
                     qnumber += 1
                 for e in errors:
-                    flash(e)
+                    flash(e[0], e[1])
                 return redirect(url_for("display_form", id=form_id, bad=response_id))
         else: #valid submission
             qnumber = 1
