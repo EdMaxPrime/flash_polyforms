@@ -252,12 +252,15 @@ def change_form():
             return render_template("delete.html", username=username, form_id=form_id)
         #determine response content-type
         if "response" in request.args:
-            status = "success" if result != False else "error"
+            status = "ok" if result != False else "bad"
             return Response('{"status": "%s", "message": "%s"}' % (status, str(result)), mimetype="application/json")
         else:
             return render_template("update.html", message=result, form_id=form_id, username=username)
     else:
-        return render_template("unauthorized.html", username=username)
+        if "response" in request.args:
+            return Response('{"status": "bad", "message": "You do not have permission to edit this form"}', mimetype="application/json")
+        else:
+            return render_template("unauthorized.html", username=username)
 
 #Delete a form
 @app.route('/form/delete')

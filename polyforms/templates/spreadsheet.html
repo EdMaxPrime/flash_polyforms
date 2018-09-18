@@ -445,7 +445,7 @@ function makeScatterChart(){
 };
 
 var flashMessage = function(type, message) {
-  document.getElementById("cards").innerHTML += '<div class="alert alert-' + type + '" onclick="this.style.display=\'none\';">' + message + ' Click here to hide this message.</div>';
+  document.getElementById("cards").innerHTML += '<div class="alert alert-' + type + '" onclick="this.style.display=\'none\';">' + message + ' (Click here to hide this message)</div>';
 };
 
 var activateToolbar = function() {
@@ -476,7 +476,8 @@ var activateToolbar = function() {
   });
 
   /* Delete response */
-  document.getElementById("del").addEventListener("click", function() {
+  document.getElementById("del").addEventListener("click", function(event) {
+    event.preventDefault();
     rows.on("click", function(data, rowIndex) {
       rows.on("click", null); //stop this event listener from affecting more rows
       thisRow = this;
@@ -486,8 +487,11 @@ var activateToolbar = function() {
         type: "json",
         error: function() { flashMessage("danger", "Operation failed. You should try again later."); },
         success: function(resp) {
-          thisRow.parentNode.removeChild(thisRow);
-          if(resp.status == "error") resp.status = "danger"; //for css
+          if(resp.status == "ok") {
+            thisRow.parentNode.removeChild(thisRow);
+            resp.status = "success";
+          }
+          else if(resp.status == "bad") resp.status = "danger"; //for css
           flashMessage(resp.status, resp.message);
         }
       });
