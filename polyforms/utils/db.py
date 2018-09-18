@@ -577,9 +577,9 @@ def delete_response(form_id, response_id=None):
     if response_id != None:
         c.execute("DELETE FROM responses WHERE form_id = ? AND response_id = ?;", (form_id, response_id))
         if response_id >= 0:
-            c.execute("UPDATE responses SET response_id = response_id - 1 WHERE response_id > ?;", (response_id,))
+            c.execute("UPDATE responses SET response_id = response_id - 1 WHERE form_id = ? AND response_id > ?;", (form_id, response_id))
         else:
-            c.execute("UPDATE responses SET response_id = response_id + 1 WHERE response_id < ?;", (response_id,))
+            c.execute("UPDATE responses SET response_id = response_id + 1 WHERE form_id = ? AND response_id < ?;", (form_id, response_id))
     else:
         c.execute("DELETE FROM responses WHERE form_id = ?;", (form_id,))
     close_db(db)
