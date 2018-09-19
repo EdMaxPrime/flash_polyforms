@@ -12,6 +12,7 @@
                 </div>
             </div>
             <div class="form-group">
+                <b>Permissions</b>
                 <div class="form-check">
                     <input type="checkbox" name="login_required" id="login_required" class="form-check-input" {{"checked" if form.login_required}}>
                     <label for="login_required" class="form-check-label">Check this box to only let respondents fill out this form once. Note that this will require them to make accounts on this website and be logged in to fill out the form.</label>
@@ -23,10 +24,12 @@
             </div>
             
             <div class="form-group">
-                <label for="theme">Choose a theme. This affects how your form will look like.</label> 
+                <label for="theme"><b>Choose a theme.</b> This affects how your form will look like.</label> 
                 <select id="theme" name="theme">
-                    {% for t in themes %}
-                    <option value="{{t.name}}" {{"selected" if form.theme == t.name}}>{{t.display_name}}</option>
+                    {% for grouper, list in themes|groupby("group") %}
+                    <optgroup label="{{grouper}}">
+                        {% for t in list %}<option value="{{t.name}}" {{"selected" if form.theme == t.name}}>{{t.display_name}}</option>{% endfor %}
+                    </optgroup>
                     {% endfor %}
                 </select>
             </div>
