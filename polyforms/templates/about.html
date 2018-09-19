@@ -1,16 +1,15 @@
 {% extends "base.html" %}
 {% block title %} About | Polyforms {% endblock %}
+{% block prebody %}
+    <a id="top"></a>
+    <div class="polyforms-feature"><p>Make forms, questionarres, and surveys that look good on desktop and mobile.</p><img src="/static/img/desktop.png" class="img-fluid" /><img src="/static/img/mobile.png" class="img-fluid" /></div>
+    <div class="polyforms-feature"><p>Sharing them is as easy as just giving people a link</p><img src="/static/img/share.png" class="img-fluid" /></div>
+    <div class="polyforms-feature">Your form and its responses are hosted online for free.<br><br><div class="row"><div class="col-sm-5 align-text-center"><img src="/static/img/results.png" class="img-fluid" /></div><img src="/static/img/arrow_right.png" class="col-sm" /><img src="/static/img/database.png" class="col-sm-5" /></div></div>
+    <div class="polyforms-feature">Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.<div class="polyforms-block-letters mt-5">Flash</div></div>
+{% endblock %}
 {% block body %}
-<h1 class="mt-5">About</h1>
-<div class="container mb-3">
-    <div class="row">
-        <div class="col-md-6 col-lg polyforms-feature">Make forms, questionarres, and surveys that look good on desktop and mobile.</div>
-        <div class="col-md-6 col-lg polyforms-feature">Sharing them is as easy as just giving people a link</div>
-        <div class="col-md-6 col-lg polyforms-feature">Your form and its responses are hosted online for free.</div>
-        <div class="col-md-6 col-lg polyforms-feature">Polyforms was made by Andrew Wong, Gordon Lei, Micheal Cheng, and Max Zlotskiy for Stuyvesant's softdev class.</div>
-    </div>
-</div>
-<h1>Table of Contents</h1>
+<a id="help"></a>
+<h1 class="mt-5">Table of Contents</h1>
 <ol>
 	<li><a href="#creating">How to make a form</a></li>
 	<li><a href="#account">How to make an account</a></li>
@@ -167,7 +166,7 @@ id=1037&amp;1=Nobody&amp;response=json</code></pre>
 <pre class="polyforms-codeblock"><code>{
     "status": "bad",
     "id": &lt;the form's id&gt;,
-    "errors": ["You must answer \"What is your name?\""],
+    "errors": [["You must answer \"What is your name?\"", "1"]],
     "answers": {"2": ["I like ice cream"]}
 }
 </code></pre>
@@ -187,6 +186,7 @@ id=1037&amp;1=Nobody&amp;response=json</code></pre>
         <li>Answers to multiple choice questions will appear as a bulleted list on the results table.</li>
         <li>Reorganized the form menu into 3 tabs: results, editing, and sharing. This replaces the old results and editing pages and makes everything easier to find.</li>
         <li>Updated this help page with clearer instructions and pictures</li>
+        <li>Errors will appear below the question they refer to if you fill a form out wrong</li>
         <li>Expanded API support for submitting form responses</li>
     </ul></li>
     <li>Version 1.X August 2018<ul>
