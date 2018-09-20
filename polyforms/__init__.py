@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, Response, abort, json
 from jinja2 import escape
+from functools import wraps
 import os   #for secret key creation and file system exploration
 import random   #for the generate_questions random word generator
 import json
@@ -15,6 +16,26 @@ db.use_database(DIR)
 db.create_tables()
 config.load_themes(DIR + "data/themes.json")
 app.secret_key = config.get_secret_key(DIR + "data/secret")
+
+#Usage: @valid_session (below the route decorator)
+#This will redirect to login page if the session expired, or if user is not logged in
+def valid_session(message="You need to login again", strict=False, redirect=""):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if "user" not in session or "user_id" not in session:
+                flash(message)
+                return redirect(url_for("login_page", redirect=redirect))
+            elif strict and db.getID("accounts", "user_id", "username", str(session["user"])) != session["user_id"]:
+                flash(message)
+                return redirect(url_for("login_page", redirect=redirect))
+            if db.did_session_expire(session.get("user", "")):
+                flash("You need to login again")
+                return redirect(url_for("login_page", redirect=redirect))
+            else:
+                return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @app.route('/test')
 def deploy_test():
@@ -93,7 +114,7 @@ def display_form():
         db.delete_response(form_id, response_id=int(request.args["bad"]))
     else:
         form = db.get_form_questions(form_id)
-    if (username == None or username == "") and form["login_required"]: #insert db check for login required
+    if (username == None or username == "" or db.did_session_expire(username)) and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
     else:
@@ -261,6 +282,7 @@ def change_form():
 
 #Delete a form
 @app.route('/form/delete')
+@valid_session
 def delete_form():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
@@ -284,6 +306,7 @@ def info_form():
 
 #Make a new form
 @app.route('/form/new')
+@valid_session("You need an account to make a form")
 def create():
     if "user" in session:
         form = config.EMPTY_FORM
@@ -293,10 +316,8 @@ def create():
         return redirect(url_for("login_page"))
 
 @app.route('/addQuestions', methods = ["POST", "GET"])
+@valid_session("You must be logged in to make a form", True)
 def addQuestions():
-    if "user_id" not in session:
-        flash("You must be logged in to make a form")
-        return redirect(url_for("login_page"))
     if "login_required" not in request.args.keys():
         loginReq = 0
     else:
@@ -356,6 +377,7 @@ def addQuestions():
     return redirect(url_for("my_forms"))
 
 @app.route('/form/edit', methods=["GET", "POST"])
+@valid_session("You need to be logged in to edit this form")
 def edit_form():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
@@ -438,19 +460,15 @@ def edit_form():
 
 #This lists all the forms in your account. Clicking on a form will bring you to /form/view
 @app.route('/my/forms')
+@valid_session("You must be logged in to view this page")
 def my_forms():
-    if "user" not in session:
-        flash("You must be logged in to view this page")
-        return redirect(url_for("login_page"))
     user_id = session.get("user_id", "")
     return render_template("ownforms.html", username=session.get("user",""), forms_user_made=db.get_forms_by(user_id))
 
 #View settings for your account
 @app.route('/my/settings')
+@valid_session("You must be logged in to view this page")
 def settings_page():
-    if "user" not in session:
-        flash("You must be logged in to view this page")
-        return redirect(url_for("login_page"))
     username = session.get("user", "")
     return render_template("settings.html", username=username)
 
@@ -488,6 +506,7 @@ def reset_password_logic():
 
 #change username or delete account
 @app.route('/my/settings/update', methods = ["POST"])
+@valid_session("You need to be logged in to do this")
 def change_account():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
@@ -516,6 +535,7 @@ def about_page():
 @app.route('/logout')
 def logout():
     if "user" in session:
+        uname = session["user"]
         session.pop("user")
         session.pop("user_id")
         # Do nothing if there is no form_id
@@ -523,6 +543,8 @@ def logout():
             session.pop("form_id")
         except KeyError:
             pass
+        if "everywhere" in request.args:
+            db.update_session(uname, "Logout everywhere")
     return redirect(url_for("home_page"))
 
 #This can be used as a Jinja filter

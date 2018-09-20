@@ -102,7 +102,7 @@ def add_style(formID, row, column, property, value):
 # sqlite automatically increments all integer primary keys (user_id)
 def add_account(username, password, security_question, security_question_answer):
     db, c = open_db()
-    c.execute("INSERT INTO accounts (username, password, security_question, security_question_answer) VALUES ('%s', '%s', '%s', '%s')" % (username, hashed(password), str(security_question), hashed(str(username) + str(security_question_answer))))
+    c.execute("INSERT INTO accounts (username, password, security_question, security_question_answer, login) VALUES ('%s', '%s', '%s', '%s', datetime('now'))" % (username, hashed(password), str(security_question), hashed(str(username) + str(security_question_answer))))
     close_db(db)
 
 #Returns true if this username+password pair matches, false if it does not
@@ -148,6 +148,16 @@ def user_exists(username):
         return False
     else:
         return len(results) > 0
+
+#returns True if this person got logged out everywhere and needs to log in again
+def did_session_expire(username):
+    db, c = open_db()
+    #db.create_function('regexp', 2, lambda x, y: 1 if re.search(x,y) else 0)
+    result = c.execute("SELECT datetime('now'), session FROM accounts WHERE username = ?;", (username,)).fetchone()
+    close_db(db)
+    if result == None:
+        return True
+    return result[0] < result[1]
 
 #returns the ID # for a specific form / question / user based off 1 thing you know about a column in the Table + the colName of the ID
 def getID(tableName, idCol, queryCol, query):
@@ -470,6 +480,11 @@ def update_username(user_id, new_username):
     c.execute("UPDATE accounts SET username = ? WHERE user_id = ?;", (new_username, user_id))
     close_db(db)
 
+#This will set the session expired time to now
+def update_session(username, action):
+    db, c = open_db()
+    c.execute("UPDATE accounts SET session = datetime('now') WHERE username = ?;", (username,))
+
 #Changes a form. ColName should be one of: title, owner_id, login_required, public_results, theme, created, message, open
 def update_form(formID, colName, status):
     db, c = open_db()
@@ -588,9 +603,9 @@ def create_tables():
     db, c = open_db()
     c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open INTEGER, message TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER, response BLOB, timestamp TEXT);")
-    c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER, optional INTEGER);")
+    c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")
-    c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT, security_question TEXT, security_question_answer TEXT);")
+    c.execute("CREATE TABLE IF NOT EXISTS accounts(user_id INTEGER PRIMARY KEY, username TEXT, password TEXT, security_question TEXT, security_question_answer TEXT, session TEXT);")
     #c.execute("CREATE TABLE IF NOT EXISTS styles(form_id INTEGER, row INTEGER, column INTEGER, property TEXT, value TEXT);")
     close_db(db)
     
