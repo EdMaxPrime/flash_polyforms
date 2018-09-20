@@ -9,14 +9,18 @@
     {% endfor %}
     <form action="/join/verify" method="POST">
         <div class="form-group">
-	    <label for="username1">Account name</label>
-            <input type="text" name="username1" placeholder="username" class="form-control">
-            <input type="text" name="username2" placeholder="confirm username" class="form-control">
+	        <label for="username1">Account name</label>
+            <div class="form-row">
+                <div class="col-12 col-sm-6"><input type="text" name="username1" placeholder="username" class="form-control"></div>
+                <div class="col-12 col-sm-6"><input type="text" name="username2" placeholder="confirm username" class="form-control"></div>
+            </div>
         </div>
         <div class="form-group">
             <label for="password1">Password</label>
-	    <input type="password" name="password1" placeholder="password" class="form-control">
-	    <input type="password" name="password2" placeholder="confirm password" class="form-control">
+            <div class="form-row">
+                <div class="col-12 col-sm-6"><input type="password" name="password1" placeholder="password" class="form-control"></div>
+                <div class="col-12 col-sm-6"><input type="password" name="password2" placeholder="confirm password" class="form-control"></div>
+            </div>
         </div>
         <div class="form-group">
             <label for="question">Select a security question and answer it. These will be used when changing your password.</label>
