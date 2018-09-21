@@ -105,6 +105,13 @@ def add_account(username, password, security_question, security_question_answer)
     c.execute("INSERT INTO accounts (username, password, security_question, security_question_answer, login) VALUES ('%s', '%s', '%s', '%s', datetime('now'))" % (username, hashed(password), str(security_question), hashed(str(username) + str(security_question_answer))))
     close_db(db)
 
+#Returns a new session token for the given user
+def add_session(username):
+    db, c = open_db()
+    session_token = c.execute("SELECT datetime('now') AS session_token;").fetchone()[0]
+    close_db(db)
+    return session_token
+
 #Returns true if this username+password pair matches, false if it does not
 def validate_login(username, password):
     db, c = open_db()
@@ -150,14 +157,14 @@ def user_exists(username):
         return len(results) > 0
 
 #returns True if this person got logged out everywhere and needs to log in again
-def did_session_expire(username):
+def did_session_expire(username, session_token):
     db, c = open_db()
     #db.create_function('regexp', 2, lambda x, y: 1 if re.search(x,y) else 0)
-    result = c.execute("SELECT datetime('now'), session FROM accounts WHERE username = ?;", (username,)).fetchone()
+    result = c.execute("SELECT session FROM accounts WHERE username = ?;", (username,)).fetchone()
     close_db(db)
     if result == None:
         return True
-    return result[0] < result[1]
+    return session_token < result[0]
 
 #returns the ID # for a specific form / question / user based off 1 thing you know about a column in the Table + the colName of the ID
 def getID(tableName, idCol, queryCol, query):
@@ -480,11 +487,6 @@ def update_username(user_id, new_username):
     c.execute("UPDATE accounts SET username = ? WHERE user_id = ?;", (new_username, user_id))
     close_db(db)
 
-#This will set the session expired time to now
-def update_session(username, action):
-    db, c = open_db()
-    c.execute("UPDATE accounts SET session = datetime('now') WHERE username = ?;", (username,))
-
 #Changes a form. ColName should be one of: title, owner_id, login_required, public_results, theme, created, message, open
 def update_form(formID, colName, status):
     db, c = open_db()
@@ -597,6 +599,12 @@ def delete_response(form_id, response_id=None):
             c.execute("UPDATE responses SET response_id = response_id + 1 WHERE form_id = ? AND response_id < ?;", (form_id, response_id))
     else:
         c.execute("DELETE FROM responses WHERE form_id = ?;", (form_id,))
+    close_db(db)
+
+#This will set the session expired time to now
+def delete_session(username, session):
+    db, c = open_db()
+    c.execute("UPDATE accounts SET session = datetime('now') WHERE username = ?;", (username,))
     close_db(db)
 
 def create_tables():

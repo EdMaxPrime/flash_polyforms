@@ -19,19 +19,23 @@ app.secret_key = config.get_secret_key(DIR + "data/secret")
 
 #Usage: @valid_session (below the route decorator)
 #This will redirect to login page if the session expired, or if user is not logged in
-def valid_session(message="You need to login again", strict=False, redirect=""):
+def valid_session(message="You need to login again", strict=False, redirectForm=""):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if "user" not in session or "user_id" not in session:
                 flash(message)
-                return redirect(url_for("login_page", redirect=redirect))
+                return redirect(url_for("login_page", redirect=redirectForm))
             elif strict and db.getID("accounts", "user_id", "username", str(session["user"])) != session["user_id"]:
+                session.pop("user")
+                session.pop("user_id")
                 flash(message)
-                return redirect(url_for("login_page", redirect=redirect))
-            if db.did_session_expire(session.get("user", "")):
+                return redirect(url_for("login_page", redirect=redirectForm))
+            if db.did_session_expire(session.get("user", ""), session.get("token", "")):
+                session.pop("user")
+                session.pop("user_id")
                 flash("You need to login again")
-                return redirect(url_for("login_page", redirect=redirect))
+                return redirect(url_for("login_page", redirect=redirectForm))
             else:
                 return f(*args, **kwargs)
         return decorated_function
@@ -65,6 +69,7 @@ def login_logic():
     if db.validate_login(uname, pword) == True:
         session["user"] = uname
         session["user_id"] = db.getID("accounts", "user_id", "username", str(uname))
+        session["token"] = db.add_session(uname)
     else:
         flash("Wrong username or password")
         return redirect(url_for("login_page", redirect=form_id))
@@ -106,6 +111,7 @@ def signup_logic():
 def display_form():
     form_id = request.args.get("id")
     username = session.get("user", "")
+    session_token = session.get("token", "")
     if test.form_exists(form_id) == False: #insert db check for existing form
         return render_template("404.html", username=username), 404
     #now that we know the form exists...
@@ -114,7 +120,7 @@ def display_form():
         db.delete_response(form_id, response_id=int(request.args["bad"]))
     else:
         form = db.get_form_questions(form_id)
-    if (username == None or username == "" or db.did_session_expire(username)) and form["login_required"]: #insert db check for login required
+    if (username == None or username == "" or db.did_session_expire(username, session_token)) and form["login_required"]: #insert db check for login required
         flash("Please login to view this form. You will be redirected after you login.")
         return redirect(url_for("login_page", redirect=form_id))
     else:
@@ -543,8 +549,10 @@ def logout():
             session.pop("form_id")
         except KeyError:
             pass
-        if "everywhere" in request.args:
-            db.update_session(uname, "Logout everywhere")
+        if "token" in session:
+            session_token = session.pop("token")
+            if "everywhere" in request.args:
+                db.delete_session(uname, session_token)
     return redirect(url_for("home_page"))
 
 #This can be used as a Jinja filter
