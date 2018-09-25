@@ -211,7 +211,6 @@ def responses_csv():
     else:
         form_id = request.args.get("id", "-1")
         form = db.get_form_responses(form_id)
-        print form["data"]
         if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
             return render_template("unauthorized.html", username=session.get("user", ""))
         else: #you do have permission to download

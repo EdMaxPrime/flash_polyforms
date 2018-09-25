@@ -503,7 +503,6 @@ def update_question(form_id, question_id, colName, status):
 #If the first number in the list is 3, then the first question will be moved to index 3.
 #Note that question indices start at 1, so the list shouldn't contain the number 0.
 def update_order(form_id, new_indexes):
-    print new_indexes
     db, c = open_db()
     c.execute("UPDATE questions SET question_id = question_id * -1 WHERE form_id = ?;", (form_id,))
     c.execute("UPDATE responses SET question_id = question_id * -1 WHERE form_id = ?;", (form_id,))
