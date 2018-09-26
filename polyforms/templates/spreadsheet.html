@@ -489,9 +489,12 @@ var activateToolbar = function() {
         success: function(resp) {
           if(resp.status == "ok") {
             thisRow.parentNode.removeChild(thisRow);
-            resp.status = "success";
+            resp.status = "success"; //for css
           }
-          else if(resp.status == "bad") resp.status = "danger"; //for css
+          else if(resp.status == "bad") {
+            resp.message = "This feature has been disabled";
+            resp.status = "danger"; //for css
+          }
           flashMessage(resp.status, resp.message);
         }
       });
