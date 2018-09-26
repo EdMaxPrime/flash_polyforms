@@ -41,6 +41,16 @@ def valid_session(message="You need to login again", strict=False, redirectForm=
         return decorated_function
     return decorator
 
+#This decorator will display the 404 page if the form in the url is not found
+def form_must_exist(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if test.form_exists(request.args.get("id", "")) == False: #insert db check for existing form
+            return render_template("404.html", username=session.get("user", "")), 404
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/test')
 def deploy_test():
     print "=====================================\nConsole Message\n"
@@ -108,13 +118,11 @@ def signup_logic():
     return redirect(url_for("signup_page"))
 
 @app.route('/form/respond', methods=["GET"])
+@form_must_exist
 def display_form():
     form_id = request.args.get("id")
     username = session.get("user", "")
     session_token = session.get("token", "")
-    if test.form_exists(form_id) == False: #insert db check for existing form
-        return render_template("404.html", username=username), 404
-    #now that we know the form exists...
     if "bad" in request.args and is_integer(request.args["bad"]):
         form = db.get_form_questions_1response(form_id, request.args["bad"])
         db.delete_response(form_id, response_id=int(request.args["bad"]))
@@ -177,69 +185,59 @@ def process_form():
 
 #Thank you message once form is filled out
 @app.route('/form/end')
+@form_must_exist
 def thankyou():
-    id = request.args.get("id", "-1")
-    if test.form_exists(id):
-        form = db.get_form_meta(id)
-        theme = config.get_theme(form["theme"])
-        return render_template("form_themes/"+theme["template_end"], form=form, theme=theme)
-    else:
-        return render_template("404.html", username=session.get("user", "")), 404
+    id = request.args["id"]
+    form = db.get_form_meta(id)
+    theme = config.get_theme(form["theme"])
+    return render_template("form_themes/"+theme["template_end"], form=form, theme=theme)
 
 #View the responses to your form and make charts
 @app.route('/form/view')
+@form_must_exist
 def responses_page():
     form_id = request.args.get("id", "-1")
     user_id = session.get("user_id", "")
     username = session.get("user", "")
-    if test.form_exists(form_id) == False:
-        return render_template("404.html", username=username)
-    else:
-        #form = db.getFormData(form_id)
-        form = db.get_form_responses(form_id)
-        isowner = form["owner_id"] == user_id
-        if isowner or form["public_results"] == True: #you have permission to view this
-            return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id, types=form["types"], isowner=isowner, form=form)
-        else: #you dont have permission to view this
-            return render_template("unauthorized.html", username=username)
+    #form = db.getFormData(form_id)
+    form = db.get_form_responses(form_id)
+    isowner = form["owner_id"] == user_id
+    if isowner or form["public_results"] == True: #you have permission to view this
+        return render_template("spreadsheet.html", username=username, title=form['title'], headers=form['headers'], data=form['data'], jsonData=json.dumps(form['data']), form_id=form_id, types=form["types"], isowner=isowner, form=form)
+    else: #you dont have permission to view this
+        return render_template("unauthorized.html", username=username)
 
 #CSV
 @app.route('/form/view/form.csv')
+@form_must_exist
 def responses_csv():
-    if not ("id" in request.args):
-        return render_template("404.html", username=session.get("user", "")), 404
-    else:
-        form_id = request.args.get("id", "-1")
-        form = db.get_form_responses(form_id)
-        if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
-            return render_template("unauthorized.html", username=session.get("user", ""))
-        else: #you do have permission to download
-            return Response(render_template("results_csv", headers=form['headers'], data=form['data']), mimetype="text/csv")
+    form_id = request.args.get("id", "-1")
+    form = db.get_form_responses(form_id)
+    if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
+        return render_template("unauthorized.html", username=session.get("user", ""))
+    else: #you do have permission to download
+        return Response(render_template("results_csv", headers=form['headers'], data=form['data']), mimetype="text/csv")
 
 #JSON
 @app.route('/form/view/form.json')
+@form_must_exist
 def responses_json():
-    if not ("id" in request.args):
-        return render_template("404.html", username=session.get("user", "")), 404
-    else:
-        form_id = request.args.get("id", "-1")
-        form = db.get_form_responses(form_id)
-        if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
-            return render_template("unauthorized.html", username=session.get("user", ""))
-        else: #you do have permission to download
-            return Response(render_template("results_json", headers=form['headers'], data=form['data']), mimetype="application/json")
+    form_id = request.args.get("id", "-1")
+    form = db.get_form_responses(form_id)
+    if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
+        return render_template("unauthorized.html", username=session.get("user", ""))
+    else: #you do have permission to download
+        return Response(render_template("results_json", headers=form['headers'], data=form['data']), mimetype="application/json")
 #XML
 @app.route('/form/view/form.xml')
+@form_must_exist
 def responses_xml():
-    if not ("id" in request.args):
-        return render_template("404.html", username=session.get("user", "")), 404
-    else:
-        form_id = request.args.get("id", "-1")
-        form = db.get_form_responses(form_id)
-        if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
-            return render_template("unauthorized.html", username=session.get("user", ""))
-        else: #you do have permission to download
-            return Response(render_template("results_xml", headers=form['headers'], data=form['data'], owner=form["owner"], created=form["created"], title=form["title"]), mimetype="application/xml")
+    form_id = request.args.get("id", "-1")
+    form = db.get_form_responses(form_id)
+    if session.get("user_id", "") != form["owner_id"] and form["public_results"] == False: #dont have permission to download
+        return render_template("unauthorized.html", username=session.get("user", ""))
+    else: #you do have permission to download
+        return Response(render_template("results_xml", headers=form['headers'], data=form['data'], owner=form["owner"], created=form["created"], title=form["title"]), mimetype="application/xml")
 
 #change form settings
 @app.route('/form/toggle')
@@ -263,9 +261,9 @@ def change_form():
             else:
                 result = "Your form's results are now private"
         elif setting == "delete_response":
-            result = True
-            result = "You deleted response #" + request.args.get("rid", "") + "."
-            db.delete_response(form_id, response_id=request.args.get("rid"))
+            result = False
+            #result = "You deleted response #" + request.args.get("rid", "") + "."
+            #db.delete_response(form_id, response_id=request.args.get("rid"))
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
         elif "theme" in request.args and config.theme_exists(request.args["theme"]):
@@ -383,6 +381,7 @@ def addQuestions():
 
 @app.route('/form/edit', methods=["GET", "POST"])
 @valid_session("You need to be logged in to edit this form")
+@form_must_exist
 def edit_form():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
@@ -392,9 +391,7 @@ def edit_form():
     else:
         form_id = request.form.get("form_id")
     #Make sure this person has permission and the form exists
-    if not test.form_exists(form_id):
-        return render_template("404.html", username=username), 404
-    elif not test.can_edit(user_id, form_id):
+    if not test.can_edit(user_id, form_id):
         return render_template("unauthorized.html", username=username)
     else:
         #Either display the form or process the results
