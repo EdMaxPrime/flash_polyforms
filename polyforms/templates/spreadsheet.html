@@ -482,7 +482,7 @@ var activateToolbar = function() {
       rows.on("click", null); //stop this event listener from affecting more rows
       thisRow = this;
       reqwest({
-        url: "/form/toggle?id=" + formID + "&setting=delete_response&rid=" + (rowIndex + 1) + "&response=simple",
+        url: "/form/toggle?id=" + formID + "&setting=delete_response&rid=" + (this.rowIndex) + "&response=simple",
         method: "GET",
         type: "json",
         error: function() { flashMessage("danger", "Operation failed. You should try again later."); },

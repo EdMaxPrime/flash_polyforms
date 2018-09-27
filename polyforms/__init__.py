@@ -261,9 +261,8 @@ def change_form():
             else:
                 result = "Your form's results are now private"
         elif setting == "delete_response":
-            result = False
-            #result = "You deleted response #" + request.args.get("rid", "") + "."
-            #db.delete_response(form_id, response_id=request.args.get("rid"))
+            result = "You deleted response #" + request.args.get("rid", "") + "."
+            db.delete_response(form_id, response_id=request.args.get("rid"))
         elif setting == "delete":
             return render_template("delete.html", username=username, form_id=form_id)
         elif "theme" in request.args and config.theme_exists(request.args["theme"]):
