@@ -12,3 +12,12 @@
   <a class="nav-item nav-link {{ 'active' if active_tab == 'info' }}" href="/form/info?id={{form.id}}">Share</a>
 </nav>
 {%- endmacro %}
+
+
+{# This will create a gray fieldset box. Must be called using the call command #}
+{% macro fieldset(title) -%}
+<fieldset class="mb-5 polyforms-fieldset">
+	<legend class="px-3 polyforms-legend">{{ title }}</legend>
+	{{ caller() }}
+</fieldset>
+{%- endmacro %}
