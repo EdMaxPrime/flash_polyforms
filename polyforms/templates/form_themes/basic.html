@@ -4,6 +4,9 @@
     <title> {{title}} | Polyforms </title>
     <link rel="shortcut icon" href="/static/img/logo_square.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="og:title" content="{{title}}">
+    <meta name="og:description" content="{{description}}">
+    <meta name="description" content="A simple survey and graph service. Completely free.">
     <style type="text/css">
         div.container {
             margin: 2em;
@@ -41,6 +44,7 @@
 <body>
     <h1>{{title}}</h1>
     <hr>
+    <p>{{description | linebreaks | msgCodes(form) | safe}}</p>
     {% set messages = get_flashed_messages() %}
     {% if messages|length > 0 %}
     <div id="error">
