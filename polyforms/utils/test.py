@@ -44,9 +44,8 @@ def form_exists(form_id):
 
 #Returns a list of errors in processing this form. If everything goes right, the error list is empty. DOES NOT store responses. Errors are a tuple: (message, category) where category is "general" or a question number
 #data should be an array of size equal to the number of questions in the form. Elements can be None or "". Choice questions must be inner lists.
-def validate_form_submission(form_id, data):
+def validate_form_submission(form, data):
     errors = []
-    form = main.get_form_questions(form_id)
     responses = []
     index = 1
     if form["open"] == False:

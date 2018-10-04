@@ -45,7 +45,11 @@ def valid_session(message="You need to login again", strict=False, redirectForm=
 def form_must_exist(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if test.form_exists(request.args.get("id", "")) == False: #insert db check for existing form
+        if request.method == "POST":
+            form_id = request.form.get("id", "")
+        else:
+            form_id = request.args.get("id", "")
+        if test.form_exists(form_id) == False and form_id != "feedback": #db check for existing form
             return render_template("404.html", username=session.get("user", "")), 404
         return f(*args, **kwargs)
     return decorated_function
@@ -123,7 +127,9 @@ def display_form():
     form_id = request.args.get("id")
     username = session.get("user", "")
     session_token = session.get("token", "")
-    if "bad" in request.args and is_integer(request.args["bad"]):
+    if form_id == "feedback":
+        form = config.FEEDBACK
+    elif "bad" in request.args and is_integer(request.args["bad"]):
         form = db.get_form_questions_1response(form_id, request.args["bad"])
         db.delete_response(form_id, response_id=int(request.args["bad"]))
     else:
@@ -142,53 +148,51 @@ def display_form_shortcut(form_id):
 
 #This will store the responses to the form and then redirect to a Thank You
 @app.route('/form/submit', methods=['POST'])
+@form_must_exist
 def process_form():
     form_id = request.form.get("id", "")
     username = session.get("user", "")
     user_id = session.get("user_id")
-    if not test.form_exists(form_id):
-        return render_template("404.html", username=username), 404
-    else:
-        data = {}
-        form = db.get_form_questions(form_id)
-        number_of_questions = len(form["questions"])
-        for qnumber in range(1, number_of_questions+1):
-            if form["questions"][qnumber-1]["type"] == "choice":
-                data[qnumber] = request.form.getlist(str(qnumber), None) or []
-            else:
-                data[qnumber] = request.form.get(str(qnumber), None)
-        errors = test.validate_form_submission(form_id, data)
-        if not test.can_respond(user_id, form_id, form["login_required"]):
-            errors.append(("You can't respond to this form more than once", "general"))
-        if len(errors) > 0: #invalid submission
-            if request.form.get("response") == "json":
-                return Response(json.dumps({"status": "bad", "errors": errors, "answers": data, "form_id": form_id}), mimetype="application/json")
-            else: 
-                qnumber = 1
-                response_id = None
-                while qnumber <= number_of_questions:
-                    response_id = db.add_response_negative(form_id, user_id, qnumber, data[qnumber], response_id)
-                    qnumber += 1
-                for e in errors:
-                    flash(e[0], e[1])
-                return redirect(url_for("display_form", id=form_id, bad=response_id))
-        else: #valid submission
+    data = {}
+    form = db.get_form_questions(id) if form_id != "feedback" else config.FEEDBACK
+    number_of_questions = len(form["questions"])
+    for qnumber in range(1, number_of_questions+1):
+        if form["questions"][qnumber-1]["type"] == "choice":
+            data[qnumber] = request.form.getlist(str(qnumber), None) or []
+        else:
+            data[qnumber] = request.form.get(str(qnumber), None)
+    errors = test.validate_form_submission(form, data)
+    if not test.can_respond(user_id, form_id, form["login_required"]):
+        errors.append(("You can't respond to this form more than once", "general"))
+    if len(errors) > 0: #invalid submission
+        if request.form.get("response") == "json":
+            return Response(json.dumps({"status": "bad", "errors": errors, "answers": data, "form_id": form_id}), mimetype="application/json")
+        else: 
             qnumber = 1
             response_id = None
             while qnumber <= number_of_questions:
-                response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
+                response_id = db.add_response_negative(form_id, user_id, qnumber, data[qnumber], response_id)
                 qnumber += 1
-            if request.form.get("response") == "json":
-                return Response(json.dumps({"status": "ok", "message": codes_to_html(form["end_message"], form), "form_id": form_id}), mimetype="application/json")
-            else:
-                return redirect(url_for("thankyou", id=form_id))
+            for e in errors:
+                flash(e[0], e[1])
+            return redirect(url_for("display_form", id=form_id, bad=response_id))
+    else: #valid submission
+        qnumber = 1
+        response_id = None
+        while qnumber <= number_of_questions:
+            response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
+            qnumber += 1
+        if request.form.get("response") == "json":
+            return Response(json.dumps({"status": "ok", "message": codes_to_html(form["end_message"], form), "form_id": form_id}), mimetype="application/json")
+        else:
+            return redirect(url_for("thankyou", id=form_id))
 
 #Thank you message once form is filled out
 @app.route('/form/end')
 @form_must_exist
 def thankyou():
     id = request.args["id"]
-    form = db.get_form_meta(id)
+    form = db.get_form_meta(id) if id != "feedback" else config.FEEDBACK
     theme = config.get_theme(form["theme"])
     return render_template("form_themes/"+theme["template_end"], form=form, theme=theme)
 
