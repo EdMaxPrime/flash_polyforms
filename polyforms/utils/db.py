@@ -48,9 +48,9 @@ def tuple_to_dictionary(tuuple, list_of_keys):
         index += 1
     return d
     
-def add_form(user_id, formTitle, loginReq, publicReq, theme, open, message):
+def add_form(user_id, formTitle, loginReq, publicReq, theme, open, end_message, description):
     db, c = open_db()
-    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created, open, message) VALUES (?,?,?,?,?, datetime('now'), ?, ?)", (formTitle, user_id, loginReq, publicReq, theme, open, message))
+    c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created, open, end_message, description, edited) VALUES (?,?,?,?,?, datetime('now'), ?, ?, ?, datetime('now'))", (formTitle, user_id, loginReq, publicReq, theme, open, end_message, description))
     form_id = c.execute("SELECT max(form_id) FROM forms;").fetchone()
     close_db(db)
     return form_id[0]
@@ -102,7 +102,7 @@ def add_style(formID, row, column, property, value):
 # sqlite automatically increments all integer primary keys (user_id)
 def add_account(username, password, security_question, security_question_answer):
     db, c = open_db()
-    c.execute("INSERT INTO accounts (username, password, security_question, security_question_answer, login) VALUES ('%s', '%s', '%s', '%s', datetime('now'))" % (username, hashed(password), str(security_question), hashed(str(username) + str(security_question_answer))))
+    c.execute("INSERT INTO accounts (username, password, security_question, security_question_answer, session) VALUES ('%s', '%s', '%s', '%s', datetime('now'))" % (username, hashed(password), str(security_question), hashed(str(username) + str(security_question_answer))))
     close_db(db)
 
 #Returns a new session token for the given user
@@ -180,9 +180,9 @@ def defaultVal(v, d):
 
 def get_form_meta(form_id):
     db, c = open_db()
-    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, message FROM forms WHERE form_id = ?;", (str(form_id),))
+    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, end_message, description FROM forms WHERE form_id = ?;", (str(form_id),))
     result = c.fetchone()
-    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "message"])
+    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "end_message", "description"])
     form["login_required"] = (form["login_required"] == 1)
     form["public_results"] = (form["public_results"] == 1)
     form["open"] = (form["open"] == 1)
@@ -487,9 +487,13 @@ def update_username(user_id, new_username):
     c.execute("UPDATE accounts SET username = ? WHERE user_id = ?;", (new_username, user_id))
     close_db(db)
 
-#Changes a form. ColName should be one of: title, owner_id, login_required, public_results, theme, created, message, open
+#Changes a form. ColName should be one of: title, owner_id, login_required (bool), public_results (bool), open (bool), theme, created, description, end_message
 def update_form(formID, colName, status):
     db, c = open_db()
+    if status == True:
+        status = 1
+    elif status == False:
+        status = 0
     c.execute("UPDATE forms SET " + colName + " = ? WHERE form_id = ?;", (status, formID))
     close_db(db)
 
@@ -608,7 +612,7 @@ def delete_session(username, session):
 
 def create_tables():
     db, c = open_db()
-    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open INTEGER, message TEXT);")
+    c.execute("CREATE TABLE IF NOT EXISTS forms(form_id INTEGER PRIMARY KEY, title TEXT, owner_id INTEGER, login_required INTEGER, public_results INTEGER, theme TEXT, created TEXT, open INTEGER, end_message TEXT, description TEXT, edited TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS responses(form_id INTEGER, question_id INTEGER, user_id INTEGER, response_id INTEGER, response BLOB, timestamp TEXT);")
     c.execute("CREATE TABLE IF NOT EXISTS questions(question_id INTEGER, question text, type TEXT, form_id INTEGER, required INTEGER, min INTEGER, max INTEGER);")
     c.execute("CREATE TABLE IF NOT EXISTS options(form_id INTEGER, question_id INTEGER, option_index INTEGER PRIMARY KEY, text_user_sees TEXT, value TEXT);")

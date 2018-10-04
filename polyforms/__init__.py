@@ -133,7 +133,7 @@ def display_form():
         return redirect(url_for("login_page", redirect=form_id))
     else:
         theme = config.get_theme(form["theme"])
-        return render_template("form_themes/"+theme["template_form"], title=form["title"], questions=form["questions"], form_id=form_id, theme=theme)
+        return render_template("form_themes/"+theme["template_form"], title=form["title"], description=form["description"], questions=form["questions"], form_id=form_id, theme=theme, form=form)
 
 #Shortcut URLS
 @app.route('/f/<form_id>')
@@ -179,7 +179,7 @@ def process_form():
                 response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
                 qnumber += 1
             if request.form.get("response") == "json":
-                return Response(json.dumps({"status": "ok", "message": codes_to_html(form["message"], form), "form_id": form_id}), mimetype="application/json")
+                return Response(json.dumps({"status": "ok", "message": codes_to_html(form["end_message"], form), "form_id": form_id}), mimetype="application/json")
             else:
                 return redirect(url_for("thankyou", id=form_id))
 
@@ -284,7 +284,7 @@ def change_form():
 
 #Delete a form
 @app.route('/form/delete')
-@valid_session
+@valid_session("You must be logged in to delete your form")
 def delete_form():
     username = session.get("user", "")
     user_id = session.get("user_id", "")
@@ -336,7 +336,7 @@ def addQuestions():
         theme = request.args.get("theme")
     else:
         theme = "basic"
-    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, theme, 1, message)
+    formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, theme, 1, message, request.args.get("description", ""))
     i=0
     while (str(i) + ".question" in request.args.keys()):
         if request.args[str(i) + ".type"] == "0":
@@ -411,8 +411,10 @@ def edit_form():
                 db.update_form(form_id, "open", 0)
             if "theme" in request.form and config.theme_exists(request.form["theme"]):
                 db.update_form(form_id, "theme", request.form["theme"])
+            if "description" in request.form:
+                db.update_form(form_id, "description", request.form["description"])
             if "message" in request.form:
-                db.update_form(form_id, "message", request.form["message"])
+                db.update_form(form_id, "end_message", request.form["message"])
             #Now do the questions
             new_order = []
             to_be_deleted = []
