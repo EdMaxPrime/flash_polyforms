@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html {{'class="with-polyforms-footer"'|safe if footer is not defined or footer}}>
   <head>
     <title>{% block title %}{% endblock %}</title>
     <link rel="shortcut icon" href="/static/img/logo_square.png">
@@ -23,7 +23,8 @@
     <meta name="og:description" content="A simple survey and graph service. Completely free.">
     <meta name="description" content="A simple survey and graph service. Completely free.">
   </head>
-  <body>
+  <body {{'class="with-polyforms-footer"'|safe if footer is not defined or footer}}>
+    {% if footer is not defined or footer %}<div class="container-polyforms-footer">{% endif %}
     <div id="navbar" role="navigation" class="navbar navbar-expand-md navbar-light bg-light justify-content-between">
       <a class="navbar-brand" href="/">
         <img src="/static/img/logo_full.png" alt="Logo" width="375" height="65">
@@ -65,9 +66,13 @@
       </div>
     </div>
     {% block prebody %}{% endblock %}
-    <div id="body-block" class="px-sm-3 px-lg-5">
+    <div id="body-block" class="px-sm-3 px-lg-5 {{'pre-polyforms-footer'|safe if footer is not defined or footer}}">
       {% block body %}
       {% endblock %}
     </div>
+    {% if footer is not defined or footer %}
+      <footer><a href="/about#help">Help</a><a href="/f/feedback">Feedback</a><a href="http://github.com/EdMaxPrime/flash_polyforms">Github</a></footer>
+    </div>
+    {% endif %}
   </body>
 </html>

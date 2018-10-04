@@ -88,3 +88,39 @@ ul.polyforms-compact {
     position: absolute;
     bottom: 1rem;
 }
+
+/* All of this is for the footer to work */
+html.with-polyforms-footer, body.with-polyforms-footer {
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+div.container-polyforms-footer {
+    position: relative;
+    min-height: 100%;
+    padding-bottom: 60px;
+    box-sizing: border-box;
+}
+
+div.pre-polyforms-footer {
+    box-sizing: border-box;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    background-color: #ddd;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+footer a {
+    display: inline-block;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+/* End of footer stuff */
