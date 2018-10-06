@@ -8,6 +8,7 @@
     {% for m in messages %}
     <div class="alert alert-info">{{ m }}</div>
     {% endfor %}
+    <div style="margin-top: -1em; margin-bottom: 1em;">Changes last saved on: <span id="editTime">{{form.edited}}</span> (<span id="ellapsedTime"></span>)</div>
     <form method="POST">
         {% call macro.fieldset("Basic Info") %}
             <div class="form-group row">
@@ -18,7 +19,7 @@
             </div>
             <div class="form-group">
                 <label for="description" class="mb-0">Write a short description of your form here. It will appear in link previews and at the top of your form. <button class="btn btn-link" type="button" onclick="toggleVisibility('desc-codes', this, 'Insert Stuff', 'Hide');">Insert Stuff</button><p class="d-none" id="desc-codes">To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</p></label>
-                <textarea id="description" rows="1" name="description" class="form-control">{{ form.message }}</textarea>
+                <textarea id="description" rows="1" name="description" class="form-control">{{ form.description }}</textarea>
             </div>
             <div class="form-group">
                 <label for="message" class="mb-0">Write a message for users to see after they submit the form. <button class="btn btn-link" type="button" onclick="toggleVisibility('msg-codes', this, 'Insert Stuff', 'Hide');">Insert Stuff</button><p class="d-none" id="msg-codes">To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</p> </label>
@@ -52,7 +53,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <input name="form_id" value="{{form.id}}" type="hidden">
+            <input name="id" value="{{form.id}}" type="hidden">
             <input name="num_questions" value="{{form.questions|length}}" type="hidden">
         {% endcall %}
         
@@ -110,23 +111,33 @@
     <br><br><br><br>
     <script type="text/javascript" src="/static/js/utils.js"></script>
     <script type="text/javascript">
-        var time = new Date();
-        var alerts = document.getElementsByClassName("alert-info");
-        var id;
-
-        for(var i = 0; i < alerts.length; i++) {
-            if(alerts[i].innerHTML == "Your changes have been saved") {
-                var a = alerts[i];
-                a.innerHTML = "Your changes have been saved " + elapsed(Date.now() - time.getTime()) + " <u>Dismiss</u>"
-                id = setInterval(function () {
-                    a.innerHTML = "Your changes have been saved " + elapsed(Date.now() - time.getTime()) + " <u>Dismiss</u>";
-                }, 60000);
-                a.addEventListener("click", function (event) {
-                    clearInterval(id);
-                    a.parentNode.removeChild(a);
+        (function() {
+            var editTimeText = document.getElementById("editTime");    //span containing YYYY-MM-DD HH:MM:SS of when this form was last edited
+            var editTime = dateStringToDate(editTimeText.textContent); //Date object representing the above time
+            editTimeText.textContent = editTime.toLocaleString();      //set the default time format to the local timezone format
+            var difference = document.getElementById("ellapsedTime");  //span containing the time difference
+            difference.textContent = elapsed(Date.now() - editTime.getTime()); //current ellapsed time
+            var intervalID = window.setInterval(function() {
+                var ellapsedTime = Date.now() - editTime.getTime();    //ellapsed time in milliseconds (1/1000 of a second)
+                if(ellapsedTime < 60 * 1000) {
+                    difference.textContent = ((ellapsedTime / 1000) | 0) + " seconds ago";
+                } else {
+                    difference.textContent = elapsed(ellapsedTime);
+                    window.clearInterval(intervalID);
+                    intervalID = window.setInterval(function() {
+                        difference.textContent = elapsed(ellapsedTime);
+                    }, 60 * 1000);
+                }
+            }, 10 * 1000);
+            //make alerts disappear when you click on them
+            var alerts = document.getElementsByClassName("alert");
+            for (var i = 0; i < alerts.length; i++) {
+                alerts[i].innerHTML += " <u>Click to dismiss</u>";
+                alerts[i].addEventListener("click", function(event) {
+                    this.parentNode.removeChild(this);
                 });
             }
-        }
+        })();
 
         var swapElements = function(before, after) {
             var beforeIndex = getChild(before, function(element) {

@@ -50,3 +50,16 @@ var toggleVisibility = function(elementID, toggleButton, showText, hideText) {
         return result;
     }
 }
+
+/* Change timestamp format event listener */
+var dateStringToDate = function(d) { //returns a Date object given a YYYY-MM-DD HH:MM:SS string
+    var p = [];
+    p[0] = parseInt(d.substring(0, 4));   //year
+    p[1] = parseInt(d.substring(5, 7));   //month
+    p[2] = parseInt(d.substring(8, 10));  //day
+    p[3] = parseInt(d.substring(11, 13)); //hour
+    p[4] = parseInt(d.substring(14, 16)); //minute
+    p[5] = parseInt(d.substring(17, 19)); //second
+    p[1] = p[1] - 1; //converts month from 1-indexed to 0-indexed format
+    return new Date(Date.UTC.apply(Date, p));
+};

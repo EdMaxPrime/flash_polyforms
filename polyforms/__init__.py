@@ -183,7 +183,7 @@ def process_form():
             response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
             qnumber += 1
         if request.form.get("response") == "json":
-            return Response(json.dumps({"status": "ok", "message": codes_to_html(form["end_message"], form), "form_id": form_id}), mimetype="application/json")
+            return Response(json.dumps({"status": "ok", "message": codes_to_html(form["message"], form), "form_id": form_id}), mimetype="application/json")
         else:
             return redirect(url_for("thankyou", id=form_id))
 
@@ -272,6 +272,9 @@ def change_form():
         elif "theme" in request.args and config.theme_exists(request.args["theme"]):
             result = 'Your form has the "%s" theme' % config.get_theme(request.args["theme"])["display_name"]
             db.update_form(form_id, "theme", request.args["theme"])
+        #update form's edit time
+        if result != False:
+            db.update_edited_time(form_id)
         #determine response content-type
         if "response" in request.args:
             status = "ok" if result != False else "bad"
@@ -392,7 +395,7 @@ def edit_form():
     if request.method == "GET":
         form_id = request.args.get("id")
     else:
-        form_id = request.form.get("form_id")
+        form_id = request.form.get("id")
     #Make sure this person has permission and the form exists
     if not test.can_edit(user_id, form_id):
         return render_template("unauthorized.html", username=username)
@@ -462,6 +465,7 @@ def edit_form():
             for i in range(0, len(to_be_deleted)):
                 #print "deleting %d which is now index %d, %d left" % (to_be_deleted[i], to_be_deleted[i]-i, len(to_be_deleted) - i - 1)
                 db.delete_question(form_id, to_be_deleted[i] - i)
+            db.update_edited_time(form_id)
             flash("Your changes have been saved")
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id), themes=config.THEMES, isowner=True)
 
