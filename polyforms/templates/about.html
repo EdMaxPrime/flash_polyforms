@@ -18,6 +18,7 @@
     <li><a href="#editing">How to edit your form after your create it</a></li>
     <li><a href="#settings">How to change your username or delete your account</a></li>
     <li><a href="#password">How to change your password</a></li>
+    <li><a href="#markup">Polyforms Markup Reference</a></li>
     <li><a href="#api">How to use our API</a></li>
     <li><a href="#changes">What's changed about Polyforms?</a></li>
 </ol>
@@ -89,6 +90,21 @@
 <img src="/static/img/tutorial_password.png" class="img-fluid"></img>
 <p>Follow the instructions on the page. A dropdown menu with all the possible security questions will be there; make sure to choose the one you did when signing up for an account. If you don't remember which one you chose, then try going through all the questions.</p>
 <p>Make sure to put your new password in both boxes. The reason for this is to make sure you don't make any typos. You're encouraged to make a long password so that it doesn't get hacked.</p>
+
+<hr>
+<a id="markup"></a>
+<h2>Polyforms Markup Reference</h2>
+<p>Polyforms Markup is the set of text codes that have special meaning. You can use them in places like a form's description. Simply write the name of the code in square brackets (capitalization matters) when editing the form.</p>
+<p>Here is a reference:</p>
+<table class="table">
+    <thead><th>Code</th><th>Meaning</th></thead>
+    <tbody>
+        <tr><td>[HOWMANY]</td><td>This will show the number of responses this form has received.</td></tr>
+        <tr><td>[SIGNATURE]</td><td>This will show the form creator's signature, which is your username italicized.</td></tr>
+        <tr><td>[RESULTS]</td><td>A link to view form results will appear.</td></tr>
+        <tr><td>[AGAIN]</td><td>A link to respond to the form again will appear.</td></tr>
+    </tbody>
+</table>
 
 <hr>
 <a id="api"></a>
@@ -170,6 +186,7 @@ id=1037&amp;1=Nobody&amp;response=json</code></pre>
     "answers": {"2": ["I like ice cream"]}
 }
 </code></pre>
+<p>The "errors" key in the response will be an array of errors. Each error will be an array of length two: the error message followed by the question number. The "answers" key in the response will be an object with question numbers as keys and your submitted answers as values.</p>
 
 
 
@@ -178,6 +195,10 @@ id=1037&amp;1=Nobody&amp;response=json</code></pre>
 <h2>What's new with Polyforms?</h2>
 <p>After our initial release, we rolled out some changes to this website. Here they are:</p>
 <ul>
+    <li>Version 2.1 October 2018<ul>
+        <li>You can see what time you last edited your form</li>
+        <li>Form descriptions will appear on the home page while they're listed under "recently created forms"</li>
+    </ul></li>
     <li>Version 2.0 September 2018<ul>
         <li>Made the website more mobile-friendly. Pages are now scaled to fit small screens</li>
         <li>Reorganized the form menu into 3 tabs: results, editing, and sharing. This replaces the old results and editing pages and makes everything easier to find.</li>
