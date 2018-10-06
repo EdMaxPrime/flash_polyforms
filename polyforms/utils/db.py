@@ -463,6 +463,13 @@ def get_recent_forms(amount):
     close_db(db)
     return [get_form_questions(x[0]) for x in list_of_ids]
 
+#Returns the total number of things created. What must be the name of a table
+def get_number_of(what="forms"):
+    db, c = open_db()
+    num = defaultVal(c.execute("SELECT count(*) FROM " + what + ";").fetchone(), 0)
+    close_db(db)
+    return num
+
 #Returns the number of questions in a form, or 0 if it doesn't exist
 def get_num_questions(form_id):
     db, c = open_db()

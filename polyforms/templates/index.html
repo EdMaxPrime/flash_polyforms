@@ -6,8 +6,8 @@
     <p class="lead">A simple survey and graph service. Completely free.</p>
     <p class="lead"><a href="{{ url_for('about_page') }}#top" class="btn btn-info">Learn More</a></p>
 </div>
-<h1>Public Forms</h1>
-<p>These are either published results or forms that anyone can fill out.</p>
+<h1>Recently Created Forms</h1>
+<p>So far, {{ totalForms }} forms have been made, {{ totalQ }} questions asked, and {{ totalAns }} answers submitted! Here are a few of the most recently created forms:</p>
 <div class="container">
     <div class="row no-gutters">
         {% for form in forms %}
@@ -16,6 +16,8 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ form.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">by {{ form.owner }}</h6>
+                    <p class="card-text">{{ form.description | truncate(50, leeway=10) }}</p>
+                    <hr>
                     <p class="card-text">
                         {{ form.questions|length }} questions.
                         Login {{ "" if form.login_required else "not" }} required.

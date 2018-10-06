@@ -66,7 +66,7 @@ def deploy_test():
 
 @app.route('/')
 def home_page():
-    return render_template("index.html", username=session.get("user", ""), forms=db.get_recent_forms(24))
+    return render_template("index.html", username=session.get("user", ""), forms=db.get_recent_forms(24), totalForms=db.get_number_of("forms"), totalQ=db.get_number_of("questions"), totalAns=db.get_number_of("responses"))
 
 #Shows the form to login
 @app.route('/login')
