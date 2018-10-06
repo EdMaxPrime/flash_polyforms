@@ -18,7 +18,7 @@
             </div>
             <div class="form-group">
                 <label for="description" class="mb-0">Write a short description of your form here. It will appear in link previews and at the top of your form. <button class="btn btn-link" type="button" onclick="toggleVisibility('desc-codes', this, 'Insert Stuff', 'Hide');">Insert Stuff</button><p class="d-none" id="desc-codes">To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</p></label>
-                <textarea id="description" rows="1" name="description" class="form-control">{{ form.message }}</textarea>
+                <textarea id="description" rows="1" name="description" class="form-control">{{ form.description }}</textarea>
             </div>
             <div class="form-group">
                 <label for="message" class="mb-0">Write a message for users to see after they submit the form. <button class="btn btn-link" type="button" onclick="toggleVisibility('msg-codes', this, 'Insert Stuff', 'Hide');">Insert Stuff</button><p class="d-none" id="msg-codes">To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</p> </label>
@@ -52,7 +52,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <input name="form_id" value="{{form.id}}" type="hidden">
+            <input name="id" value="{{form.id}}" type="hidden">
             <input name="num_questions" value="{{form.questions|length}}" type="hidden">
         {% endcall %}
         

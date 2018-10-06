@@ -183,7 +183,7 @@ def process_form():
             response_id = db.add_response(form_id, user_id, qnumber, data[qnumber], response_id)
             qnumber += 1
         if request.form.get("response") == "json":
-            return Response(json.dumps({"status": "ok", "message": codes_to_html(form["end_message"], form), "form_id": form_id}), mimetype="application/json")
+            return Response(json.dumps({"status": "ok", "message": codes_to_html(form["message"], form), "form_id": form_id}), mimetype="application/json")
         else:
             return redirect(url_for("thankyou", id=form_id))
 
