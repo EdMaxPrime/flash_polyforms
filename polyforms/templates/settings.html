@@ -1,32 +1,33 @@
 {% extends "base.html" %}
 {% block title %} Settings | Polyforms {% endblock %}
 {% block body %}
-<form action="/my/settings/update" method="POST">
-    <fieldset style="border: 2px groove #555; padding: 10px" class="my-5">
-        <legend style="display: inline-block; width: 200px; background-color: #777; color:white;" class="px-3">Settings</legend>
-        <div class="form-check">
-            <input id="make_all_forms_public" name="make_all_forms_public" type="checkbox" value="on" class="form-check-input">
-            <label for="make_all_forms_public" class="form-check-label">Make all of your forms submittable by anyone, even if they're not logged in (overrides previous settings)</label>
+{% set messages = get_flashed_messages() %}
+<h1 class="mt-5">Account Settings</h1>
+<div class="polyforms-settings">
+    <h6>Username</h6>
+    {% for m in messages %}
+    {% if "username" in m %}
+    <div class="alert alert-danger">{{ m }}</div>
+    {% endif %}
+    {% endfor %}
+    <form action="/my/settings/update" method="POST" class="form-inline">
+        <label for="new_username">To change your username, enter a new one here then press "change"</label>
+        <input type="text" name="new_username" class="form-control mx-1" id="new_username" value="{{ username }}">
+        <input type="submit" name="setting" value="Change" class="form-control btn-primary mx-1">
+    </form>
+</div>
+<div class="polyforms-settings">
+    <h6>Security</h6>
+    <p>To change your password, click the link below. You will be sent to a page where you have to answer the security question you chose when making your account. <a href="/my/settings/password">Change Password</a></p>
+    <p>To logout everywhere, from all devices, click <a href="{{ url_for('logout') }}?everywhere=true">here</a>. This will secure your account in case you forgot to logout on a public access computer. Note that this will require you to login again.</p>
+</div>
+<div class="polyforms-settings">
+    <h6>Delete Account</h6>
+    <form action="/my/settings/update" method="POST" class="form-inline">
+        <div class="row">
+            <div class="col col-md-10">This will delete your account and all forms made with this account. Make sure you've made up your mind, as this can't be undone. We're sad to see you go!</div>
+            <div class="col col-md"><input type="submit" name="setting" value="Delete" class="form-control btn-danger"></div>
         </div>
-        <div class="form-check">
-            <input id="make_all_forms_result_private" name="make_all_forms_result_private" type="checkbox" value="on" class="form-check-input">
-            <label for="make_all_forms_result_private" class="form-check-label">Make all of your form results private</label>
-        </div>
-        <div class="form-check">
-            <input id="make_all_forms_private" name="make_all_forms_private" type="checkbox" value="on" class="form-check-input">
-            <label for="make_all_forms_private" class="form-check-label">Make all your forms require responders to login so that they can only fill it out once (overrides previous settings)</label>
-        </div>
-        <div class="form-check">
-            <input id="make_all_forms_result_public" name="make_all_forms_result_public" type="checkbox" value="on" class="form-check-input">
-            <label for="make_all_forms_result_public" class="form-check-label">Make all of your form results public</label>
-        </div>
-        <div class="form-group mt-3">
-            <input type="submit" class="form-control btn-primary" name="update" value="Update Settings">
-        </div>
-    </fieldset>
-</form>
-<div>
-    <p>To change your password, click the link below. You will be logged out then sent to a page where you must input the answer to the security question you chose when making your account.</p>
-    <a href="/my/settings/password" class="btn btn-link">Change Password</a>
+    </form>
 </div>
 {% endblock %}

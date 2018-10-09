@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{title}} | Polyforms </title>
+    <link rel="shortcut icon" href="/static/img/logo_square.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="og:title" content="{{title}}">
+    <meta name="og:description" content="{{description}}">
+    <meta name="description" content="A simple survey and graph service. Completely free.">
+    <style type="text/css">
+        div.container {
+            margin-bottom: 4em;
+        }
+        #error {
+            border: 4px solid red;
+            background-color: rgba(255, 102, 102, 0.25);
+            padding: 20px;
+            margin-bottom: 2em;
+        }
+        #contents {
+            background-color: white;
+            margin: 2em 8% 2em 8%;
+            padding: 2em;
+        }
+        h2.section {
+            text-decoration: underline;
+        }
+        span.hint {
+            display: inline-block;
+            padding-left: 5px;
+            padding-right: 5px;
+            border-left: 1px solid {{theme.data.hint}};
+            color: {{theme.data.hint}};
+            font-size: 12px;
+        }
+        span.question {
+            font-weight: bold;
+        }
+        span.error {
+            color: red;
+        }
+        body{
+            font-family: Optima,Segoe,Segoe UI,Candara,Calibri,Arial,sans-serif;
+            font-size: 14px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            line-height: 20px;
+            background-color: {{theme.data.bg}};
+            color: {{theme.data.text}};
+        }
+        input, textarea {
+            color: {{theme.data.text}};
+            border: 1px solid {{theme.data.normal}};
+            padding: 2px;
+        }
+        input:focus, textarea:focus {
+            outline-color: {{theme.data.active}};
+        }
+        input[type="submit"] {
+            display: block;
+            padding: 10px;
+            background-color: {{theme.data.text}};
+            color: white;
+            width: 80%;
+            margin: 0 auto;
+        }
+        input[type="submit"]:hover {
+            background-color: {{theme.data.active}};
+        }
+        textarea {
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div id="contents">
+        <h1>{{title}}</h1>
+        <hr>
+        <p>{{ description | linebreaks | msgCodes(form) | safe }}</p>
+        {% set messages = get_flashed_messages() %}
+        {% if messages|length > 0 %}
+        <div id="error">
+            <p>Please fix the following before your responses can be submitted</p>
+            {% set messages = get_flashed_messages(category_filter=["general"]) %}
+            <ul>
+                {% for m in messages %}
+                <li>{{ m }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <form method="POST" action="/form/submit">
+          {% for q in questions %}
+            <div class="container">
+                {% if q.type == "section" %}
+                <h2 class="section">{{ q.question }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2>
+                {% elif q.type == "username" %}
+                <input type="hidden" name="{{q.index}}" value="{{username}}">
+                {% else %}
+                <label for="q{{q.index}}">
+                    <span class="question">{{ q.question }}</span>
+                    {% if q.required %} <span class="hint">required</span> {% endif %}
+                    {% if q.min != None and q.min != "" %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} at least {{q.min}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
+                    {% if q.max != None and q.min != "" %}<span class="hint">{% if q.type == "choice" %} Select {% endif %} no more than {{q.max}} {% if q.type == "short" or q.type == "long" %}characters{% endif %}</span>{% endif %}
+                </label>
+                {% endif %}
+
+                {% if q.type == "short" %}
+                <input type="text" name="{{q.index}}" id="q{{q.index}}" size="25" {{q|attributes|safe}} value="{{q.value|default('')}}">
+
+                {% elif q.type == "long" %}<br>
+                <textarea name="{{q.index}}" id="q{{q.index}}" rows="5" {{q|attributes|safe}}>{{q.value|default('')}}</textarea>
+
+                {% elif q.type == "number" %}
+                <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" step="any" {{q|attributes|safe}} value="{{q.value|default(''),true}}">
+
+                {% elif q.type == "int" %}
+                <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="number" {{q|attributes|safe}} value="{{q.value|default(''),true}}">
+
+                {% elif q.type == "choice" and q.max != 1 %}
+                <!-- If the maximum selectable choices is more than 1, then checkboxes -->
+                {% for c in q.choices %}
+                <br><input type="checkbox" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ 'checked' if c.selected|default(false, true)}}> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
+                {% endfor %}
+
+                {% else %}
+                <!-- If the maximum selectable choices is 1, then radio buttons -->
+                {% for c in q.choices %}
+                <br><input type="radio" name="{{q.index}}" value="{{c.value}}" id="{{q.index}}.{{loop.index}}" {{ 'checked' if c.selected|default(false, true)}}> <label for="{{q.index}}.{{loop.index}}">{{ c.text }}</label>
+                {% endfor %}
+
+                {% endif %}
+
+                {% set messages = get_flashed_messages(category_filter=[q.index|string]) %}
+                {% for m in messages %}<br><span class="error">{{ m }}</span>{% endfor %}
+           </div>
+          {% endfor %}
+          <input type="hidden" name="id" value="{{form_id}}">
+          <input type="submit" name="submit" value="Submit">	
+        </form>
+    </div>
+</body>
+</html>
+

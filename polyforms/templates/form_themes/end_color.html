@@ -14,22 +14,37 @@
             font-style: normal;
             font-variant: normal;
             font-weight: 400;
+            background-color: {{theme.data.bg}};
+            color: {{theme.data.text}};
         }
         div.logo {
             text-align: center;
             margin-top: 5em;
         }
+        #contents {
+            background-color: white;
+            margin: 2em 1in 2em 1in;
+            padding: 2em;
+        }
+        a {
+            color: {{theme.data.normal}};
+        }
+        a:hover, a:active {
+            color: {{theme.data.active}};
+        }
     </style>
 </head>
 <body>
-    <h1>{{form.title}}</h1>
-    <hr>
-    <p>{{form.message | linebreaks| msgCodes(form) | safe}}</p>
-    <div class="logo heading">
-        <p>This form was made with</p>
-        <a href="/">
-            <img src="/static/img/logo_full.png" alt="Logo" width="375" height="65">
-        </a>
+    <div id="contents">
+        <h1>{{form.title}}</h1>
+        <hr>
+        <p>{{form.message | linebreaks| msgCodes(form) | safe}}</p>
+        <div class="logo heading">
+            <p>This form was made with</p>
+            <a href="/">
+                <img src="/static/img/logo_full.png" alt="Logo" width="375" height="65">
+            </a>
+        </div>
     </div>
 </body>
 </html>

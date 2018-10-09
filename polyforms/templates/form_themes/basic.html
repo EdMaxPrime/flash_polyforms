@@ -3,6 +3,10 @@
 <head>
     <title> {{title}} | Polyforms </title>
     <link rel="shortcut icon" href="/static/img/logo_square.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="og:title" content="{{title}}">
+    <meta name="og:description" content="{{description}}">
+    <meta name="description" content="A simple survey and graph service. Completely free.">
     <style type="text/css">
         div.container {
             margin: 2em;
@@ -32,15 +36,20 @@
             font-weight: 400;
             line-height: 20px;
         }
+        span.error {
+            color: red;
+        }
     </style>
 </head>
 <body>
     <h1>{{title}}</h1>
     <hr>
+    <p>{{description | linebreaks | msgCodes(form) | safe}}</p>
     {% set messages = get_flashed_messages() %}
     {% if messages|length > 0 %}
     <div id="error">
         <p>Please fix the following before your responses can be submitted</p>
+        {% set messages = get_flashed_messages(category_filter=["general"]) %}
         <ul>
             {% for m in messages %}
             <li>{{ m }}</li>
@@ -89,6 +98,9 @@
             {% endfor %}
 
             {% endif %}
+            
+            {% set messages = get_flashed_messages(category_filter=[q.index|string]) %}
+            {% for m in messages %}<br><span class="error">{{ m }}</span>{% endfor %}
        </div>
       {% endfor %}
       <input type="hidden" name="id" value="{{form_id}}">

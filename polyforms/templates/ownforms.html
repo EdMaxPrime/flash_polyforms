@@ -6,7 +6,7 @@
     <p>You currently do not have any forms.</p>
 {% else %}
     <div class="container">
-        <div class="row">
+        <div class="row font-weight-bold">
             <div class="col-12 col-md">Form Title</div>
             <div class="col-12 col-md-2">Responses</div>
             <div class="col-12 col-md-2">Date Created</div>
@@ -15,7 +15,7 @@
         <a href="/form/view?id={{f.id}}" class="list-group-item list-group-item-action">
             <div class="row">
                 <div class="col-12 col-md">{{f.title}}</div>
-                <div class="col-12 col-md-2"><span>{{f.data}} responses</span></div>
+                <div class="col-12 col-md-2">{{f.num_responses}}<span class="d-inline d-md-none"> responses</span></div>
                 <div class="col-12 col-md-2"><span>{{f['created']|dtnormal}}</span></div>
             </div>
         </a>

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% import "macros.html" as macro %}
+{% block title %} Edit Form | Polyforms {% endblock %}
+{% block body %}
+    {{ macro.form_nav_tabs("edit", form, isowner) }}
+    
+    {% set messages = get_flashed_messages() %}
+    {% for m in messages %}
+    <div class="alert alert-info">{{ m }}</div>
+    {% endfor %}
+    <form method="POST">
+        {% call macro.fieldset("Basic Info") %}
+            <div class="form-group row">
+                <label for="title" class="col-sm-2 col-form-label">Form Title: </label>
+                <div class="col">
+                    <input type="text" name="title" class="form-control" value="{{ form.title }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="mb-0">Write a short description of your form here. It will appear in link previews and at the top of your form. <button class="btn btn-link" type="button" onclick="toggleVisibility('desc-codes', this, 'Insert Stuff', 'Hide');">Insert Stuff</button><p class="d-none" id="desc-codes">To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</p></label>
+                <textarea id="description" rows="1" name="description" class="form-control">{{ form.description }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="message" class="mb-0">Write a message for users to see after they submit the form. <button class="btn btn-link" type="button" onclick="toggleVisibility('msg-codes', this, 'Insert Stuff', 'Hide');">Insert Stuff</button><p class="d-none" id="msg-codes">To show a link back to the form, write <code>[AGAIN]</code>. To show a link to the results page, write <code>[RESULTS]</code>. To show the number of responses, write <code>[HOWMANY]</code>. To include your signature, write <code>[SIGNATURE]</code>.</p> </label>
+                <textarea id="message" rows="2" name="message" class="form-control" required>{{ form.message }}</textarea>
+            </div>
+        {% endcall %}
+        {% call macro.fieldset("Permissions") %}
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" name="login_required" id="login_required" class="form-check-input" {{"checked" if form.login_required}}>
+                    <label for="login_required" class="form-check-label">Check this box to only let respondents fill out this form once. Note that this will require them to make accounts on this website and be logged in to fill out the form.</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="public_results" id="public_results" class="form-check-input" {{"checked" if form.public_results}}>
+                    <label for="public_results" class="form-check-label">Check this box to let the results to this form be viewable by anyone with the link to the form. Otherwise, only you will be able to see the responses to this form.</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" name="open" id="open" class="form-check-input" {{"checked" if form.open}}>
+                    <label for="open" class="form-check-label">Check this box to continue letting people respond to this form.</label>
+                </div>
+            </div>
+        {% endcall %}
+        {% call macro.fieldset("Theme") %}
+            <div class="form-group">
+                <label for="theme">Choose a theme. This affects how your form will look like.</label> 
+                <select id="theme" name="theme">
+                    {% for grouper, list in themes|groupby("group") %}
+                    <optgroup label="{{grouper}}">
+                        {% for t in list %}<option value="{{t.name}}" {{"selected" if form.theme == t.name}}>{{t.display_name}}</option>{% endfor %}
+                    </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+            <input name="id" value="{{form.id}}" type="hidden">
+            <input name="num_questions" value="{{form.questions|length}}" type="hidden">
+        {% endcall %}
+        
+        <h2>Questions</h2>
+        <ol id="questionList">
+        </ol>
+        <div class="text-center mb-5"><a class="btn btn-primary" href="#" id="add">Add Question</a></div>
+        <p>Make sure you save your changes before doing anything else</p>
+        <input class="btn btn-success" type="submit" value="Save Changes">
+        <a class="btn btn-danger" href="/form/toggle?id={{form.id}}&amp;setting=delete">Delete This Form</a>
+    </form>
+    <!-- hidden prototype -->
+    <div class="d-none">
+        <div id="copyMe" class="card mb-5">
+            <div class="card-header">
+                <a class="card-link" href="">Move Up</a>
+                <a class="card-link" href="">Move Down</a>
+                <a class="card-link" href="" id="INDEX.deleteButton">Delete</a>
+                <p class="card-text text-danger d-none" id="INDEX.deleteWarning">This question and its responses will be permanently deleted when you save.</p>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="INDEX.question" class="polyforms-label col-12 col-sm-2 col-form-label">Question: </label>
+                    <div class="col"><input id="INDEX.question" name="INDEX.question" type="text" value="" class="form-control" required></div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-12 col-sm-6">
+                        <label for="INDEX.type" class="polyforms-label">Question Type: </label>
+                        <select id="INDEX.type" name="INDEX.type"  onchange="changeType(INDEX, this.value);">
+                            <option value="short" selected>one-line response</option>
+                            <option value="long">extended response</option>
+                            <option value="int">integer</option>
+                            <option value="number">number</option>
+                            <option value="choice">multiple-choice</option>
+                        </select>
+                    </div>
+                    <div class="form-group col">
+                        <label for="INDEX.required">Answer is required:</label>
+                        <input id="INDEX.required" name="INDEX.required" type="checkbox">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col"><label for="INDEX.min">Minimum answer length</label><input id="INDEX.min" name="INDEX.min" type="number" min="0" class="form-control" placeholder="number"></div>
+                    <div class="col"><label for="INDEX.max">Maximum answer length</label><input id="INDEX.max" name="INDEX.max" type="number" min="0" class="form-control" placeholder="number"></div>
+                </div>
+                <div class="form-group polyforms-hidden" id="INDEX.answersDiv">
+                    <label for="INDEX.answers">Enter answer choices in the following box, where each answer choice is on a new line. <button class="btn btn-link" id="INDEX.toggleHelp">More</button><span class="d-none" id="INDEX.advancedHelp"><br>If you want a choice to appear differently on the spreadsheet (like an abbreviation) than it does on the form for respondents, then place the spreadsheet value to the left of the form value and separate them with a parenthesis. For example, the line <code class="polyforms-code">4) Four times a week</code> will show "Four times a week" on the form, but just "4" on the spreadsheet if that option is selected.</span></label>
+                    <textarea name="INDEX.answers" id="INDEX.answers" class="form-control" rows="4" required>.</textarea>
+                </div>
+                <input type="hidden" name="INDEX.newIndex" value="INDEX">
+                <input type="hidden" name="INDEX.delete" id="INDEX.delete" value="">
+            </div>
+        </div>
+    </div>
+    <br><br><br><br>
+    <script type="text/javascript" src="/static/js/utils.js"></script>
+    <script type="text/javascript">
+        var time = new Date();
+        var alerts = document.getElementsByClassName("alert-info");
+        var id;
+
+        for(var i = 0; i < alerts.length; i++) {
+            if(alerts[i].innerHTML == "Your changes have been saved") {
+                var a = alerts[i];
+                a.innerHTML = "Your changes have been saved " + elapsed(Date.now() - time.getTime()) + " <u>Dismiss</u>"
+                id = setInterval(function () {
+                    a.innerHTML = "Your changes have been saved " + elapsed(Date.now() - time.getTime()) + " <u>Dismiss</u>";
+                }, 60000);
+                a.addEventListener("click", function (event) {
+                    clearInterval(id);
+                    a.parentNode.removeChild(a);
+                });
+            }
+        }
+
+        var swapElements = function(before, after) {
+            var beforeIndex = getChild(before, function(element) {
+                var n = element.getAttribute("name");
+                return (typeof n == "string") && n.indexOf(".newIndex") != -1;
+            });
+            var afterIndex = getChild(after, function(element) {
+                var n = element.getAttribute("name");
+                return (typeof n == "string") && n.indexOf(".newIndex") != -1;
+            });
+            var temp = beforeIndex.getAttribute("value");
+            beforeIndex.setAttribute("value", afterIndex.getAttribute("value"));
+            afterIndex.setAttribute("value", temp);
+            after.parentNode.insertBefore(after, before);
+        };
+        /* This gets run whenever something in the <li> element gets clicked. This function is for <a> element buttons. */
+        var liListener = function(event) {
+            var target = event.target || event.srcElement || event.originalTarget;
+            if(target.textContent == "Move Up") {
+                event.preventDefault();
+                if(this.previousElementSibling != null) {
+                    swapElements(this.previousElementSibling, this);
+                }
+            }
+            else if(target.textContent == "Move Down") {
+                event.preventDefault();
+                if(this.nextElementSibling != null) {
+                    swapElements(this, this.nextElementSibling);
+                }
+            }
+            else if(target.textContent == "Delete" || target.textContent == "Undo Delete") {
+                event.preventDefault();
+                var question_index = target.getAttribute("id").split(".")[0];
+                toggleVisibility(question_index + ".deleteWarning", target, "Delete", "Undo Delete");
+                var hiddenInput = document.getElementById(question_index + ".delete");
+                if(hiddenInput.value == "delete") hiddenInput.value = "";
+                else                              hiddenInput.value = "delete";
+            }
+            else if(target.textContent == "More" || target.textContent == "Less") {
+                event.preventDefault();
+                var question_index = target.getAttribute("id").split(".")[0];
+                toggleVisibility(question_index + ".advancedHelp", target, "More", "Less");
+            }
+        };
+
+        //Given a question's index (starting from 1) and the desired question type, this will reformat the div element to let the user access hidden options
+        var changeType = function(question_index, type) {
+            var minmax = "";
+            var answersDiv = document.getElementById(question_index+".answersDiv");
+            var minimum = document.getElementById(question_index+".min");
+            var maximum = document.getElementById(question_index+".max");
+            if(type == "choice") {
+                minmax = "selectable choices";
+                answersDiv.classList.remove("polyforms-hidden");
+                minimum.setAttribute("min", 0);
+                maximum.setAttribute("min", 0);
+            } else if(type == "int" || type == "number") {
+                minmax = "value";
+                answersDiv.classList.add("polyforms-hidden");
+                minimum.removeAttribute("min");
+                maximum.removeAttribute("min");
+            } else {
+                minmax = "answer length";
+                answersDiv.classList.add("polyforms-hidden");
+                minimum.setAttribute("min", 0);
+                maximum.setAttribute("min", 0);
+            }
+            document.getElementById(question_index+".min").previousElementSibling.textContent = "Minimum " + minmax;
+            document.getElementById(question_index+".max").previousElementSibling.textContent = "Maximum " + minmax;
+        };
+
+        //Adds a question to the list, and returns it's index. All parameters are optional
+        var addQuestion = function(questionText, questionType, minimum, maximum, required, choices) {
+            var li = document.createElement("li");
+            var ol = document.getElementsByTagName("ol")[0];
+            var card = document.getElementById("copyMe").cloneNode(true);
+            var question_index = ol.children.length + 1;
+            card.innerHTML = card.innerHTML.replace(/INDEX/g, question_index);
+            card.removeAttribute("id");
+            li.appendChild(card);
+            li.addEventListener("click", liListener);
+            ol.appendChild(li);
+            if(questionText != undefined) document.getElementById(question_index + ".question").setAttribute("value", questionText);
+            if(minimum != undefined) document.getElementById(question_index + ".min").setAttribute("value", minimum);
+            if(maximum != undefined) document.getElementById(question_index + ".max").setAttribute("value", maximum);
+            if(required == true) document.getElementById(question_index + ".required").setAttribute("checked", "checked");
+            if(choices != undefined) document.getElementById(question_index + ".answers").textContent = choices;
+            if(questionType != undefined) {
+                var select = document.getElementById(question_index + ".type");
+                for(var i = 0; i < select.options.length; i++) {
+                    if(select.options[i].getAttribute("value") == questionType) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+                changeType(question_index, questionType);
+            }
+            return question_index;
+        };
+
+        document.getElementById("add").addEventListener("click", function(event) {
+            event.preventDefault();
+            addQuestion();
+        });
+
+        {% for q in form.questions %}
+        addQuestion("{{q.question}}", "{{q.type}}", {{q.min|default("undefined", true)}}, {{q.max|default("undefined", true)}}, {{"true" if q.required else "false"}}{% if "choices" in q and q.choices|length > 0 %}, "{{q.choices|map('formatChoice')|join('\\n')}}" {% endif %});
+        {% endfor %}
+    </script>
+{% endblock %}

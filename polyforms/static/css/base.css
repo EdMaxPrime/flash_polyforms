@@ -4,11 +4,123 @@ body {
     padding-right: 30px;
 }
 */
-.feature {
+.polyforms-feature {
     background-color: rgba(199, 221, 255, 0.5);
-    border: 5px solid white;
-    border-radius: 5px;
     padding: 2em;
-    font-size: 18px;
     text-align: center;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
 }
+
+.polyforms-feature:nth-child(3) {
+    background-color: #C390D4;
+}
+
+.polyforms-feature:nth-child(4) {
+    background-color: #A1D490;
+}
+
+.polyforms-feature:nth-child(5) {
+    background-color: #D4A190;
+}
+
+.polyforms-settings {
+	margin-top: 1em;
+	padding: 10px;
+	border-radius: 5px;
+	border: 1px solid #eee;
+}
+
+fieldset.polyforms-fieldset {
+    border: 2px groove #555;
+    padding: 10px;
+}
+
+legend.polyforms-legend {
+    display: inline-block;
+    width: 200px;
+    background-color: #777;
+    color: white;
+}
+
+div.polyforms-question {
+    border: 2px solid black; 
+    padding: 5px;  
+    margin-bottom: 15px;
+}
+
+div.polyforms-question:hover {
+    border: 2px dashed black;
+}
+
+.polyforms-label {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.polyforms-hidden {
+    display: none;
+}
+
+.polyforms-codeblock {
+    border: 1px solid #CCCCCC;
+    border-radius: 15px;
+    padding: 2em;
+}
+
+.polyforms-code {
+    display: inline-block;
+    background-color: #eee;
+    color: black;
+    font-family: monospace;
+    font-size: 1em;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+ul.polyforms-compact {
+    margin-bottom: 0rem;
+    padding-left: 20px;
+}
+
+.polyforms-bottom-text {
+    position: absolute;
+    bottom: 1rem;
+}
+
+/* All of this is for the footer to work */
+html.with-polyforms-footer, body.with-polyforms-footer {
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+div.container-polyforms-footer {
+    position: relative;
+    min-height: 100%;
+    padding-bottom: 60px;
+    box-sizing: border-box;
+}
+
+div.pre-polyforms-footer {
+    box-sizing: border-box;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    background-color: #ddd;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+footer a {
+    display: inline-block;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+/* End of footer stuff */

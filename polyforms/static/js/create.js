@@ -102,8 +102,7 @@ var addQuestion= function(e) {
     
     var questionDiv = document.createElement('div');
     newQuestion.appendChild(questionDiv);
-    questionDiv.setAttribute('class', 'question');
-    questionDiv.setAttribute('style','outline: 1px solid black; padding: 5px;  margin-bottom: 15px;');
+    questionDiv.className += " question polyforms-question";
     questionDiv.setAttribute('name', questionNumber);
     questionDiv.addEventListener('mouseover', function(){this.setAttribute('style','outline: 2px dashed black; padding: 5px; margin-bottom: 15px;');});
     questionDiv.addEventListener('mouseout', function(){this.setAttribute('style','outline: 1px solid black; padding: 5px; margin-bottom: 15px;');});

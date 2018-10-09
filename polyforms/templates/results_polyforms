@@ -1,0 +1,12 @@
+{
+	"version": "August 2018",
+	"document_type": "Polyforms Form",
+	"form": {
+		"title": "{{form.title}}",
+		"owner": "{{form.owner}}",
+		"theme": "{{form.theme}}",
+		"message": "{{form.message}}"
+	},
+	"questions": {{ form.questions|tojson }},
+	"responses": {{ form.data|tojson }}
+}

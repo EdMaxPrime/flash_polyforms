@@ -1,22 +1,20 @@
 {% extends "base.html" %}
+{% import "macros.html" as macro %}
 {% block title %} {{title}} | Polyforms {% endblock %}
 {% block body %}
-<div id="wowie"></div>
-<!-- This is the toolbar for the spreadsheet. Includes form title, make chart button, and filter input box -->
-<div class="row my-3">
-  <div class="col mb-1">
-    <h1>{{title}}</h1>
-    <div id="cards">
-      <div class="card my-3" id="helpBox">
-        <div id="info" class="card-body">
-          <p>Shareable link: <a href="/f/{{form_id}}">http://polyforms.me{{url_for("display_form_shortcut", form_id=form_id)}}</a> (right click the blue link and then click "copy link address" in the popup menu)</p>
-          <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
-          <button class="btn btn-dark" id="closeHelp">Dismiss help menu</button>
-        </div>
-      </div>
+{{ macro.form_nav_tabs("view", form, isowner) }}
+<div id="cards">
+  <div class="card my-3" id="helpBox">
+    <div class="card-footer"><h5 class="d-inline card-title">Help</h5><a id="infoToggle" href="#" class="card-link float-right">Show</a></div>
+    <div id="info" class="card-body d-none">
+      <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
+      <p>To delete a response, click on "Delete a response" in the configure menu then click on a row.</p>
+      <p>To import these responses into Excel or a similar spreadsheet editor, download this as a CSV file</p>
     </div>
   </div>
-  <div class="w-100"></div>
+</div>
+<!-- This is the toolbar for the spreadsheet. Includes dropdown menus and filter input box -->
+<div class="row my-5">
   <div class="col-12 col-md-7 col-lg-6 order-last order-md-2">
     <div class="btn-group" role="group">
       <div class="btn-group" role="group">
@@ -39,14 +37,8 @@
       <div class="btn-group" role="group">
         <button class="btn btn-secondary dropdown-toggle" id="configureMenuToggler" data-toggle="dropdown" type="button">Configure</button>
         <div class="dropdown-menu" aria-labelledby="configureMenuToggler">
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=basic">Change theme to basic</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=light">Change theme to light</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=dark">Change theme to dark</a>
-          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="cew">Make columns equal width</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=public">Make results publicly viewable</a>
-          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=open">Stop/resume accepting responses</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=delete" id="">Delete form</a>
+          <a class="dropdown-item" href="#" id="del">Delete a response</a>
         </div>
       </div>
     </div>
@@ -71,9 +63,9 @@
         {% if loop.first %}
         <th scope="row">{{cell}}</th>
         {% elif cell is iterable and cell is not string %}
-        <td>{% for item in cell %}{{item}}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
+        <td><ul class="polyforms-compact">{% for item in cell %}<li>{{item}}</li>{% endfor %}</ul></td>
         {% else %}
-        <td>{{cell}}</td>
+        <td>{{cell if cell != None else ""}}</td>
         {% endif %}
         {% endfor %}
       </tr>
@@ -248,8 +240,10 @@
     </div>
   </div>
 </div>
+<br><br><br><br>
 
 <script type="text/javascript" src="/static/js/reqwest.min.js"></script>
+<script type="text/javascript" src="/static/js/utils.js"></script>
 <script type="text/javascript">
 var mydata = {{ data|tojson }};
 var headers = {{ headers|tojson|safe }};
@@ -451,7 +445,7 @@ function makeScatterChart(){
 };
 
 var flashMessage = function(type, message) {
-  document.getElementById("cards").innerHTML += '<div class="alert alert-' + type + '" onclick="this.style.display=\'none\';">' + message + ' Click here to hide this message.</div>';
+  document.getElementById("cards").innerHTML += '<div class="alert alert-' + type + '" onclick="this.style.display=\'none\';">' + message + ' (Click here to hide this message)</div>';
 };
 
 var activateToolbar = function() {
@@ -461,14 +455,14 @@ var activateToolbar = function() {
   var rows = d3.select("#responsesTable").selectAll("tbody tr");
   //a helper function that returns true if this filter matches
   var filterMatches = function(innerHTML, filterText) {
-    return innerHTML.replace("<br>", " ").indexOf(filterText) != -1;
+    return innerHTML.replace(" ", "").toLowerCase().indexOf(filterText.replace(" ", "").toLowerCase()) != -1;
   }
   //This event happens whenever you type in the search bar
   filter.addEventListener("input", function(evt) {
     filterText = filter.value;
     rows.style("display", function(d, rowIndex) {
       for(var i = 0; i < this.children.length; i++) {
-        if(filterMatches(this.children[i].innerHTML, filterText)) {
+        if(filterMatches(this.children[i].textContent, filterText)) {
           return "table-row";
         }
       }
@@ -481,8 +475,33 @@ var activateToolbar = function() {
     d3.select("#columns").selectAll("th").style("width", "400px");
   });
 
+  /* Delete response */
+  document.getElementById("del").addEventListener("click", function(event) {
+    event.preventDefault();
+    rows.on("click", function(data, rowIndex) {
+      rows.on("click", null); //stop this event listener from affecting more rows
+      thisRow = this;
+      reqwest({
+        url: "/form/toggle?id=" + formID + "&setting=delete_response&rid=" + (this.rowIndex) + "&response=simple",
+        method: "GET",
+        type: "json",
+        error: function() { flashMessage("danger", "Operation failed. You should try again later."); },
+        success: function(resp) {
+          if(resp.status == "ok") {
+            thisRow.parentNode.removeChild(thisRow);
+            resp.status = "success"; //for css
+          }
+          else if(resp.status == "bad") {
+            resp.message = "This feature has been disabled";
+            resp.status = "danger"; //for css
+          }
+          flashMessage(resp.status, resp.message);
+        }
+      });
+    })
+  });
+
   /* Change timestamp format event listener */
-  var format = 0;
   var dateStringToDate = function(d) { //returns a Date object given a YYYY-MM-DD HH:MM:SS string
     var p = [];
     p[0] = parseInt(d.substring(0, 4));   //year
@@ -491,57 +510,67 @@ var activateToolbar = function() {
     p[3] = parseInt(d.substring(11, 13)); //hour
     p[4] = parseInt(d.substring(14, 16)); //minute
     p[5] = parseInt(d.substring(17, 19)); //second
+    p[1] = p[1] - 1; //converts month from 1-indexed to 0-indexed format
     return new Date(Date.UTC.apply(Date, p));
   };
   var week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   document.getElementById("columns").children[1].addEventListener("click", function() {
-    format = (format + 1) % 8;
+    currentFormat++;
+    this.textContent = changeDateTimeFormat(currentFormat % 8);
+  });
+  /* Given int 0-7, changes each row's time column to the specified format, then returns the string name of the format. */
+  var changeDateTimeFormat = function(format) {
     var cells = d3.selectAll("#responsesTable tbody td:nth-child(2)").data(mydata);
+    var formatName;
     switch(format) {
       case 0:
-        this.innerHTML = "When";
+        formatName = "UTC/GMT";
         cells.text(function(d, i) {return d[1];});
         break;
       case 1:
-        this.innerHTML = "Date";
+        formatName = "Date";
         cells.text(function(d, i) {return dateStringToDate(d[1]).toLocaleDateString();});
         break;
       case 2:
-        this.innerHTML = "Time";
+        formatName = "Time";
         cells.text(function(d, i) {return dateStringToDate(d[1]).toLocaleTimeString();});
         break;
       case 3:
-        this.innerHTML = "Day of Week";
+        formatName = "Day of Week";
         cells.text(function(d, i) {return week[dateStringToDate(d[1]).getDay()];});
         break;
       case 4:
-        this.innerHTML = "Date of Month";
+        formatName = "Date of Month";
         cells.text(function(d, i) {return dateStringToDate(d[1]).getDate();});
         break;
       case 5:
-        this.innerHTML = "Month";
+        formatName = "Month";
         cells.text(function(d, i) {return month[dateStringToDate(d[1]).getMonth()];});
         break;
       case 5:
-        this.innerHTML = "Year";
+        formatName = "Year";
         cells.text(function(d, i) {return dateStringToDate(d[1]).getFullYear();});
         break;
       case 6:
-        this.innerHTML = "Human Time";
-        cells.text(function(d, i) {return dateStringToDate(d[1]).toDateString();});
+        formatName = "When";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).toLocaleString();});
         break;
-      case 7:
-        this.innerHTML = "Unix Time";
+      default:
+        formatName = "Unix Time";
         cells.text(function(d, i) {return dateStringToDate(d[1]).getTime();});
         break;
 
     }
-  });
+    return formatName;
+  };
+  var currentFormat = 6;
+  changeDateTimeFormat(currentFormat);
 
   /* Close help card */
-  document.getElementById("closeHelp").addEventListener("click", function() {
-    document.getElementById("helpBox").style.display = "none";
+  document.getElementById("infoToggle").addEventListener("click", function(event) {
+    event.preventDefault();
+    toggleVisibility("info", this, "Show", "Hide");
   });
 
   /* AJAX things */
