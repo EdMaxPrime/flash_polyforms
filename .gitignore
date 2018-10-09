@@ -1,5 +1,6 @@
 # Ignore permission changes
 log.sh
+polyforms/data/secret
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

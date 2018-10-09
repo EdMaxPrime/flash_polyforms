@@ -1,3 +1,0 @@
-Response Index{% for columnName in headers %},"{{columnName}}"{% endfor %}
-{% for row in data %}{{loop.index}}{% for cell in row %},"{{cell}}"{% endfor %}
-{% endfor %}

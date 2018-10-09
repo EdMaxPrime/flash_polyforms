@@ -6,16 +6,25 @@
 <div class="row my-3">
   <div class="col mb-1">
     <h1>{{title}}</h1>
-    Shareable link: <a href="/f/{{form_id}}">http://polyforms.me{{url_for("display_form_shortcut", form_id=form_id)}}</a>
+    <div id="cards">
+      <div class="card my-3" id="helpBox">
+        <div id="info" class="card-body">
+          <p>Shareable link: <a href="/f/{{form_id}}">http://polyforms.me{{url_for("display_form_shortcut", form_id=form_id)}}</a> (right click the blue link and then click "copy link address" in the popup menu)</p>
+          <p>Click on the black header of the second column ("when") to cycle through different formats of the date/time</p>
+          <button class="btn btn-dark" id="closeHelp">Dismiss help menu</button>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="w-100"></div>
   <div class="col-12 col-md-7 col-lg-6 order-last order-md-2">
     <div class="btn-group" role="group">
-      <div class="button-group" role="group">
+      <div class="btn-group" role="group">
         <button class="btn btn-secondary dropdown-toggle" id="downloadMenuToggler" data-toggle="dropdown" type="button">Download</button>
         <div class="dropdown-menu" aria-labelledby="downloadMenuToggler">
           <a class="dropdown-item" href="/form/view/form.csv?id={{form_id}}">CSV</a>
           <a class="dropdown-item" href="/form/view/form.json?id={{form_id}}">JSON</a>
+          <a class="dropdown-item" href="/form/view/form.xml?id={{form_id}}">XML</a>
         </div>
       </div>
       <div class="btn-group" role="group">
@@ -30,13 +39,14 @@
       <div class="btn-group" role="group">
         <button class="btn btn-secondary dropdown-toggle" id="configureMenuToggler" data-toggle="dropdown" type="button">Configure</button>
         <div class="dropdown-menu" aria-labelledby="configureMenuToggler">
+          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=basic">Change theme to basic</a>
+          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=light">Change theme to light</a>
+          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=dark">Change theme to dark</a>
+          <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="cew">Make columns equal width</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=basic">Change theme to basic</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=light">Change theme to light</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=dark">Change theme to dark</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=public">Make results publicly viewable</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=open">Stop/resume accepting responses</a>
-          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=delete">Delete form</a>
+          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=public">Make results publicly viewable</a>
+          <a class="dropdown-item setting" href="/form/toggle?id={{form_id}}&amp;setting=open">Stop/resume accepting responses</a>
+          <a class="dropdown-item" href="/form/toggle?id={{form_id}}&amp;setting=delete" id="">Delete form</a>
         </div>
       </div>
     </div>
@@ -51,15 +61,21 @@
   <table class="table table-bordered table-hover" id="responsesTable">
     <thead class="thead-dark">
       <tr id="columns">
-        <th>Response Index</th>
         {% for columnName in headers %}<th>{{ columnName }}</th>{% endfor %}
       </tr>
     </thead>
     <tbody>
       {% for row in data %}
       <tr>
-        <th scope="row">{{ loop.index }}</th>
-        {% for cell in row %}<td>{{cell|replace(",", ", ")}}</td>{% endfor %}
+        {% for cell in row %}
+        {% if loop.first %}
+        <th scope="row">{{cell}}</th>
+        {% elif cell is iterable and cell is not string %}
+        <td>{% for item in cell %}{{item}}{% if not loop.last %}<br>{% endif %}{% endfor %}</td>
+        {% else %}
+        <td>{{cell}}</td>
+        {% endif %}
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
@@ -85,7 +101,6 @@
           <div class="form-group">
             <label for="thing2">Frequency:</label>
             <select class="form-control" id="pieColumn" name="x">
-              <option value="0">Response Index</option>
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
@@ -177,7 +192,6 @@
           <div class="form-group">
             <label for="thing2">X-axis:</label>
             <select class="form-control" id="thing2" name="x">
-              <option value="0">Response Index</option>
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
@@ -186,7 +200,6 @@
           <div class="form-group">
             <label for="thing2a">Y-Axis:</label>
             <select class="form-control" id="thing2a" name="y">
-              <option value="0">Response Index</option>
               {% for columnName in headers %}
               <option value="{{loop.index}}">{{columnName}}</option>
               {% endfor %}
@@ -236,22 +249,32 @@
   </div>
 </div>
 
-
+<script type="text/javascript" src="/static/js/reqwest.min.js"></script>
 <script type="text/javascript">
 var mydata = {{ data|tojson }};
-console.log({{headers|tojson}})
-console.log(mydata)
+var headers = {{ headers|tojson|safe }};
+var qTypes = {{ types|tojson|safe }};
+var formID = {{ form_id }};
+
 function makePieChart(){
   var column = document.getElementById("pieColumn").value - 1;
-  d3.select("#chartModalLabel").text({{headers|safe}}[column]);
+  d3.select("#chartModalLabel").text(headers[column]);
   var counts = {};
   for (var i = 0; i < mydata.length; i++) {
-    if(mydata[i][column] in counts){
-      counts[mydata[i][column]]++;
+    if(Array.isArray(mydata[i][column])) {
+      for(var choice = 0; choice < mydata[i][column].length; choice++) {
+        if(mydata[i][column][choice] in counts) counts[mydata[i][column][choice]]++;
+        else counts[mydata[i][column][choice]] = 1;
+      }
+    } else {
+      if(mydata[i][column] in counts){
+        counts[mydata[i][column]]++;
+      }
+      else{
+        counts[mydata[i][column]] = 1;
+      }
     }
-    else{
-      counts[mydata[i][column]] = 1;
-    }
+    
   }
   //console.log(counts);
   var chart = c3.generate({
@@ -274,7 +297,7 @@ function makePieChart(){
 
 function makeBarChart(){
   var x = document.getElementById("thing3").value - 1;
-  d3.select("#chartModalLabel").text({{headers|safe}}[x]);
+  d3.select("#chartModalLabel").text(headers[x]);
   var xLabels = ['x'];
   var counts = ['y'];
   var xType = 'indexed'
@@ -310,7 +333,7 @@ function makeBarChart(){
     axis: {
           x: {
             label: {
-              text: {{headers|tojson}}[x],
+              text: headers[x],
               position: 'outer-center'
             },
             type: xType
@@ -322,7 +345,7 @@ function makeBarChart(){
 function makeLineChart(){
   var x = document.getElementById("thing2").value - 1;
   var y = document.getElementById("thing2a").value - 1;
-  d3.select("#chartModalLabel").text({{headers|tojson}}[x] + ' vs. ' + {{headers|tojson}}[y]);
+  d3.select("#chartModalLabel").text(headers[x] + ' vs. ' + headers[y]);
   var xLabels = ['x'];
   var data = ['y'];
   //console.log(data);
@@ -357,14 +380,14 @@ function makeLineChart(){
     axis: {
           x: {
             label: {
-              text: {{headers|tojson}}[x],
+              text: headers[x],
               position: 'outer-center'
             },
             type: xType
           },
           y: {
             label: {
-              text: {{headers|tojson}}[y],
+              text: headers[y],
               position: 'outer-middle'
           },
           type: yType
@@ -377,7 +400,7 @@ function makeLineChart(){
 function makeScatterChart(){
   var x = document.getElementById("plotX").value - 1;
   var y = document.getElementById("plotY").value - 1;
-  d3.select("#chartModalLabel").text({{headers|tojson}}[x] + ' vs. ' + {{headers|tojson}}[y]);
+  d3.select("#chartModalLabel").text(headers[x] + ' vs. ' + headers[y]);
   var xLabels = ['x'];
   var data = ['y'];
   console.log(data);
@@ -393,9 +416,7 @@ function makeScatterChart(){
       yType = 'category';
     }
   }
-  console.log(xLabels);
-  console.log(data);
-  console.log({{headers|tojson}}[y]);
+  
   var chart = c3.generate({
     bindto: '#chart',
     data: {
@@ -413,14 +434,14 @@ function makeScatterChart(){
     axis: {
           x: {
             label: {
-              text: {{headers|tojson}}[x],
+              text: headers[x],
               position: 'outer-center'
             },
             type: xType
           },
           y: {
             label: {
-              text: {{headers|tojson}}[y],
+              text: headers[y],
               position: 'outer-middle'
           },
         type: yType
@@ -429,17 +450,25 @@ function makeScatterChart(){
   });
 };
 
+var flashMessage = function(type, message) {
+  document.getElementById("cards").innerHTML += '<div class="alert alert-' + type + '" onclick="this.style.display=\'none\';">' + message + ' Click here to hide this message.</div>';
+};
+
 var activateToolbar = function() {
   /* Attach event listeners to the filter search bar */
   var filter = document.getElementById("filter");
   //Select all <tr> elements in the table
   var rows = d3.select("#responsesTable").selectAll("tbody tr");
+  //a helper function that returns true if this filter matches
+  var filterMatches = function(innerHTML, filterText) {
+    return innerHTML.replace("<br>", " ").indexOf(filterText) != -1;
+  }
   //This event happens whenever you type in the search bar
   filter.addEventListener("input", function(evt) {
     filterText = filter.value;
-    rows.style("display", function(d, i) {
+    rows.style("display", function(d, rowIndex) {
       for(var i = 0; i < this.children.length; i++) {
-        if(this.children[i].innerHTML.indexOf(filterText) != -1) {
+        if(filterMatches(this.children[i].innerHTML, filterText)) {
           return "table-row";
         }
       }
@@ -451,6 +480,87 @@ var activateToolbar = function() {
   document.getElementById("cew").addEventListener("click", function() {
     d3.select("#columns").selectAll("th").style("width", "400px");
   });
+
+  /* Change timestamp format event listener */
+  var format = 0;
+  var dateStringToDate = function(d) { //returns a Date object given a YYYY-MM-DD HH:MM:SS string
+    var p = [];
+    p[0] = parseInt(d.substring(0, 4));   //year
+    p[1] = parseInt(d.substring(5, 7));   //month
+    p[2] = parseInt(d.substring(8, 10));  //day
+    p[3] = parseInt(d.substring(11, 13)); //hour
+    p[4] = parseInt(d.substring(14, 16)); //minute
+    p[5] = parseInt(d.substring(17, 19)); //second
+    return new Date(Date.UTC.apply(Date, p));
+  };
+  var week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  document.getElementById("columns").children[1].addEventListener("click", function() {
+    format = (format + 1) % 8;
+    var cells = d3.selectAll("#responsesTable tbody td:nth-child(2)").data(mydata);
+    switch(format) {
+      case 0:
+        this.innerHTML = "When";
+        cells.text(function(d, i) {return d[1];});
+        break;
+      case 1:
+        this.innerHTML = "Date";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).toLocaleDateString();});
+        break;
+      case 2:
+        this.innerHTML = "Time";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).toLocaleTimeString();});
+        break;
+      case 3:
+        this.innerHTML = "Day of Week";
+        cells.text(function(d, i) {return week[dateStringToDate(d[1]).getDay()];});
+        break;
+      case 4:
+        this.innerHTML = "Date of Month";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).getDate();});
+        break;
+      case 5:
+        this.innerHTML = "Month";
+        cells.text(function(d, i) {return month[dateStringToDate(d[1]).getMonth()];});
+        break;
+      case 5:
+        this.innerHTML = "Year";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).getFullYear();});
+        break;
+      case 6:
+        this.innerHTML = "Human Time";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).toDateString();});
+        break;
+      case 7:
+        this.innerHTML = "Unix Time";
+        cells.text(function(d, i) {return dateStringToDate(d[1]).getTime();});
+        break;
+
+    }
+  });
+
+  /* Close help card */
+  document.getElementById("closeHelp").addEventListener("click", function() {
+    document.getElementById("helpBox").style.display = "none";
+  });
+
+  /* AJAX things */
+  var settings = document.getElementsByClassName("setting");
+  for(var i = 0; i < settings.length; i++) {
+    settings[i].addEventListener("click", function(event) {
+      event.preventDefault(); //stop from redirecting
+      reqwest({
+        url: this.getAttribute("href") + "&response=simple",
+        method: "GET",
+        type: "json",
+        error: function() { flashMessage("danger", "Operation failed. You should try again later."); },
+        success: function(resp) {
+          if(resp.status == "error") resp.status = "danger"; //for css
+          flashMessage(resp.status, resp.message);
+        }
+      });
+    });
+  }
 };
 
 activateToolbar();

@@ -1,0 +1,9 @@
+[
+{% for row in data %}
+    {
+    {% for answer in row %}
+        "{{headers[loop.index0]}}": {{ answer|tojson }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+]

@@ -4,3 +4,11 @@ body {
     padding-right: 30px;
 }
 */
+.feature {
+    background-color: rgba(199, 221, 255, 0.5);
+    border: 5px solid white;
+    border-radius: 5px;
+    padding: 2em;
+    font-size: 18px;
+    text-align: center;
+}

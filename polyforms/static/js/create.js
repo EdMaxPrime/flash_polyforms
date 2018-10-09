@@ -15,7 +15,7 @@ var dynamicAnswer = function(e){
             dropdown.onchange = function(){
                 //console.log("parent is " + dropdown.parentElement.getAttribute('name'));
                 //console.log('looking at ' + index);
-                answer = dropdown.parentElement.querySelector('div[class="answer"]');
+                answer = dropdown.parentElement.parentElement.getElementsByClassName("answer")[0];
                 if (dropdown.value=="0" || dropdown.value=="1"){ // text responses
                     while (answer.firstChild) answer.removeChild(answer.firstChild);
                     answer.innerHTML+='(Optional) Min. characters: ';
@@ -55,10 +55,12 @@ var dynamicAnswer = function(e){
                 } 
                 else if (dropdown.value == "4"){ // multiple-choice
                     while (answer.firstChild) answer.removeChild(answer.firstChild);
-                    answer.innerHTML+='Enter answer choices in the following box, separated by commas only';
-                    answer.appendChild(document.createElement('br'));
-                    answers = document.createElement('input');
+                    answer.innerHTML += '<label>Min. number of selectable answer choices <input type="number" min="0" name="Q.min"></label><br><label>Max. number of selectable answer choices<input type="number" min="1" name="Q.max"></label>'.replace("Q", index);
+                    answer.innerHTML+='<p>Enter answer choices in the following box, where each answer choice is on a new line. If you want an answer choice to be recorded differently than it is presented on this form, then put the text you want to see in the spreadsheet for that answer choice at the start of the line and end it with a closing parenthesis. Ex: "A) Bananas" will show "Bananas" on the form but "A" on the spreadsheet</p>';
+                    answers = document.createElement('textarea');
                     answers.setAttribute('name', index + '.answers');
+                    answers.setAttribute('cols', "50");
+                    answers.setAttribute('rows', "4");
                     answer.appendChild(answers);
                 } else {while (answer.firstChild) answer.removeChild(answer.firstChild);};
                 //console.log('changed');
@@ -118,7 +120,6 @@ var addQuestion= function(e) {
         removeButtons[i].addEventListener('click', removeQuestion); // workaround for above eventlistener not working
     };
     
-    questionDiv.innerHTML+='Question Type: ';
     var newDropdown = document.createElement('select');
     newDropdown.setAttribute('class', 'select');
     newDropdown.setAttribute('name', questionNumber + '.type');
@@ -129,22 +130,21 @@ var addQuestion= function(e) {
         questionTypeOption.innerHTML = questionTypes[i];
         newDropdown.appendChild(questionTypeOption);
     };
-    questionDiv.appendChild(newDropdown);
+    questionDiv.appendChild(makeLabel("Question Type: ", newDropdown));
     questionDiv.appendChild(document.createElement('br'));
     
-    questionDiv.innerHTML+='Question: ';
     var newQuestionBox = document.createElement('input');
-    questionDiv.appendChild(newQuestionBox);
-    questionDiv.appendChild(document.createElement('br'));
     newQuestionBox.setAttribute('type', 'text');
+    newQuestionBox.setAttribute('required', 'required');
     newQuestionBox.setAttribute('name', questionNumber + '.question');
+    questionDiv.appendChild(makeLabel("Question: ", newQuestionBox));
+    questionDiv.appendChild(document.createElement('br'));
     
-    questionDiv.innerHTML+="Required? "
     var requiredBox = document.createElement('input');
     requiredBox.setAttribute('type', 'checkbox');
     requiredBox.setAttribute('value', '1');
     requiredBox.setAttribute('name', questionNumber + '.required');
-    questionDiv.appendChild(requiredBox);
+    questionDiv.appendChild(makeLabel("Required?", requiredBox));
     
     var answerDiv = document.createElement('div');
     answerDiv.setAttribute('class', 'answer');
@@ -170,6 +170,14 @@ var addQuestion= function(e) {
     //console.log(answerDivs.length);
     dynamicAnswer();
 };
+
+/* Returns a labeled input element */
+var makeLabel = function(labelText, inputElement) {
+    var label = document.createElement("label");
+    label.innerHTML += '<span style="display: inline-block; margin-right: 5px;">' + labelText + '</span>';
+    label.appendChild(inputElement);
+    return label;
+}
 
 addButton.addEventListener('click', addQuestion);
 

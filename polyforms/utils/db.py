@@ -1,6 +1,5 @@
 import sqlite3   # enable control of an sqlite database
 import hashlib   # allows for passwords and emails to be encrypted and decrypted
-from flask import session  # interact with cookie
 import os
 
 #this will be the one we use when routes work
@@ -39,6 +38,15 @@ def increment_id(table):
 
 def hashed(foo):
     return hashlib.md5(str(foo)).hexdigest()
+
+#Given a tuple/list and a list of strings, will create a dictionary where the first key in the list corresponds to the first element in the tuple
+def tuple_to_dictionary(tuuple, list_of_keys):
+    d = {} #the dictionary
+    index = 0 #the column index
+    while index < len(tuuple):
+        d[ list_of_keys[index] ] = tuuple[index]
+        index += 1
+    return d
     
 def add_form(user_id, formTitle, loginReq, publicReq, theme, open, message):
     db, c = open_db()
@@ -47,28 +55,24 @@ def add_form(user_id, formTitle, loginReq, publicReq, theme, open, message):
     close_db(db)
     return form_id[0]
 
-def add_response(userID, formID, question_id, response, timestamp):
+#Add a response to a question, returns its id
+def add_response(form_id, user_id, question_id, response, new_row=False):
     db, c = open_db()
-    c.execute("SELECT response_id FROM responses where form_id = " + str(formID) + ";")
-    tempCounter = c.fetchall()
-    if tempCounter == None or tempCounter == [] or len(tempCounter) == 0:
-        response_id = 1
-    else:
-        response_id = len(tempCounter) + 1
-    c.execute("INSERT INTO responses (response_id, form_id, question_id, user_id, response, timestamp) VALUES (?,?,?,?,?,?)", (response_id, formID, question_id, userID, response, timestamp))
+    response_id = c.execute("SELECT max(response_id) FROM responses WHERE form_id = ?;", (form_id,)).fetchone()[0] or 0
+    if new_row:
+        response_id += 1
+    if isinstance(response, list):
+        response = "\n".join(response)
+    c.execute("INSERT INTO responses (user_id, form_id, question_id, response_id, response, timestamp) VALUES (?,?,?,?,?, datetime('now'));", (user_id,form_id, question_id, response_id, response))
     close_db(db)
+    return response_id
     
 def add_question(formID, question, type, required, min, max):
     db, c = open_db()
-    c.execute("SELECT question_id FROM questions where form_id = " + str(formID) + ";")
-    tempCounter = c.fetchall()
-    if tempCounter == None or tempCounter == [] or len(tempCounter) == 0:
-        question_id = 1
-    else:
-        question_id = len(tempCounter) + 1
+    question_id = c.execute("SELECT max(question_id) FROM questions WHERE form_id = ?;", (form_id,)).fetchone()
+    question_id = (question_id[0] + 1) if question_id[0] != None else 1
     c.execute("INSERT INTO questions (question, question_id, form_id, type, required, min, max) VALUES (?,?,?,?,?,?,?);", (question, int(question_id),int(formID), type, required, min, max))
-    db.commit()
-    db.close()
+    close_db(db)
     return question_id
 
 def add_option(formID, questionID, text_user_sees, value):
@@ -140,6 +144,84 @@ def getID(tableName, idCol, queryCol, query):
     ID = c.fetchone()
     close_db(db)
     return ID[0]
+
+#Useful for retrieving sqlite query results
+def defaultVal(v, d):
+    return d if v == None else v[0]
+
+def get_form_meta(form_id):
+    db, c = open_db()
+    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, message FROM forms WHERE form_id = ?;", (str(form_id),))
+    result = c.fetchone()
+    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "message"])
+    form["login_required"] = (form["login_required"] == 1)
+    form["public_results"] = (form["public_results"] == 1)
+    form["open"] = (form["open"] == 1)
+    form["num_responses"] = defaultVal(c.execute("SELECT max(response_id) FROM responses WHERE form_id = " + str(form_id) + ";").fetchone(), 0)
+    form["owner"] = defaultVal(c.execute("SELECT username FROM accounts WHERE user_id=?;", (form["owner"],)).fetchone(), "")
+    close_db(db)
+    return form
+
+#Returns form info with more question data. Top level keys are: id, title, owner, login_required, public_results, theme, created, open
+#The questions array has items with these keys: index, question, type, required, min, max
+#Choices in the choices key of a question have these keys: text and value
+def get_form_questions(form_id):
+    form = get_form_meta(form_id) #get basic info into the dictionary
+    db, c = open_db()
+    form["questions"] = []
+    questions = c.execute("SELECT question_id, question, type, required, min, max FROM questions WHERE form_id = ? ORDER BY question_id ASC;", (form_id,)).fetchall()
+    for q in questions:
+        #convert the query result into a dictionary
+        questionAsDict = tuple_to_dictionary(q, ["index", "question", "type", "required", "min", "max"])
+        #If this question lists options, then add them as a list under the key "choices"
+        if questionAsDict["type"] == "choice":
+            c.execute("SELECT text_user_sees, value FROM options WHERE form_id = ? AND question_id = ? ORDER BY option_index ASC;", (form_id, questionAsDict["index"]))
+            result = c.fetchall()
+            questionAsDict["choices"] = [tuple_to_dictionary(choice, ["text", "value"]) for choice in result]
+        #add this to the list of questions
+        form["questions"].append(questionAsDict)
+    close_db(db)
+    return form
+
+#form_id, question_id, user_id, response_id, response, timestamp
+def get_form_responses(form_id):
+    form = get_form_meta(form_id)
+    db, c = open_db()
+    questions = c.execute("SELECT question, type FROM questions WHERE form_id = ? ORDER BY question_id;", (form_id,)).fetchall()
+    form["headers"] = ["Response Index", "When"] + [query[0] for query in questions]
+    form["types"] = ["int", "short"] + [query[1] for query in questions]
+    responseArray = c.execute("SELECT * FROM responses WHERE form_id = ? ORDER BY response_id, question_id;", (form_id,)).fetchall()    
+    form["data"] = []
+    response_id = 1
+    tempArray = [None for i in range(0, len(form["headers"]))]
+    for r in responseArray:
+        #when the response index goes up, put the previous row in the 2d data array and then fill the tempArray with None values to signify a new row
+        if r[3] > response_id:
+            form["data"].append(tempArray)
+            tempArray = [None for i in range(0, len(form["headers"]))]
+            response_id += 1
+        #make sure response index and timestamp are recorded
+        if tempArray[0] == None:
+            tempArray[0] = response_id  #response index/id
+            tempArray[1] = r[5]         #timestamp
+        #now put the actual answer for this question into its right spot, accounting for the extra response index and timestamp columns
+        tempArray[ r[1] + 1 ] = r[4]
+        #if its a choice question, turn the answer into a list
+        if form["types"][ r[1] + 1 ] == "choice":
+            tempArray[ r[1] + 1 ] = tempArray[ r[1] + 1 ].splitlines()
+    #put the last row in
+    if len(form["data"]) < len(responseArray):
+        form["data"].append(tempArray)
+    close_db(db)
+    return form
+
+#Returns a list of forms that are owned by the given user
+def get_forms_by(user_id):
+    db, c = open_db()
+    result = c.execute("SELECT form_id FROM forms WHERE owner_id=?;", (user_id,)).fetchall()
+    close_db(db)
+    list_of_forms = [get_form_questions(r[0]) for r in result]
+    return list_of_forms
 
 # This returns a dictionary that represents a form.
 # Keys are title, id, created, headers, types, data.
@@ -325,32 +407,13 @@ def getFormDataNoResponse(formID):
     close_db(db)
     return formData
 
-# This returns an array of Dictionaries. Each dictionary represents a form.
-# Dictionary keys are: form_id, title, owner_id, owner, theme
-def getPublicForms(number):
-    formArray = []
+#Returns a list of forms with responses in the given amount. These are the most recently created ones
+def get_recent_forms(amount):
     db, c = open_db()
-    c.execute("SELECT * FROM forms WHERE login_required = 0 AND open = 1 ORDER BY created DESC;")
-    tempResult = c.fetchmany(size=number)
-    for each in tempResult:
-        #tempDict = {}
-        #tempDict["form_id"] = each[0]
-        #tempDict["title"] = each[1]
-        #tempDict["owner_id"] = each[2]
-
-        #ownerID = each[2]
-        #c.execute("SELECT username FROM accounts where user_id = " + str(ownerID) + ";")
-        #tempResult = c.fetchone()
-        #tempDict["owner"] = (str(tempResult[0]))
-        #tempDict["theme"] = each[5]
-        #tempDict["open"] = each[7]
-        #formArray.append(tempDict)
-        formArray.append(getFormData(each[0]))
-
-
-    #c.execute("INSERT INTO forms (title, owner_id, login_required, public_results, theme, created) VALUES ('form 3',1,0,0,'no theme', datetime('now'));")
+    c.execute("SELECT form_id FROM forms WHERE open = 1 ORDER BY created DESC LIMIT %s;" % str(amount))
+    list_of_ids = c.fetchall()
     close_db(db)
-    return formArray
+    return [get_form_questions(x[0]) for x in list_of_ids]
 
 def getSQ(username):
     db, c = open_db()
@@ -366,7 +429,7 @@ def update_account(username, password):
 
 def update_form(formID, colName, status):
     db, c = open_db()
-    c.execute("UPDATE forms SET " + "'"+ colName + "' = " + "" + str(status) + " WHERE form_id = '" + str(formID) + "';")
+    c.execute("UPDATE forms SET " + colName + " = ? WHERE form_id = ?;", (status, formID))
     close_db(db)
 
 
@@ -394,6 +457,14 @@ def get_form_questionsOptions(form_id, question_id):
     for each in question:
         optionArray.append(each["option"])
     return optionArray
+
+#Change form settings, where the column is a 1/0 boolean column
+def toggle_form(form_id, what):
+    db, c = open_db()
+    c.execute("UPDATE forms SET %s = 1 - %s WHERE form_id = %s" % (what, what, str(form_id)))
+    value = c.execute("SELECT %s FROM forms WHERE form_id = %s;" % (what, str(form_id))).fetchone()
+    close_db(db)
+    return (value[0] == 1) if value != None else False
 
 #Deletes a form, questions and responses
 def delete_form(form_id):
