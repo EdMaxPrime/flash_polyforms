@@ -154,7 +154,7 @@ def process_form():
     username = session.get("user", "")
     user_id = session.get("user_id")
     data = {}
-    form = db.get_form_questions(id) if form_id != "feedback" else config.FEEDBACK
+    form = db.get_form_questions(form_id) if form_id != "feedback" else config.FEEDBACK
     number_of_questions = len(form["questions"])
     for qnumber in range(1, number_of_questions+1):
         if form["questions"][qnumber-1]["type"] == "choice":
