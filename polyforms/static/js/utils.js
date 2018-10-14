@@ -63,3 +63,14 @@ var dateStringToDate = function(d) { //returns a Date object given a YYYY-MM-DD 
     p[1] = p[1] - 1; //converts month from 1-indexed to 0-indexed format
     return new Date(Date.UTC.apply(Date, p));
 };
+
+/* Returns the time in "MMM DD at H:MM Am|PM" format */
+var dateTimeShortFormat = function(d) {
+    var months = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var m = months[d.getMonth()];
+    var h = d.getHours() % 12;
+    if(h == 0) {h = 12;}
+    var a = d.getHours() < 12 ? "AM" : "PM";
+    var mm = d.getMinutes() < 10? "0"+d.getMinutes() : d.getMinutes();
+    return m + " " + d.getDate() + " at " + h + ":" + mm + " " + a;
+}
