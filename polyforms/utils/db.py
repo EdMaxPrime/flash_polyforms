@@ -180,9 +180,9 @@ def defaultVal(v, d):
 
 def get_form_meta(form_id):
     db, c = open_db()
-    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, end_message, description FROM forms WHERE form_id = ?;", (str(form_id),))
+    c.execute("SELECT form_id, title, owner_id, login_required, public_results, theme, created, open, end_message, description, edited FROM forms WHERE form_id = ?;", (str(form_id),))
     result = c.fetchone()
-    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "end_message", "description"])
+    form = tuple_to_dictionary(result, ["id", "title", "owner", "login_required", "public_results", "theme", "created", "open", "message", "description", "edited"])
     form["login_required"] = (form["login_required"] == 1)
     form["public_results"] = (form["public_results"] == 1)
     form["open"] = (form["open"] == 1)
@@ -463,6 +463,13 @@ def get_recent_forms(amount):
     close_db(db)
     return [get_form_questions(x[0]) for x in list_of_ids]
 
+#Returns the total number of things created. What must be the name of a table
+def get_number_of(what="forms"):
+    db, c = open_db()
+    num = defaultVal(c.execute("SELECT count(*) FROM " + what + ";").fetchone(), 0)
+    close_db(db)
+    return num
+
 #Returns the number of questions in a form, or 0 if it doesn't exist
 def get_num_questions(form_id):
     db, c = open_db()
@@ -517,6 +524,12 @@ def update_order(form_id, new_indexes):
         c.execute("UPDATE responses SET question_id = ? WHERE question_id = ? * -1 AND form_id = ?;", (new_indexes[i], i + 1, form_id))
         c.execute("UPDATE options   SET question_id = ? WHERE question_id = ? * -1 AND form_id = ?;", (new_indexes[i], i + 1, form_id))
         i += 1
+    close_db(db)
+
+#sets the time the form was edited to the current time
+def update_edited_time(form_id):
+    db, c = open_db()
+    c.execute("UPDATE forms SET edited = datetime('now') WHERE form_id = ?;", (form_id,))
     close_db(db)
 
 def get_form_questionResponses(form_id, question_id):

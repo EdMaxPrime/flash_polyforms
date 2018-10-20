@@ -5,21 +5,52 @@
 {% if forms_user_made|length == 0 %}
     <p>You currently do not have any forms.</p>
 {% else %}
+    <div>
+        <label for="sortby">Sort By:</label>
+        <select id="sortby"><option value="atitle">form title, ascending</option><option value="dtitle">form title, descending</option><option value="acreated" selected="selected">most recently created last</option><option value="dcreated">most recently created first</option><option value="aedited">most recently edited last</option><option value="dedited">most recently edited first</option><option value="anum_responses">ascending number of responses</option><option value="dnum_responses">descending number of responses</option></select>
+    </div>
     <div class="container">
         <div class="row font-weight-bold">
             <div class="col-12 col-md">Form Title</div>
             <div class="col-12 col-md-2">Responses</div>
-            <div class="col-12 col-md-2">Date Created</div>
+            <div class="col-12 col-md-3">Date Created</div>
         </div>
         {% for f in forms_user_made %}
         <a href="/form/view?id={{f.id}}" class="list-group-item list-group-item-action">
             <div class="row">
                 <div class="col-12 col-md">{{f.title}}</div>
                 <div class="col-12 col-md-2">{{f.num_responses}}<span class="d-inline d-md-none"> responses</span></div>
-                <div class="col-12 col-md-2"><span>{{f['created']|dtnormal}}</span></div>
+                <div class="col-12 col-md-3"><span class="thisIsATime">{{f['created']|dtnormal}}</span></div>
             </div>
         </a>
         {% endfor %}
     </div>
+    <script type="text/javascript" src="/static/js/utils.js"></script>
+    <script type="text/javascript">
+        var formInformation = {{ forms_user_made | tojson | safe }};
+        //Convert date-time string to javascript Date object
+        for(var i = 0; i < formInformation.length; i++) {
+            formInformation[i].created = dateStringToDate(formInformation[i].created);
+            formInformation[i].edited = dateStringToDate(formInformation[i].edited);
+        }
+        //Store form data with the list elements they represent
+        var formRows = d3.selectAll("a.list-group-item").data(formInformation);
+        //Convert the displayed time to local time from UTC/GMT
+        var timeColumns = d3.selectAll("span.thisIsATime").data(formInformation).text(function(formData) {
+            return dateTimeShortFormat(formData.created);
+        });
+        //Whenever a new sorting method is chosen, this will change the order of list elements based on the chosen method
+        document.getElementById("sortby").addEventListener("change", function() {
+            var category = this.options[this.selectedIndex].value.substring(1);
+            var direction = this.options[this.selectedIndex].value.substring(0, 1) == 'a' ? 1 : -1;
+            console.log(category + " " + direction);
+            //Note: a and b are the data of two elements that are being sorted, not the elements themselves
+            formRows.sort(function(a, b) {
+                if(a[category] < b[category]) return -1 * direction;
+                else if(a[category] > b[category]) return 1 * direction;
+                return 0;
+            });
+        });
+    </script>
 {% endif %}
 {% endblock %}

@@ -67,7 +67,7 @@ def deploy_test():
 
 @app.route('/')
 def home_page():
-    return render_template("index.html", username=session.get("user", ""), forms=db.get_recent_forms(24))
+    return render_template("index.html", username=session.get("user", ""), forms=db.get_recent_forms(24), totalForms=db.get_number_of("forms"), totalQ=db.get_number_of("questions"), totalAns=db.get_number_of("responses"))
 
 #Shows the form to login
 @app.route('/login')
@@ -155,7 +155,7 @@ def process_form():
     username = session.get("user", "")
     user_id = session.get("user_id")
     data = {}
-    form = db.get_form_questions(id) if form_id != "feedback" else config.FEEDBACK
+    form = db.get_form_questions(form_id) if form_id != "feedback" else config.FEEDBACK
     number_of_questions = len(form["questions"])
     for qnumber in range(1, number_of_questions+1):
         if form["questions"][qnumber-1]["type"] == "choice":
@@ -273,6 +273,9 @@ def change_form():
         elif "theme" in request.args and config.theme_exists(request.args["theme"]):
             result = 'Your form has the "%s" theme' % config.get_theme(request.args["theme"])["display_name"]
             db.update_form(form_id, "theme", request.args["theme"])
+        #update form's edit time
+        if result != False:
+            db.update_edited_time(form_id)
         #determine response content-type
         if "response" in request.args:
             status = "ok" if result != False else "bad"
@@ -393,7 +396,7 @@ def edit_form():
     if request.method == "GET":
         form_id = request.args.get("id")
     else:
-        form_id = request.form.get("form_id")
+        form_id = request.form.get("id")
     #Make sure this person has permission and the form exists
     if not test.can_edit(user_id, form_id):
         return render_template("unauthorized.html", username=username)
@@ -463,6 +466,7 @@ def edit_form():
             for i in range(0, len(to_be_deleted)):
                 #print "deleting %d which is now index %d, %d left" % (to_be_deleted[i], to_be_deleted[i]-i, len(to_be_deleted) - i - 1)
                 db.delete_question(form_id, to_be_deleted[i] - i)
+            db.update_edited_time(form_id)
             flash("Your changes have been saved")
         return render_template("edit.html", username=username, form=db.get_form_questions(form_id), themes=config.THEMES, isowner=True)
 
