@@ -9,7 +9,6 @@ from utils import test
 from utils import config
 
 app = Flask(__name__)
-app.config['TEMPLATES_AUTO_RELOAD'] = True
 DIR = os.path.dirname(__file__) or '.'
 DIR += '/'
 db.use_database(DIR)
@@ -529,7 +528,9 @@ def change_account():
         elif db.user_exists(new_username) and new_username != username:
             flash("This username is already in use")
         else:
+            db.delete_session(username, session.get("token"))
             db.update_username(user_id, new_username)
+            session["token"] = db.add_session(new_username)
             session["user"] = new_username
     elif setting == "Delete":
         myforms = db.get_forms_by(user_id)
@@ -623,5 +624,6 @@ def is_integer(thing):
 #Will not be executed if this is imported by WSGI
 if __name__ == "__main__":
     app.debug = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True   #allows html templates to be updated without restarting server
     app.run()
 
