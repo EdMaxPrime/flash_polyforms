@@ -345,42 +345,35 @@ def addQuestions():
     formID = db.add_form(session.get("user_id", ""), request.args.get("title", ""), loginReq, publicReq, theme, 1, message, request.args.get("description", ""))
     i=0
     while (str(i) + ".question" in request.args.keys()):
-        if request.args[str(i) + ".type"] == "0":
-            type = "short"
-        elif request.args[str(i) + ".type"] == "1":
-            type = "long"
-        elif request.args[str(i) + ".type"] == "2":
-            type = "int"
-        elif request.args[str(i) + ".type"] == "3":
-            type = "number"
-        elif request.args[str(i) + ".type"] == "4":
-            type = "choice"
-        else:
-            type = request.args[str(i) + ".type"]
+        question_type = "short"
+        try:
+            question_type = config.TYPES[ int(request.args[str(i) + ".type"]) ]
+        except:
+            question_type = "short"
         if (str(i) + ".required" not in request.args.keys()):
-            required = 0
+            required = config.OPTIONAL
         else:
-            required = 1
+            required = config.REQUIRED
         if (is_positive_number(request.args.get(str(i) + ".min")) and type != "number" and type != "int"):
-            min = request.args[str(i) + ".min"]
+            answer_min = request.args[str(i) + ".min"]
         elif (is_integer(request.args.get(str(i) + ".min")) and (type == "number" or type == "int")):
-            min = request.args[str(i) + ".min"]
+            answer_min = request.args[str(i) + ".min"]
         else:
-            min = None
+            answer_min = config.NO_LIMIT
         if (is_positive_number(request.args.get(str(i) + ".max")) and type != "number" and type != "int"):
-            max = request.args[str(i) + ".max"]
+            answer_max = request.args[str(i) + ".max"]
         elif (is_integer(request.args.get(str(i) + ".max")) and (type == "number" or type == "int")):
-            max = request.args[str(i) + ".max"]
+            answer_max = request.args[str(i) + ".max"]
         else:
-            max = None
-        question_id = db.add_question(formID, request.args[str(i) + ".question"], type, required, min, max)
+            answer_max = config.NO_LIMIT
+        question_id = db.add_question(formID, request.args[str(i) + ".question"], question_type, required, answer_min, answer_max)
         if type == "choice":
-            for o in request.args.get(str(i) + ".answers", "").splitlines():
-                if len(o) == 0:
+            for option in request.args.get(str(i) + ".answers", "").splitlines():
+                if len(option) == 0: #skip empty lines
                     continue
-                ovalue = o.split(")", 1)[0]
-                otext = o.split(")", 1)[-1]
-                db.add_option(formID, question_id, otext, ovalue)
+                option_value = o.split(")", 1)[0]
+                option_text = o.split(")", 1)[-1]
+                db.add_option(formID, question_id, option_text, option_value)
         i+=1
     return redirect(url_for("my_forms"))
 
@@ -404,17 +397,17 @@ def edit_form():
             if "title" in request.form:
                 db.update_form(form_id, "title", request.form["title"])
             if "public_results" in request.form:
-                db.update_form(form_id, "public_results", 1)
+                db.update_form(form_id, "public_results", config.PUBLIC)
             else:
-                db.update_form(form_id, "public_results", 0)
+                db.update_form(form_id, "public_results", config.PRIVATE)
             if "login_required" in request.form:
-                db.update_form(form_id, "login_required", 1)
+                db.update_form(form_id, "login_required", config.USERS)
             else:
-                db.update_form(form_id, "login_required", 0)
+                db.update_form(form_id, "login_required", config.ANYONE)
             if "open" in request.form:
-                db.update_form(form_id, "open", 1)
+                db.update_form(form_id, "open", config.OPEN)
             else:
-                db.update_form(form_id, "open", 0)
+                db.update_form(form_id, "open", config.CLOSED)
             if "theme" in request.form and config.theme_exists(request.form["theme"]):
                 db.update_form(form_id, "theme", request.form["theme"])
             if "description" in request.form:
@@ -429,33 +422,33 @@ def edit_form():
             while str(question_id) + ".question" in request.form:
                 i = str(question_id)
                 if question_id > number_of_questions: #if this is a new question, add it
-                    db.add_question(form_id, request.form[i+".question"], "short", 0, None, None) #default values: one-line question that's optional with no min/max
+                    db.add_question(form_id, request.form[i+".question"], "short", config.OPTIONAL, config.NO_LIMIT, config.NO_LIMIT) #default values: one-line question that's optional with no min/max
                 else: #if this is an exisiting question, update it
                     db.update_question(form_id, question_id, "question", request.form[i+".question"])
                 new_order.append(request.form.get(i+".newIndex", i))
                 if request.form.get(i+".delete") == "delete":
                     to_be_deleted.append(int(new_order[-1]))
                 if i+".required" in request.form:
-                    db.update_question(form_id, question_id, "required", 1)
+                    db.update_question(form_id, question_id, "required", config.REQUIRED)
                 else:
-                    db.update_question(form_id, question_id, "required", 0)
+                    db.update_question(form_id, question_id, "required", config.OPTIONAL)
                 if i+".min" in request.form and is_integer(request.form[i+".min"]):
                     db.update_question(form_id, question_id, "min", request.form[i+".min"])
                 else:
-                    db.update_question(form_id, question_id, "min", None)
+                    db.update_question(form_id, question_id, "min", config.NO_LIMIT)
                 if i+".max" in request.form and is_integer(request.form[i+".max"]):
                     db.update_question(form_id, question_id, "max", request.form[i+".max"])
                 else:
-                    db.update_question(form_id, question_id, "max", None)
+                    db.update_question(form_id, question_id, "max", config.NO_LIMIT)
                 if i+".answers" in request.form:
                     db.delete_options(form_id, question_id)
-                    for o in request.form[i+".answers"].splitlines():
-                        if len(o) == 0:
+                    for option in request.form[i+".answers"].splitlines():
+                        if len(option) == 0: #skip empty lines
                             continue
-                        ovalue = o.split(")", 1)[0].strip()
-                        otext = o.split(")", 1)[-1].strip()
-                        db.add_option(form_id, question_id, otext, ovalue)
-                if i+".type" in request.form:
+                        option_value = o.split(")", 1)[0].strip()
+                        option_text = o.split(")", 1)[-1].strip()
+                        db.add_option(form_id, question_id, option_text, option_value)
+                if (i+".type") in request.form and request.form[i+".type"] in config.TYPES:
                     db.update_question(form_id, question_id, "type", request.form[i+".type"])
                 question_id += 1
             db.update_order(form_id, new_order)
