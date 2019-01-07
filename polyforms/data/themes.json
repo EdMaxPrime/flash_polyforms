@@ -92,5 +92,18 @@
             "normal": "#858C65",
             "hint":   "#804E49"
         }
+    },
+    {
+        "name": "marvel",
+        "display_name": "Narrow Marvel Font",
+        "template_form": "text_and_fields.html",
+        "template_end": "end_text_and_fields.html",
+        "group": "Answer Fields Embedded in Text",
+        "data": {
+            "fontSource": "<link rel=\"stylesheet\" type=\"text/css\" href=\"//fonts.googleapis.com/css?family=Marvel\" />",
+            "fontFamily": "Marvel",
+            "fontSize":   "18px",
+            "lineHeight": "19px"
+        }
     }
 ]

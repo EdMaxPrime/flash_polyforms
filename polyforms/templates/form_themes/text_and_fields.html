@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{title}} | Polyforms </title>
+    <link rel="shortcut icon" href="/static/img/logo_square.png">
+    {{ theme.data.fontSource | safe }}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="og:title" content="{{title}}">
+    <meta name="og:description" content="{{description}}">
+    <meta name="description" content="A simple survey and graph service. Completely free.">
+    <style type="text/css">
+        div.container {
+            margin-bottom: 4em;
+        }
+        #error {
+            border: 4px solid red;
+            background-color: rgba(255, 102, 102, 0.25);
+            padding: 20px;
+            margin-bottom: 2em;
+        }
+        #contents {
+            background-color: white;
+            margin: 2em 8% 2em 8%;
+            padding: 2em;
+        }
+        h2.section {
+            text-decoration: underline;
+        }
+        body{
+            font-family: Marvel,Optima,Calibri,sans-serif;
+            font-size: {{theme.data.fontSize}};
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            line-height: {{theme.data.lineHeight}};
+        }
+        input[type="submit"] {
+            display: block;
+            padding: 10px;
+            width: 80%;
+            margin: 0 auto;
+        }
+        textarea {
+            width: 100%;
+        }
+        a.reference {
+            color: black;
+        }
+        .invalid {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <div id="contents">
+        <h1>{{title}}</h1>
+        <hr>
+        {% set messages = get_flashed_messages() %}
+        {% if messages|length > 0 %}
+        <div id="error">
+            <p>Please fix the following before your responses can be submitted</p>
+            {% set messages = get_flashed_messages(with_categories=true) %}
+            <ul>
+                {% for category, message in messages %}
+                <li><a class="reference" href="#q{{category}}">{{ message }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <form method="POST" action="/form/submit" novalidate="">
+            <p>
+                {% set d = description | linebreaks | msgCodes(form) | splitBBCodes %}
+                {% for piece in d -%}
+                    {%- if loop.cycle("text", "question") == "text" %} {{ piece | safe }}
+                    {%- else -%}
+                        {% set q = questions | selectattr("index", "equalto", piece|int(-1)) | first %}
+                        {% if q is defined %}
+                            {% if q.type == "short" %}
+                            <input type="text" name="{{q.index}}" id="q{{q.index}}" size="{{ [q.question|length, q.max] | max }}" {{q|attributes|safe}} value="{{q.value|default('')}}" placeholder="{{q.question}}">
+
+                            {% elif q.type == "long" %}<br>
+                            <textarea name="{{q.index}}" id="q{{q.index}}" rows="5" {{q|attributes|safe}} placeholder="{{q.question}}"></textarea>{{q.value|default('')}}</textarea>
+
+                            {% elif q.type == "number" %}
+                            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="{{q.question}}" step="any" {{q|attributes|safe}} value="{{q.value|default(''),true}}">
+
+                            {% elif q.type == "int" %}
+                            <input type="number" name="{{q.index}}" id="q{{q.index}}" placeholder="{{q.question}}" {{q|attributes|safe}} value="{{q.value|default(''),true}}">
+
+                            {% elif q.type == "choice" %}
+                            <select name="{{q.index}}" id="q{{q.index}}">
+                            <option>Choose {{q.question}}</option>
+                            {% for c in q.choices %}
+                            <option value="{{c.value}}" {{ 'selected' if c.selected|default(false, true) }}>{{c.text}}</option>
+                            {% endfor %}
+                            </select>
+                            {% if q.max != 1 %}
+                            <button type="button" onclick="addOption(this);">Add {{q.question}}</button>
+                            {% endif %}
+
+                            {% endif %}
+                        {% else %}
+                        {{ "[" ~ piece ~ "]" }}
+                        {% endif %}
+                    {% endif %}
+                {%- endfor %}
+            </p>
+              
+            <input type="hidden" name="id" value="{{form_id}}">
+            <input type="submit" name="submit" value="Submit">	
+        </form>
+    </div>
+    <script type="text/javascript">
+        var addOption = function(button) {
+            button.parentNode.insertBefore(button.previousElementSibling.cloneNode(true), button);
+        };
+        //highlight invalid fields
+        var errors = {{messages | tojson}};
+        for(var i = 0; i < errors.length; i++) {
+            var inputs = document.getElementsByName(errors[i][0] + "");
+            for(var i = 0; i < inputs.length; i++) {
+                inputs[i].classList.add("invalid");
+                console.log(errors[i]);
+            }
+        }
+    </script>
+</body>
+</html>
+

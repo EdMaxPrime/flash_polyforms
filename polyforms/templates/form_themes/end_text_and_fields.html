@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> {{form.title}} | Polyforms </title>
+    <link rel="shortcut icon" href="/static/img/logo_square.png">
+    {{ theme.data.fontSource | safe }}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="og:title" content="{{form.title}}">
+    <meta name="og:description" content="{{form.message}}">
+    <meta name="description" content="A simple survey and graph service. Completely free.">
+    <style type="text/css">
+        body {
+            font-family: Marvel,Optima,Calibri,sans-serif;
+            font-size: {{theme.data.fontSize}};
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            line-height: {{theme.data.lineHeight}};
+        }
+        div.logo {
+            text-align: center;
+            margin-top: 5em;
+        }
+        #contents {
+            background-color: white;
+            margin: 2em 1in 2em 1in;
+            padding: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="contents">
+        <h1>{{form.title}}</h1>
+        <hr>
+        <p>{{form.message | linebreaks| msgCodes(form) | safe}}</p>
+        <div class="logo heading">
+            <p>This form was made with</p>
+            <a href="/">
+                <img src="/static/img/logo_full.png" alt="Logo" width="375" height="65">
+            </a>
+        </div>
+    </div>
+</body>
+</html>
