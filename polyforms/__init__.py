@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 from jinja2 import escape
 from functools import wraps
 import os   #for secret key creation and file system exploration
-import random   #for the generate_questions random word generator
+import re   #for regular expressions
 import json
 from utils import db
 from utils import test
@@ -371,8 +371,8 @@ def addQuestions():
             for option in request.args.get(str(i) + ".answers", "").splitlines():
                 if len(option) == 0: #skip empty lines
                     continue
-                option_value = o.split(")", 1)[0]
-                option_text = o.split(")", 1)[-1]
+                option_value = option.split(")", 1)[0]
+                option_text = option.split(")", 1)[-1]
                 db.add_option(formID, question_id, option_text, option_value)
         i+=1
     return redirect(url_for("my_forms"))
@@ -445,8 +445,8 @@ def edit_form():
                     for option in request.form[i+".answers"].splitlines():
                         if len(option) == 0: #skip empty lines
                             continue
-                        option_value = o.split(")", 1)[0].strip()
-                        option_text = o.split(")", 1)[-1].strip()
+                        option_value = option.split(")", 1)[0].strip()
+                        option_text = option.split(")", 1)[-1].strip()
                         db.add_option(form_id, question_id, option_text, option_value)
                 if (i+".type") in request.form and request.form[i+".type"] in config.TYPES:
                     db.update_question(form_id, question_id, "type", request.form[i+".type"])
@@ -592,6 +592,10 @@ def newline_br(value):
 @app.template_filter('msgCodes')
 def codes_to_html(value, form):
     return value.replace("[SIGNATURE]", "<em>%s</em>"%form["owner"]).replace("[HOWMANY]", str(form["num_responses"])).replace("[AGAIN]", '<a href="/f/%s">Submit another response</a>'%str(form["id"])).replace("[RESULTS]", '<a href="/form/view?id=%s">See the responses</a>'%str(form["id"]))
+
+@app.template_filter('splitBBCodes')
+def split_on_bb_codes(value):
+    return re.split(r'[\[\]]', value)
 
 @app.template_filter('formatChoice')
 def formatChoice(value):
